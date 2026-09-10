@@ -30,8 +30,9 @@
             tools:iconTint="?colorOnPrimaryContainer" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
@@ -44,9 +45,17 @@
                 android:id="@+id/eventsNoData"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:text="@string/events_no_nearest" />
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/settings"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            tools:src="@sample/settings" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

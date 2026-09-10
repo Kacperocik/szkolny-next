@@ -5,8 +5,13 @@
 package pl.szczodrzynski.edziennik.ui.login
 
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -19,6 +24,7 @@ import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.api.models.ApiError
 import pl.szczodrzynski.edziennik.data.db.entity.LoginStore
 import pl.szczodrzynski.edziennik.databinding.LoginActivityBinding
+import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ui.base.dialog.SimpleDialog
 import pl.szczodrzynski.edziennik.ui.main.ErrorSnackbar
 import kotlin.coroutines.CoroutineContext
@@ -48,7 +54,6 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        // TODO fix deprecation
         val destination = nav.currentDestination ?: run {
             nav.navigateUp()
             return
@@ -67,7 +72,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
             return
         }
         if (destination.id == R.id.loginChooserFragment && loginStores.isEmpty()) {
-            setResult(Activity.RESULT_CANCELED)
+            setResult(RESULT_CANCELED)
             finish()
             return
         }
@@ -76,7 +81,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
                 title(R.string.are_you_sure)
                 message(R.string.login_cancel_confirmation)
                 positive(R.string.yes) {
-                    setResult(Activity.RESULT_CANCELED)
+                    setResult(RESULT_CANCELED)
                     finish()
                 }
                 negative(R.string.no)
@@ -100,6 +105,15 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
         b = LoginActivityBinding.inflate(layoutInflater)
         setContentView(b.root)
         errorSnackbar.setCoordinator(b.coordinator, b.snackbarAnchor)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            ViewCompat.setOnApplyWindowInsetsListener(b.root) { view: View, insets: WindowInsetsCompat ->
+                val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+                insets
+            }
+        }
 
         app.buildManager.validateBuild(this)
 

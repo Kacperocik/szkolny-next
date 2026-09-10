@@ -20,6 +20,9 @@ import androidx.core.view.plusAssign
 import androidx.core.view.setMargins
 import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Observer
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.utils.sizeDp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,9 +33,11 @@ import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_NO_GRADE
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.data.db.entity.Subject
 import pl.szczodrzynski.edziennik.data.db.full.GradeFull
+import pl.szczodrzynski.edziennik.data.enums.NavTarget
 import pl.szczodrzynski.edziennik.databinding.CardHomeGradesBinding
 import pl.szczodrzynski.edziennik.ext.dp
-import pl.szczodrzynski.edziennik.data.enums.NavTarget
+import pl.szczodrzynski.edziennik.ext.onClick
+import pl.szczodrzynski.edziennik.ui.dialogs.settings.HomeConfigDialog
 import pl.szczodrzynski.edziennik.ui.grades.GradeView
 import pl.szczodrzynski.edziennik.ui.home.HomeCard
 import pl.szczodrzynski.edziennik.ui.home.HomeCardAdapter
@@ -40,6 +45,7 @@ import pl.szczodrzynski.edziennik.ui.home.HomeFragment
 import pl.szczodrzynski.edziennik.utils.Utils
 import pl.szczodrzynski.edziennik.utils.models.Date
 import pl.szczodrzynski.edziennik.utils.models.ItemGradesSubjectModel
+import pl.szczodrzynski.navlib.colorAttr
 import kotlin.coroutines.CoroutineContext
 
 class HomeGradesCard(
@@ -62,14 +68,27 @@ class HomeGradesCard(
     override fun bind(position: Int, holder: HomeCardAdapter.ViewHolder) {
         holder.root.removeAllViews()
         b = CardHomeGradesBinding.inflate(LayoutInflater.from(holder.root.context))
-        b.root.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+        b.root.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+            WRAP_CONTENT
+        ).apply {
             setMargins(8.dp)
         }
         holder.root += b.root
 
-        val sevenDaysAgo = Date.getToday().stepForward(0, 0, -7)
+        b.settings.setImageDrawable(
+            IconicsDrawable(activity, CommunityMaterial.Icon.cmd_cog_outline).apply {
+                colorAttr(activity, R.attr.colorIcon)
+                sizeDp = 24
+            }
+        )
+        b.settings.onClick {
+            HomeConfigDialog(activity, reloadOnDismiss = true).show()
+        }
 
-        app.db.gradeDao().getAllFromDate(profile.id, sevenDaysAgo).observe(fragment, Observer {
+        val days = app.profile.config.ui.homeGradesWeeks * 7
+        val fromDate = Date.getToday().stepForward(0, 0, -days)
+
+        app.db.gradeDao().getAllFromDate(profile.id, fromDate).observe(fragment, Observer {
             grades.apply {
                 clear()
                 addAll(it.filter { it.type != TYPE_NO_GRADE })
@@ -155,7 +174,7 @@ class HomeGradesCard(
                         ?: "")
                 ellipsize = TextUtils.TruncateAt.END
                 setSingleLine()
-                measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                measure(WRAP_CONTENT, WRAP_CONTENT)
             }
 
             gradeItem.addView(subjectName, textLayoutParams)

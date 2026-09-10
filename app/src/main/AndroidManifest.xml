@@ -84,7 +84,7 @@
                 android:resource="@xml/widget_timetable_info" />
         </receiver>
         <service android:name=".ui.widgets.timetable.WidgetTimetableService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" android:foregroundServiceType="dataSync"/>
+            android:permission="android.permission.BIND_REMOTEVIEWS" android:foregroundServiceType="dataSync" />
         <activity android:name=".ui.widgets.LessonDialogActivity"
             android:label=""
             android:configChanges="orientation|keyboardHidden"
@@ -105,7 +105,7 @@
                 android:resource="@xml/widget_notifications_info" />
         </receiver>
         <service android:name=".ui.widgets.notifications.WidgetNotificationsService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" android:foregroundServiceType="dataSync"/>
+            android:permission="android.permission.BIND_REMOTEVIEWS" android:foregroundServiceType="dataSync" />
         <!-- LUCKY NUMBER -->
         <receiver android:name=".ui.widgets.luckynumber.WidgetLuckyNumberProvider"
             android:label="@string/widget_lucky_number_title"

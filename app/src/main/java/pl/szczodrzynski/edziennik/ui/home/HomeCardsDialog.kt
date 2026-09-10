@@ -15,7 +15,7 @@ import pl.szczodrzynski.edziennik.ui.home.HomeCard.Companion.CARD_LUCKY_NUMBER
 import pl.szczodrzynski.edziennik.ui.home.HomeCard.Companion.CARD_NOTES
 import pl.szczodrzynski.edziennik.ui.home.HomeCard.Companion.CARD_TIMETABLE
 
-class HomeConfigDialog(
+class HomeCardsDialog(
     activity: AppCompatActivity,
     private val reloadOnDismiss: Boolean = true,
 ) : BaseDialog<Any>(activity) {

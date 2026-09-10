@@ -102,7 +102,7 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
             .withIcon(CommunityMaterial.Icon3.cmd_table_large)
             .withOnClickListener {
                 activity.bottomSheet.close()
-                GenerateBlockTimetableDialog(activity)
+                GenerateBlockTimetableDialog(activity).show()
             },
         BottomSheetPrimaryItem(true)
             .withTitle(R.string.menu_timetable_config)
@@ -239,15 +239,4 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
             fabShown = true
         }
     }
-
-    /*private fun markLessonsAsSeen() = pageSelection?.let { date ->
-        app.db.timetableDao().getForDate(App.profileId, date).observeOnce(this@TimetableFragment, Observer { lessons ->
-            lessons.forEach { lesson ->
-                if (lesson.type != Lesson.TYPE_NORMAL && lesson.type != Lesson.TYPE_NO_LESSONS
-                        && !lesson.seen) {
-                    app.db.metadataDao().setSeen(lesson.profileId, lesson, true)
-                }
-            }
-        })
-    }*/
 }

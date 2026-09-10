@@ -5,14 +5,14 @@ buildscript {
         kotlin_version = '1.9.24'
 
         release = [
-                versionName: "4.14",
-                versionCode: 4140099
+                versionName: "4.15.1",
+                versionCode: 4150199
         ]
 
         setup = [
-                compileSdk: 34,
+                compileSdk: 35,
                 minSdk    : 19,
-                targetSdk : 34
+                targetSdk : 35
         ]
     }
 
@@ -22,7 +22,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.5.0'
+        classpath 'com.android.tools.build:gradle:8.6.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.gms:google-services:4.4.2'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.1'
