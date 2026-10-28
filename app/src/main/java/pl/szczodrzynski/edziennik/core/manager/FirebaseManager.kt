@@ -70,37 +70,39 @@ class FirebaseManager(val app: App) {
 
     fun initializeApps() {
         try {
-            // skip Firebase setup if the default app is not initialized
-            // (e.g. in the crash process)
             FirebaseApp.getInstance()
-        } catch (e: IllegalStateException) {
-            return
+            FirebaseInstanceId.getInstance().instanceId
+                .addOnSuccessListener { result ->
+                    app.config.sync.tokenApp = result.token
+                }
+                .addOnFailureListener { Timber.w(it, "Failed to get App push token") }
+            FirebaseMessaging.getInstance().subscribeToTopic(app.packageName)
+                .addOnFailureListener { Timber.w(it, "Failed to subscribe to App push topic") }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to initialize App push notifications")
         }
 
-        FirebaseInstanceId.getInstance().instanceId.addOnSuccessListener { result ->
-            val token = result.token
-            Timber.i("Got App token: $token")
-            app.config.sync.tokenApp = token
-        }
-        FirebaseMessaging.getInstance().subscribeToTopic(app.packageName)
+        instances.forEach { config ->
+            try {
+                val instance = FirebaseApp.getApps(app).firstOrNull { it.name == config.name }
+                    ?: FirebaseApp.initializeApp(app, FirebaseOptions.Builder()
+                        .setProjectId(config.projectId)
+                        .setStorageBucket("${config.projectId}.appspot.com")
+                        .setDatabaseUrl("https://${config.projectId}.firebaseio.com")
+                        .setGcmSenderId(config.projectNumber)
+                        .setApiKey(config.apiKey)
+                        .setApplicationId("1:${config.projectNumber}:android:${config.applicationId}")
+                        .build(), config.name)
 
-        instances.forEach {
-            val options = FirebaseOptions.Builder()
-                .setProjectId(it.projectId)
-                .setStorageBucket("${it.projectId}.appspot.com")
-                .setDatabaseUrl("https://${it.projectId}.firebaseio.com")
-                .setGcmSenderId(it.projectNumber)
-                .setApiKey(it.apiKey)
-                .setApplicationId("1:${it.projectNumber}:android:${it.applicationId}")
-                .build()
-
-            val instance = FirebaseApp.initializeApp(app, options, it.name)
-
-            FirebaseInstanceId.getInstance(instance).instanceId.addOnSuccessListener { result ->
-                val token = result.token
-                Timber.i("Got ${it.name} token: $token")
-                if (token != app.config["token${it.name}"])
-                    it.onToken(token)
+                FirebaseInstanceId.getInstance(instance).instanceId
+                    .addOnSuccessListener { result ->
+                        val token = result.token
+                        if (token.isNotBlank() && token != app.config["token${config.name}"])
+                            config.onToken(token)
+                    }
+                    .addOnFailureListener { Timber.w(it, "Failed to get %s push token", config.name) }
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to initialize %s push notifications", config.name)
             }
         }
     }

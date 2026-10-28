@@ -46,7 +46,7 @@ open class LibrusApi(open val data: DataLibrus, open val lastSync: Long?) {
                 }
                 /*
 {"Status":"Error","Code":"DeviceRegistered","Message":"This device is alerdy registered.","Resources":{"..":{"Url":"https:\/\/api.librus.pl\/2.0\/Root"}},"Url":"https:\/\/api.librus.pl\/2.0\/ChangeRegister"}*/
-                val error = if (response?.code() == 200) null else
+                val error = if (response?.code() in 200..299) null else
                     json.getString("Code") ?:
                     json.getString("Message") ?:
                     json.getString("Status") ?:
@@ -58,8 +58,12 @@ open class LibrusApi(open val data: DataLibrus, open val lastSync: Long?) {
                         "Request is denied" -> ERROR_LIBRUS_API_ACCESS_DENIED
                         "Resource not found" -> ERROR_LIBRUS_API_RESOURCE_NOT_FOUND
                         "NotFound" -> ERROR_LIBRUS_API_DATA_NOT_FOUND
-                        "AccessDeny" -> when (json.getString("Message")) {
-                            "Student timetable is not public" -> ERROR_LIBRUS_API_TIMETABLE_NOT_PUBLIC
+                        "AccessDeny" -> when {
+                            // Reuse the endpoint-specific retry policy for restricted calendars.
+                            endpoint == "Calendars/TeacherFreeDays" ->
+                                ERROR_LIBRUS_API_TEACHER_FREE_DAYS_NOT_PUBLIC
+                            json.getString("Message") == "Student timetable is not public" ->
+                                ERROR_LIBRUS_API_TIMETABLE_NOT_PUBLIC
                             else -> ERROR_LIBRUS_API_RESOURCE_ACCESS_DENIED
                         }
                         "LuckyNumberIsNotActive" -> ERROR_LIBRUS_API_LUCKY_NUMBER_NOT_ACTIVE

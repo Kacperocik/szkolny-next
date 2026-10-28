@@ -68,7 +68,8 @@ val LibrusFeatures = listOf(
         Feature(LoginType.LIBRUS, FeatureType.PUSH_CONFIG, listOf(
                 ENDPOINT_LIBRUS_API_PUSH_CONFIG to LoginMethod.LIBRUS_API
         )).withShouldSync { data ->
-                (data as DataLibrus).isPremium && !data.app.config.sync.tokenLibrusList.contains(data.profileId)
+                !data.app.config.sync.tokenLibrus.isNullOrBlank() &&
+                        !data.app.config.sync.tokenLibrusList.contains(data.profileId)
         },
 
 
