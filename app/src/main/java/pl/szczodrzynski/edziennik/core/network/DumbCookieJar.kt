@@ -2,6 +2,8 @@
  * Copyright (c) Kuba Szczodrzyński 2020-3-24.
  */
 
+@file:Suppress("DEPRECATION_ERROR")
+
 package pl.szczodrzynski.edziennik.core.network
 
 import android.content.Context
@@ -68,7 +70,7 @@ class DumbCookieJar(
         }
     }
 
-    override fun saveFromResponse(url: HttpUrl, cookies: MutableList<Cookie>) {
+    override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
         for (cookie in cookies) {
             val dc = DumbCookie(cookie)
             save(dc)

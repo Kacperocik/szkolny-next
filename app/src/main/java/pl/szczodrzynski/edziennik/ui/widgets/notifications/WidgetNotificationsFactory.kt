@@ -4,6 +4,7 @@
 
 package pl.szczodrzynski.edziennik.ui.widgets.notifications
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.database.Cursor
 import android.os.Binder
@@ -18,6 +19,7 @@ import pl.szczodrzynski.edziennik.data.enums.NavTarget
 import pl.szczodrzynski.edziennik.data.enums.NotificationType
 import pl.szczodrzynski.edziennik.ext.*
 import pl.szczodrzynski.edziennik.ui.widgets.WidgetConfig
+import pl.szczodrzynski.edziennik.ui.widgets.resolveWidgetTheme
 import pl.szczodrzynski.edziennik.utils.models.Date
 
 class WidgetNotificationsFactory(val app: App, val config: WidgetConfig) : RemoteViewsService.RemoteViewsFactory {
@@ -34,15 +36,23 @@ class WidgetNotificationsFactory(val app: App, val config: WidgetConfig) : Remot
         }
     }
 
+    @SuppressLint("ResourceType")
     override fun getViewAt(position: Int): RemoteViews? {
         if (position == AdapterView.INVALID_POSITION || cursor?.moveToPosition(position) != true)
             return null
 
+        val isDark = config.isDarkTheme(app)
+        val colors = resolveWidgetTheme(app, config)
+
         val views: RemoteViews = if (config.bigStyle) {
-            RemoteViews(app.packageName, if (config.darkTheme) R.layout.row_widget_notifications_dark_big_item else R.layout.row_widget_notifications_big_item)
+            RemoteViews(app.packageName, if (isDark) R.layout.row_widget_notifications_dark_big_item else R.layout.row_widget_notifications_big_item)
         } else {
-            RemoteViews(app.packageName, if (config.darkTheme) R.layout.row_widget_notifications_dark_item else R.layout.row_widget_notifications_item)
+            RemoteViews(app.packageName, if (isDark) R.layout.row_widget_notifications_dark_item else R.layout.row_widget_notifications_item)
         }
+
+        val titleColor = colors.secondary
+        val textColor = colors.onSurface
+        val dateColor = colors.onSurfaceVariant
 
         val notification = cursor?.run {
             Notification(
@@ -64,6 +74,15 @@ class WidgetNotificationsFactory(val app: App, val config: WidgetConfig) : Remot
         } ?: return views
 
         views.apply {
+            if (titleColor != 0) {
+                setTextColor(R.id.widgetNotificationsTitle, titleColor)
+            }
+            if (textColor != 0) {
+                setTextColor(R.id.widgetNotificationsText, textColor)
+            }
+            if (dateColor != 0) {
+                setTextColor(R.id.widgetNotificationsDate, dateColor)
+            }
             setTextViewText(R.id.widgetNotificationsTitle,
                     app.getString(R.string.widget_notifications_title_format, notification.title, notification.type.titleRes.resolveString(app)))
             setTextViewText(R.id.widgetNotificationsText, notification.text)

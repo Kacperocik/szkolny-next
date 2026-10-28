@@ -2,9 +2,15 @@
  * Copyright (c) Kuba Szczodrzyński 2020-5-12.
  */
 
+@file:Suppress("DEPRECATION_ERROR")
+
 package pl.szczodrzynski.edziennik.ui.debug
 
+import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
@@ -13,10 +19,13 @@ import com.chuckerteam.chucker.api.Chucker
 import com.chuckerteam.chucker.api.Chucker.SCREEN_HTTP
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.MainActivity
+import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.api.szkolny.interceptor.SignatureInterceptor
 import pl.szczodrzynski.edziennik.data.config.Config
+import pl.szczodrzynski.edziennik.data.db.ProfileBackupManager
 import pl.szczodrzynski.edziennik.data.db.entity.EventType.Companion.SOURCE_DEFAULT
 import pl.szczodrzynski.edziennik.databinding.LabFragmentBinding
 import pl.szczodrzynski.edziennik.ext.asBoldSpannable
@@ -39,6 +48,36 @@ class LabPageFragment : BaseFragment<LabFragmentBinding, AppCompatActivity>(
     inflater = LabFragmentBinding::inflate,
 ) {
 
+    private val profileBackupManager by lazy {
+        ProfileBackupManager(app.db)
+    }
+
+    private val exportProfileLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri ->
+        uri ?: return@registerForActivityResult
+        launch {
+            val result = runCatching {
+                withContext(Dispatchers.IO) {
+                    val output = requireNotNull(activity.contentResolver.openOutputStream(uri)) {
+                        "Unable to open the selected file"
+                    }
+                    output.bufferedWriter().use { writer ->
+                        profileBackupManager.export(app.profile.id, writer)
+                    }
+                }
+            }
+            showFileResult(result, "Profile exported")
+        }
+    }
+
+    private val importProfileLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        uri ?: return@registerForActivityResult
+        confirmProfileImport(uri)
+    }
+
     override fun getScrollingView() = b.scrollView
 
     override suspend fun onViewReady(savedInstanceState: Bundle?) {
@@ -55,6 +94,8 @@ class LabPageFragment : BaseFragment<LabFragmentBinding, AppCompatActivity>(
             b.unarchive.isVisible = false
             b.profile.isVisible = false
             b.clearConfigProfile.isVisible = false
+            b.exportProfile.isVisible = false
+            b.importProfile.isVisible = false
         }
 
         b.last10unseen.onClick {
@@ -70,7 +111,7 @@ class LabPageFragment : BaseFragment<LabFragmentBinding, AppCompatActivity>(
         b.rodo.onClick {
             app.db.teacherDao().query(SimpleSQLiteQuery("UPDATE teachers SET teacherSurname = \"\" WHERE profileId = ${App.profileId}"))
         }
-        
+
         b.fullSync.onClick {
             app.profile.empty = true
             app.profileSave()
@@ -94,10 +135,19 @@ class LabPageFragment : BaseFragment<LabFragmentBinding, AppCompatActivity>(
         }
 
         b.chucker.isChecked = App.enableChucker
-        b.chucker.onChange { _, isChecked ->
+        b.chucker.setOnCheckedChangeListener { _, isChecked ->
             app.config.enableChucker = isChecked
             App.enableChucker = isChecked
             RestartDialog(activity).show()
+        }
+
+        b.labOldAgenda.isChecked = app.config.labOldAgenda
+        b.labOldAgenda.setOnCheckedChangeListener { _, isChecked ->
+            app.config.labOldAgenda = isChecked
+            (activity as? MainActivity)?.let { mainActivity ->
+                mainActivity.setDrawerItems()
+                mainActivity.reloadTarget()
+            }
         }
 
         if (App.enableChucker) {
@@ -117,6 +167,14 @@ class LabPageFragment : BaseFragment<LabFragmentBinding, AppCompatActivity>(
             app.profile.archived = false
             app.profile.archiveId = null
             app.profileSave()
+        }
+
+        b.exportProfile.onClick {
+            exportProfileLauncher.launch("szkolny-profile-${app.profile.id}.json")
+        }
+
+        b.importProfile.onClick {
+            importProfileLauncher.launch(arrayOf("application/json", "text/json", "text/plain"))
         }
 
         b.resetCert.onClick {
@@ -188,6 +246,57 @@ class LabPageFragment : BaseFragment<LabFragmentBinding, AppCompatActivity>(
                     ).concat("")
                 }.concat("\n\n")
             b.cookies.text = text
+        }
+    }
+
+    private fun showFileResult(result: Result<Unit>, successMessage: String) {
+        val message = result.fold(
+            onSuccess = { successMessage },
+            onFailure = { "Profile file error: ${it.message ?: it.javaClass.simpleName}" },
+        )
+        Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun confirmProfileImport(uri: Uri) {
+        AlertDialog.Builder(activity)
+            .setTitle("Import full profile backup")
+            .setMessage(
+                "All data of the current profile will be replaced, including grades, " +
+                    "messages, events, attendance, timetable, notes and settings."
+            )
+            .setPositiveButton("Import") { _, _ ->
+                importProfile(uri)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun importProfile(uri: Uri) {
+        launch {
+            val result = runCatching {
+                withContext(Dispatchers.IO) {
+                    val input = requireNotNull(activity.contentResolver.openInputStream(uri)) {
+                        "Unable to open the selected file"
+                    }
+                    input.bufferedReader().use { reader ->
+                        profileBackupManager.import(app.profile.id, reader)
+                    }
+                }
+            }
+            result.fold(
+                onSuccess = {
+                    Toast.makeText(activity, "Full profile backup imported", Toast.LENGTH_LONG)
+                        .show()
+                    RestartDialog(activity).show()
+                },
+                onFailure = {
+                    Toast.makeText(
+                        activity,
+                        "Profile file error: ${it.message ?: it.javaClass.simpleName}",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                },
+            )
         }
     }
 }

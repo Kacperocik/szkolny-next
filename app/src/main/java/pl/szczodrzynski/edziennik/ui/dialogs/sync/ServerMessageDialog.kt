@@ -17,4 +17,5 @@ class ServerMessageDialog(
     override fun getTitle() = titleText
     override fun getMessage() = messageText
     override fun getPositiveButtonText() = R.string.close
+    override fun hasCloseIconWhenSpaceLimited() = true
 }

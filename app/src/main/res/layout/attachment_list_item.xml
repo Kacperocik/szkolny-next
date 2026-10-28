@@ -24,10 +24,14 @@
         tools:closeIconVisible="true"
         tools:text="Zadanie z matematyki.pdf" />
 
-    <ProgressBar
+    <com.google.android.material.loadingindicator.LoadingIndicator
         android:id="@+id/progressBar"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="end|center_vertical"
-        android:layout_marginHorizontal="8dp" />
+        android:layout_marginHorizontal="8dp"
+        app:containerHeight="24dp"
+        app:containerWidth="24dp"
+        app:indicatorColor="?attr/colorPrimary"
+        app:indicatorSize="20dp" />
 </FrameLayout>

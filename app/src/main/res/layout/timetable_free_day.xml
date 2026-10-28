@@ -19,7 +19,7 @@
         android:gravity="center_horizontal"
         android:text="@string/timetable_free_day_title"
         android:textAppearance="?textAppearanceHeadlineSmall"
-        app:drawableTopCompat="@drawable/ic_sunbed" />
+        app:drawableTopCompat="@drawable/illustration_free_day" />
 
     <TextView
         android:layout_width="wrap_content"

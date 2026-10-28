@@ -38,19 +38,21 @@ class PostNotifications(val app: App, nList: List<AppNotification>) {
         return now in start..end || now+240000 in start..end
     }
 
-    private fun NotificationCompat.Builder.addDefaults(): NotificationCompat.Builder {
+    private fun NotificationCompat.Builder.addDefaults(type: NotificationType): NotificationCompat.Builder {
+        val channel = app.notificationManager.dataChannel(type)
         return this.setColor(0xff2196f3.toInt())
                 .setLights(0xff2196f3.toInt(), 2000, 2000)
                 .setPriority(if (quiet) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_MAX)
                 .also {
                     if (quiet) {
+                        it.setSilent(true)
                         it.setSound(null)
                         it.setVibrate(longArrayOf())
                     }
                     else
                         it.setDefaults(NotificationCompat.DEFAULT_ALL)
                 }
-                .setGroup(if (quiet) app.notificationManager.dataQuiet.key else app.notificationManager.data.key)
+                .setGroup(channel.key)
     }
 
     private fun buildSummaryText(summaryCounts: Map<NotificationType, Int>): CharSequence {
@@ -83,7 +85,9 @@ class PostNotifications(val app: App, nList: List<AppNotification>) {
         // On Nougat or newer - show maximum 8 notifications
         // On Marshmallow or older - show maximum 4 notifications
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N && count > 4 || Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && count > 8) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O &&
+                (Build.VERSION.SDK_INT < Build.VERSION_CODES.N && count > 4 ||
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && count > 8)) {
             val summaryList = mutableListOf<CharSequence>()
             nList.forEach {
                 summaryCounts[it.type] = summaryCounts.getOrDefault(it.type, 0) + 1
@@ -118,7 +122,7 @@ class PostNotifications(val app: App, nList: List<AppNotification>) {
                                     it.addLine(line)
                                 }
                             })
-                    .addDefaults()
+                    .addDefaults(NotificationType.GENERAL)
                     .setContentIntent(summaryIntent)
                     .setAutoCancel(true)
                     .build()
@@ -128,7 +132,7 @@ class PostNotifications(val app: App, nList: List<AppNotification>) {
             // Less than 8 notifications
             val notifications = nList.map {
                 summaryCounts[it.type] = summaryCounts.getOrDefault(it.type, 0) + 1
-                NotificationCompat.Builder(app, app.notificationManager.data.key)
+                NotificationCompat.Builder(app, app.notificationManager.dataChannel(it.type).key)
                         .setContentTitle(it.profileName ?: app.getString(R.string.app_name))
                         .setContentText(it.text)
                         .setSubText(if (it.type == NotificationType.SERVER_MESSAGE) null else it.title)
@@ -142,8 +146,11 @@ class PostNotifications(val app: App, nList: List<AppNotification>) {
                         .setStyle(NotificationCompat.BigTextStyle()
                                 .bigText(it.textLong ?: it.text))
                         .setWhen(it.addedDate)
-                        .addDefaults()
-                        .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
+                        .addDefaults(it.type)
+                        .also { builder ->
+                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+                                builder.setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
+                        }
                         .setContentIntent(it.getPendingIntent(app))
                         .setAutoCancel(true)
                         .build()
@@ -156,7 +163,8 @@ class PostNotifications(val app: App, nList: List<AppNotification>) {
                 }
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &&
+                    Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 val summary = NotificationCompat.Builder(app, app.notificationManager.data.key)
                         .setContentTitle(newNotificationsText)
                         .setContentText(buildSummaryText(summaryCounts))
@@ -167,7 +175,7 @@ class PostNotifications(val app: App, nList: List<AppNotification>) {
                                 .toDrawable(app, colorAttr = R.attr.colorPrimary)
                                 .toBitmap()
                         )
-                        .addDefaults()
+                        .addDefaults(NotificationType.GENERAL)
                         .setGroupSummary(true)
                         .setContentIntent(summaryIntent)
                         .setAutoCancel(true)

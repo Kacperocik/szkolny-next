@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.core.view.isVisible
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.color.MaterialColors
 import pl.szczodrzynski.navlib.bottomsheet.NavBottomSheet
 
 class NavToolbar @JvmOverloads constructor(
@@ -13,6 +14,10 @@ class NavToolbar @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyle: Int = 0,
 ) : MaterialToolbar(context, attrs, defStyle), NavMenuBarBase {
+
+    init {
+        setSubtitleTextColor(MaterialColors.getColor(this, R.attr.colorSecondary))
+    }
 
     internal lateinit var navView: NavView
 

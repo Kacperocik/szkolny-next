@@ -1,0 +1,21 @@
+# Exclude build output, caches and IDE metadata.
+build/
+**/build/
+.gradle/
+.idea/
+.git/
+graphify-out/
+
+# Exclude Android resources and image assets.
+**/res/**
+*.xml
+*.png
+*.jpg
+*.webp
+*.svg
+*.json
+
+# Exclude documents and media to keep analysis focused on source code.
+*.md
+*.txt
+*.pdf

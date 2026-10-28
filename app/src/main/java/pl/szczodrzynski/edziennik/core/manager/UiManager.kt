@@ -4,8 +4,10 @@
 
 package pl.szczodrzynski.edziennik.core.manager
 
+import android.app.LocaleManager
 import android.content.Context
 import android.os.Build
+import android.os.LocaleList
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
@@ -39,7 +41,7 @@ class UiManager(val app: App) {
                 when (nightMode) {
                     true -> MODE_NIGHT_YES
                     false -> MODE_NIGHT_NO
-                    null -> MODE_NIGHT_FOLLOW_SYSTEM
+                    null -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MODE_NIGHT_FOLLOW_SYSTEM else MODE_NIGHT_NO
                 }
             )
     }
@@ -49,13 +51,13 @@ class UiManager(val app: App) {
         val mode = app.config.ui.themeMode
         val blackMode = app.config.ui.themeBlackMode
 
+        var color = app.config.ui.themeColor
         val themeRes = if (noDisplay) {
             when (type) {
                 Type.M2 -> R.style.AppTheme_M2_NoDisplay
                 Type.M3 -> R.style.AppTheme_M3_NoDisplay
             }
         } else {
-            var color = app.config.ui.themeColor
             if (
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.S
                 && color == Theme.DEFAULT
@@ -68,11 +70,28 @@ class UiManager(val app: App) {
         }
         activity.setTheme(themeRes)
 
+        if (!noDisplay) {
+            val overlay = color.intensityOverlay(app.config.ui.themeIntensity, type, mode)
+            if (overlay != 0) activity.theme?.applyStyle(overlay, true)
+        }
+
         if (!noDisplay && blackMode && activity.isNightMode)
             activity.theme?.applyStyle(R.style.ThemeOverlay_AppTheme_Black, true)
     }
 
     fun applyLanguage(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val localeManager = context.getSystemService(LocaleManager::class.java)
+            val legacyLanguage = app.config.ui.language
+            if (legacyLanguage != null) {
+                if (localeManager.applicationLocales.isEmpty) {
+                    localeManager.applicationLocales = LocaleList.forLanguageTags(legacyLanguage)
+                }
+                app.config.ui.language = null
+            }
+            return
+        }
+
         val language = app.config.ui.language ?: return
         val locale = Locale(language.lowercase())
         val configuration = context.resources.configuration

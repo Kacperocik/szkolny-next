@@ -2,9 +2,15 @@
 <!--
   ~ Copyright (c) Kuba Szczodrzyński 2019-11-24.
   -->
-
 <resources>
-    <item name="move_card_down_action" type="id"/>
+    <item name="fullscreen_timetable_monday" type="id" />
+    <item name="fullscreen_timetable_tuesday" type="id" />
+    <item name="fullscreen_timetable_wednesday" type="id" />
+    <item name="fullscreen_timetable_thursday" type="id" />
+    <item name="fullscreen_timetable_friday" type="id" />    <item name="move_card_down_action" type="id"/>
     <item name="move_card_up_action" type="id"/>
     <item name="bettermovementmethod_highlight_background_span" type="id" />
+    <item name="expressive_card_shape_morph_locked" type="id" />
+    <item name="expressive_card_shape_morph_animator" type="id" />
+    <item name="expressive_button_touch_listener" type="id" />
 </resources>

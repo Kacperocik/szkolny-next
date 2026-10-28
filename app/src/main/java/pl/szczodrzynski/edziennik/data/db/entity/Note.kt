@@ -114,6 +114,9 @@ data class Note(
     @Transient
     override var searchHighlightText: String? = null
 
+    override val isCategoryHeader: Boolean
+        get() = isCategoryItem
+
     @delegate:Ignore
     @delegate:Transient
     override val searchKeywords by lazy {

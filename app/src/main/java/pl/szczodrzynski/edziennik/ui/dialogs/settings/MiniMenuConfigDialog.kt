@@ -27,7 +27,7 @@ class MiniMenuConfigDialog(
         .filter {
             (!it.devModeOnly || App.devMode) && it.location in listOf(
                 NavTargetLocation.DRAWER,
-                // NavTargetLocation.DRAWER_MORE,
+                NavTargetLocation.DRAWER_MORE,
                 NavTargetLocation.DRAWER_BOTTOM,
             )
         }

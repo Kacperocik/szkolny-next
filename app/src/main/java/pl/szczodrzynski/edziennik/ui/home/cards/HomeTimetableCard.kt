@@ -5,10 +5,13 @@
 package pl.szczodrzynski.edziennik.ui.home.cards
 
 import android.content.Intent
+import android.text.style.ForegroundColorSpan
+import android.text.style.StrikethroughSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.view.isVisible
 import androidx.core.view.plusAssign
 import androidx.core.view.setMargins
 import androidx.lifecycle.Observer
@@ -22,6 +25,7 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import pl.szczodrzynski.edziennik.ext.applyExpressiveShapeMorphToButtons
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
@@ -37,13 +41,16 @@ import pl.szczodrzynski.edziennik.databinding.CardHomeTimetableBinding
 import pl.szczodrzynski.edziennik.ext.Bundle
 import pl.szczodrzynski.edziennik.ext.JsonObject
 import pl.szczodrzynski.edziennik.ext.MINUTE
+import pl.szczodrzynski.edziennik.ext.asColoredSpannable
 import pl.szczodrzynski.edziennik.ext.asItalicSpannable
+import pl.szczodrzynski.edziennik.ext.asSpannable
 import pl.szczodrzynski.edziennik.ext.asStrikethroughSpannable
 import pl.szczodrzynski.edziennik.ext.compareTo
 import pl.szczodrzynski.edziennik.ext.concat
 import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ext.getStudentData
 import pl.szczodrzynski.edziennik.ext.onClick
+import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.ext.setText
 import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
 import pl.szczodrzynski.edziennik.ext.timeLeft
@@ -103,25 +110,44 @@ class HomeTimetableCard(
         holder.root.removeAllViews()
         b = CardHomeTimetableBinding.inflate(LayoutInflater.from(holder.root.context))
         b.root.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-            setMargins(8.dp)
+            setMargins(4.dp)
         }
+        // the lessons are looked up asynchronously, so the card is shown only
+        // once it knows what to display - otherwise it appears stretched to
+        // the height of the whole layout, with no lessons in it
+        b.root.isVisible = false
         holder.root += b.root
+        b.root.applyExpressiveShapeMorphToButtons()
 
-        b.settings.setImageDrawable(CommunityMaterial.Icon.cmd_cog_outline.toDrawable(activity, R.attr.colorOnPrimaryContainer))
+        b.settings.visibility = View.GONE
+
+        b.progress.waveAmplitude =
+            if (app.profile.config.ui.homeTimetableWavyProgress) 3.dp else 0
+
+        val cornerButtons = app.profile.config.ui.homeTimetableCornerButtons
+        b.headerCornerButtons.isVisible = cornerButtons
+        b.bellSync.isVisible = !cornerButtons
+        b.showCounter.isVisible = !cornerButtons
+
         b.bellSync.icon = SzkolnyFont.Icon.szf_alarm_bell_outline.toDrawable(activity)
         b.showCounter.icon = CommunityMaterial.Icon2.cmd_fullscreen.toDrawable(activity)
+        b.noTimetableSync.icon = CommunityMaterial.Icon.cmd_download_outline.toDrawable(activity)
 
         b.bellSync.setOnClickListener {
-            BellSyncTimeChooseDialog(
-                    activity
-            ).show()
+            BellSyncTimeChooseDialog(activity).show()
+        }
+        b.bellSyncCorner.setOnClickListener {
+            BellSyncTimeChooseDialog(activity).show()
         }
 
         b.showCounter.setOnClickListener {
             activity.startActivity(Intent(activity, CounterActivity::class.java))
         }
+        b.showCounterCorner.setOnClickListener {
+            activity.startActivity(Intent(activity, CounterActivity::class.java))
+        }
 
-        b.root.onClick {
+        holder.root.onClick {
             activity.navigate(navTarget = NavTarget.TIMETABLE, args = Bundle(
                 "timetableDate" to timetableDate.stringY_m_d,
             ))
@@ -130,6 +156,7 @@ class HomeTimetableCard(
         if (app.profile.getStudentData("timetableNotPublic", false)) {
             b.timetableLayout.visibility = View.GONE
             b.notPublicLayout.visibility = View.VISIBLE
+            b.root.isVisible = true
             return
         }
 
@@ -194,6 +221,7 @@ class HomeTimetableCard(
         }
 
         timetableDate = deferred.await()
+        b.root.isVisible = true
 
         if (lessons.isEmpty() && checkedDays < 7) {
             // timetable is not downloaded yet
@@ -265,7 +293,7 @@ class HomeTimetableCard(
             else
                 R.string.home_timetable_lesson_not_started
             b.lessonBig.setText(lessonRes, firstLesson.subjectSpannable)
-            firstLesson?.displayClassroom?.let {
+            firstLesson?.displayClassroom?.takeIf { it.isNotBlank() }?.let {
                 b.classroomHeading.visibility = View.VISIBLE
                 b.classroom.visibility = View.VISIBLE
                 b.classroom.text = it
@@ -311,7 +339,7 @@ class HomeTimetableCard(
             b.lessonBig.setText(R.string.home_timetable_lesson_first, firstLesson.subjectSpannable)
             b.counter.visibility = View.VISIBLE
             b.counter.text = firstLesson?.displayStartTime?.stringHM
-            firstLesson?.displayClassroom?.let {
+            firstLesson?.displayClassroom?.takeIf { it.isNotBlank() }?.let {
                 b.classroomHeading.visibility = View.VISIBLE
                 b.classroom.visibility = View.VISIBLE
                 b.classroom.text = it
@@ -333,11 +361,23 @@ class HomeTimetableCard(
         else
             lessons.drop(skipFirst + 1)
 
+        val classroomColor = R.attr.colorOnSurfaceVariant.resolveAttr(activity)
         val text = mutableListOf<CharSequence>()
+        val showClassroom = app.profile.config.ui.homeTimetableClassroomParentheses
         for (lesson in nextLessons) {
+            val classroomRaw = if (showClassroom) lesson.displayClassroom?.takeIf { it.isNotBlank() } else null
+            val classroom = if (classroomRaw != null) {
+                if (lesson.isCancelled)
+                    " [$classroomRaw]".asSpannable(
+                        ForegroundColorSpan(classroomColor),
+                        StrikethroughSpan()
+                    )
+                else
+                    " [$classroomRaw]".asColoredSpannable(classroomColor)
+            } else ""
             text += listOf(
                     adjustTimeWidth(lesson.displayStartTime?.stringHM),
-                    lesson.subjectSpannable
+                    listOf(lesson.subjectSpannable, classroom).concat("")
             ).concat(" ")
         }
         if (text.isEmpty())
@@ -416,7 +456,7 @@ class HomeTimetableCard(
             val timeLeft = counterEnd - now
             b.counter.text = activity.timeLeft(timeLeft.toInt(), " ", countInSeconds)
             b.progress.max = lessonLength.toInt()
-            b.progress.progress = timePassed.toInt()
+            b.progress.setProgressCompat(timePassed.toInt(), true)
         }
     }
 

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.databinding.LoginChooserModeItemBinding
+import pl.szczodrzynski.edziennik.ext.enableExpressiveCardShapeMorph
 import pl.szczodrzynski.edziennik.ext.resolveColor
 import pl.szczodrzynski.edziennik.ext.setTintColor
 import pl.szczodrzynski.edziennik.ui.grades.viewholder.BindableViewHolder
@@ -19,21 +20,17 @@ import pl.szczodrzynski.edziennik.ui.login.LoginChooserAdapter
 import pl.szczodrzynski.edziennik.ui.login.LoginInfo
 
 class ModeViewHolder(
-        inflater: LayoutInflater,
-        parent: ViewGroup,
-        val b: LoginChooserModeItemBinding = LoginChooserModeItemBinding.inflate(inflater, parent, false)
+    inflater: LayoutInflater,
+    parent: ViewGroup,
+    val b: LoginChooserModeItemBinding = LoginChooserModeItemBinding.inflate(inflater, parent, false)
 ) : RecyclerView.ViewHolder(b.root), BindableViewHolder<LoginInfo.Mode, LoginChooserAdapter> {
-    companion object {
-        private const val TAG = "ModeViewHolder"
-    }
 
     override fun onBind(activity: AppCompatActivity, app: App, item: LoginInfo.Mode, position: Int, adapter: LoginChooserAdapter) {
         b.logo.setImageResource(item.icon)
         b.name.setText(item.name)
         if (item.hintText == null) {
             b.description.isVisible = false
-        }
-        else {
+        } else {
             b.description.isVisible = true
             b.description.setText(item.hintText)
         }
@@ -51,5 +48,7 @@ class ModeViewHolder(
             b.badge.setText(R.string.login_chooser_mode_dev_only)
             b.badge.background.setTintColor(R.color.md_red_300.resolveColor(app))
         }
+
+        b.card.enableExpressiveCardShapeMorph()
     }
 }

@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   ~ Copyright (c) Kuba Szczodrzyński 2021-4-10.
   -->
 
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -17,9 +18,13 @@
         <variable
             name="isAgendaMode"
             type="boolean" />
+
+        <variable
+            name="isNewAgenda"
+            type="boolean" />
     </data>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -27,147 +32,776 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
 
+            <!-- Appearance -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="6dp"
                 android:text="@string/config_appearance"
-                android:textAppearance="?textAppearanceTitleMedium" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
 
-            <com.google.android.material.checkbox.MaterialCheckBox
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:checked="@={config.ui.agendaLessonChanges}"
-                android:minHeight="32dp"
-                android:text="@string/agenda_config_lesson_changes" />
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="@{() -> agendaLessonChanges.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupTop"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-            <com.google.android.material.checkbox.MaterialCheckBox
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/agendaLessonChanges"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.ui.agendaLessonChanges}" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/agenda_config_lesson_changes"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardLessonChangesDots"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:checked="@={config.ui.agendaTeacherAbsence}"
-                android:minHeight="32dp"
-                android:text="@string/agenda_config_teacher_absence" />
+                android:layout_marginBottom="1dp"
+                android:clickable="@{config.ui.agendaLessonChanges}"
+                android:focusable="@{config.ui.agendaLessonChanges}"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="@{() -> agendaLessonChangesDots.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-            <com.google.android.material.checkbox.MaterialCheckBox
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/agendaLessonChangesDots"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.ui.agendaLessonChangesDots}"
+                        android:enabled="@{config.ui.agendaLessonChanges}" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/lessonChangesDotsTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="@{config.ui.agendaLessonChanges}"
+                            android:text="@string/agenda_config_lesson_changes_dots"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:checked="@={config.ui.agendaSubjectImportant}"
-                android:minHeight="32dp"
-                android:text="@string/agenda_config_subject_important" />
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="@{() -> agendaTeacherAbsence.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-            <com.google.android.material.checkbox.MaterialCheckBox
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/agendaTeacherAbsence"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.ui.agendaTeacherAbsence}" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/agenda_config_teacher_absence"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardTeacherAbsenceDots"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:checked="@={config.ui.agendaCompactMode}"
-                android:enabled="@{isAgendaMode}"
-                android:minHeight="32dp"
-                android:text="@string/agenda_config_compact_mode"
-                tools:enabled="false" />
+                android:layout_marginBottom="1dp"
+                android:clickable="@{config.ui.agendaTeacherAbsence}"
+                android:focusable="@{config.ui.agendaTeacherAbsence}"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="@{() -> agendaTeacherAbsenceDots.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-            <TextView
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/agendaTeacherAbsenceDots"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.ui.agendaTeacherAbsenceDots}"
+                        android:enabled="@{config.ui.agendaTeacherAbsence}" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/teacherAbsenceDotsTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="@{config.ui.agendaTeacherAbsence}"
+                            android:text="@string/agenda_config_teacher_absence_dots"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="32dp"
-                android:enabled="@{isAgendaMode}"
-                android:text="@string/agenda_config_compact_mode_hint"
-                android:textAppearance="?textAppearanceBodySmall"
-                tools:enabled="false" />
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="@{() -> agendaSubjectImportant.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-            <com.google.android.material.checkbox.MaterialCheckBox
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/agendaSubjectImportant"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.ui.agendaSubjectImportant}" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/agenda_config_subject_important"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:checked="@={config.ui.agendaGroupByType}"
-                android:enabled="@{isAgendaMode}"
-                android:minHeight="32dp"
-                android:text="@string/agenda_config_group_by_type"
-                tools:enabled="false" />
+                android:layout_marginBottom="1dp"
+                android:clickable="@{isNewAgenda || isAgendaMode}"
+                android:focusable="@{isNewAgenda || isAgendaMode}"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="@{() -> agendaCompactMode.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-            <TextView
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/agendaCompactMode"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.ui.agendaCompactMode}"
+                        android:enabled="@{isNewAgenda || isAgendaMode}"
+                        tools:enabled="false" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="@{isNewAgenda || isAgendaMode}"
+                            android:text="@string/agenda_config_compact_mode"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary"
+                            tools:enabled="false" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:enabled="@{isNewAgenda || isAgendaMode}"
+                            android:text="@string/agenda_config_compact_mode_hint"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?android:attr/textColorSecondary"
+                            tools:enabled="false" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="32dp"
-                android:isVisible="@{!isAgendaMode}"
-                android:text="@string/agenda_config_mode_unavailable"
-                android:textAppearance="?textAppearanceBodySmall" />
+                android:layout_marginBottom="1dp"
+                android:clickable="@{isNewAgenda || isAgendaMode}"
+                android:focusable="@{isNewAgenda || isAgendaMode}"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="@{() -> agendaGroupByType.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-            <TextView
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/agendaGroupByType"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.ui.agendaGroupByType}"
+                        android:enabled="@{isNewAgenda || isAgendaMode}"
+                        tools:enabled="false" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="@{isNewAgenda || isAgendaMode}"
+                            android:text="@string/agenda_config_group_by_type"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary"
+                            tools:enabled="false" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/agenda_config_group_by_type_hint"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?android:attr/textColorSecondary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/agenda_config_event_sharing"
-                android:textAppearance="?textAppearanceTitleMedium" />
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:isVisible="@{isNewAgenda}"
+                android:onClick="@{() -> agendaShowEmptyDays.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/eventSharingEnabled"
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/agendaShowEmptyDays"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.ui.agendaShowEmptyDays}" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/agenda_config_show_empty_days"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/agenda_config_show_empty_days_hint"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?android:attr/textColorSecondary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:minHeight="32dp"
-                android:text="@string/agenda_config_event_sharing_enabled" />
+                android:layout_marginBottom="1dp"
+                android:isVisible="@{isNewAgenda}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/shareByDefault"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:checked="@={config.shareByDefault}"
-                android:minHeight="32dp"
-                android:text="@string/settings_register_share_by_default_text" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/agenda_config_elearning"
-                android:textAppearance="?textAppearanceTitleMedium" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/agenda_config_not_available_yet"
-                android:textAppearance="?textAppearanceBodySmall" />
-
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/elearningEnabled"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:checked="@={config.ui.agendaElearningMark}"
-                android:enabled="false"
-                android:minHeight="32dp"
-                android:text="@string/agenda_config_elearning_mark" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/elearningType"
-                style="?textInputOutlinedDenseStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:enabled="@{elearningEnabled.checked}"
-                android:hint="@string/agenda_config_elearning_type">
-
-                <pl.szczodrzynski.edziennik.utils.TextInputDropDown
-                    android:id="@+id/elearningTypeDropdown"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:enabled="false"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="12dp">
 
-            <com.google.android.material.checkbox.MaterialCheckBox
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/agendaCalendarWeeks"
+                        style="?textInputOutlinedDenseStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="@{isNewAgenda &amp;&amp; !isAgendaMode}"
+                        android:hint="@string/agenda_config_calendar_weeks">
+
+                        <pl.szczodrzynski.edziennik.utils.TextInputDropDown
+                            android:id="@+id/agendaCalendarWeeksDropdown"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="@{isNewAgenda &amp;&amp; !isAgendaMode}"
+                            android:focusable="true"
+                            android:focusableInTouchMode="true" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/changeEventColors"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:checked="@={config.ui.agendaElearningGroup}"
-                android:enabled="false"
-                android:minHeight="32dp"
-                android:text="@string/agenda_config_elearning_group" />
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.mikepenz.iconics.view.IconicsImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="16dp"
+                        app:iiv_color="?attr/colorOnSurfaceVariant"
+                        app:iiv_icon="cmd-brush"
+                        app:iiv_size="24dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/agenda_config_change_event_colors"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?android:attr/textColorPrimary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="@{isNewAgenda || isAgendaMode}"
+                android:focusable="@{isNewAgenda || isAgendaMode}"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="@{() -> agendaClassicCards.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupBottom"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/agendaClassicCards"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.ui.agendaClassicCards}"
+                        android:enabled="@{isNewAgenda || isAgendaMode}"
+                        tools:enabled="false" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="@{isNewAgenda || isAgendaMode}"
+                            android:text="@string/agenda_config_classic_cards"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary"
+                            tools:enabled="false" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:enabled="@{isNewAgenda || isAgendaMode}"
+                            android:text="@string/agenda_config_classic_cards_hint"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?android:attr/textColorSecondary"
+                            tools:enabled="false" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Event sharing -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="6dp"
+                android:text="@string/agenda_config_event_sharing"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="@{() -> eventSharingEnabled.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupTop"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/eventSharingEnabled"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/agenda_config_event_sharing_enabled"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="@{eventSharingEnabled.checked}"
+                android:focusable="@{eventSharingEnabled.checked}"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="@{() -> shareByDefault.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupBottom"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/shareByDefault"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.shareByDefault}"
+                        android:enabled="@{eventSharingEnabled.checked}" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="@{eventSharingEnabled.checked}"
+                            android:text="@string/settings_register_share_by_default_text"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Remote learning -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="6dp"
+                android:text="@string/agenda_config_elearning"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
+                android:paddingBottom="8dp"
+                android:text="@string/agenda_config_not_available_yet"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupTop"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/elearningEnabled"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.ui.agendaElearningMark}"
+                        android:enabled="false" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"
+                            android:text="@string/agenda_config_elearning_mark"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="12dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/elearningType"
+                        style="?textInputOutlinedDenseStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="@{elearningEnabled.checked}"
+                        android:hint="@string/agenda_config_elearning_type">
+
+                        <pl.szczodrzynski.edziennik.utils.TextInputDropDown
+                            android:id="@+id/elearningTypeDropdown"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"
+                            android:focusable="true"
+                            android:focusableInTouchMode="true" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupBottom"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.ui.agendaElearningGroup}"
+                        android:enabled="false" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"
+                            android:text="@string/agenda_config_elearning_group"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </layout>

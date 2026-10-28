@@ -1,20 +1,12 @@
 package pl.szczodrzynski.edziennik.ui.feedback
 
 import android.content.BroadcastReceiver
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import coil.imageLoader
-import coil.request.ImageRequest
-import com.github.bassaer.chatmessageview.model.IChatUser
-import com.github.bassaer.chatmessageview.model.Message
-import com.github.bassaer.chatmessageview.view.ChatView
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,20 +19,15 @@ import pl.szczodrzynski.edziennik.data.api.events.FeedbackMessageEvent
 import pl.szczodrzynski.edziennik.data.api.szkolny.SzkolnyApi
 import pl.szczodrzynski.edziennik.data.db.entity.FeedbackMessage
 import pl.szczodrzynski.edziennik.databinding.FragmentFeedbackBinding
-import pl.szczodrzynski.edziennik.ext.crc16
 import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ui.base.fragment.BaseFragment
-import pl.szczodrzynski.edziennik.utils.Utils
 import pl.szczodrzynski.edziennik.utils.Utils.openUrl
-import timber.log.Timber
-import java.util.Calendar
-import kotlin.collections.set
 
 class FeedbackFragment : BaseFragment<FragmentFeedbackBinding, AppCompatActivity>(
     inflater = FragmentFeedbackBinding::inflate,
 ) {
 
-    private val chatView: ChatView by lazy { b.chatView }
+    private val chatAdapter = FeedbackChatAdapter()
     private val api by lazy { SzkolnyApi(app) }
     private var isDev = false
     private var currentDeviceId: String? = null
@@ -52,32 +39,14 @@ class FeedbackFragment : BaseFragment<FragmentFeedbackBinding, AppCompatActivity
         EventBus.getDefault().removeStickyEvent(event)
         val message = event.message
         if (currentDeviceId == null || message.deviceId == currentDeviceId) {
-            val chatMessage = getChatMessage(message)
-            if (message.received) chatView.receive(chatMessage)
-            else chatView.send(chatMessage)
-        }
-        else {
+            chatAdapter.addMessage(message)
+            if (chatAdapter.itemCount > 0) {
+                b.chatRecyclerView.smoothScrollToPosition(chatAdapter.itemCount - 1)
+            }
+        } else {
             Toast.makeText(context, "${message.senderName}: Nowa wiadomość w innym wątku.", Toast.LENGTH_LONG).show()
         }
     }
-
-    private val users = mutableMapOf(
-            0 to User(0, "Ja", null)
-    )
-    private fun getUser(message: FeedbackMessage): User {
-        val userId = message.devId ?: if (message.received) -message.senderName.crc16() else 0
-        return users[userId] ?: run {
-            User(userId, message.senderName, message.devImage).also { users[userId] = it }
-        }
-    }
-
-    private fun getChatMessage(message: FeedbackMessage): Message = Message.Builder()
-            .setUser(getUser(message))
-            .setRight(!message.received)
-            .setText(message.text)
-            .setSendTime(Calendar.getInstance().apply { timeInMillis = message.sentTime })
-            .hideIcon(!message.received)
-            .build()
 
     private fun launchDeviceSelection() {
         if (!isDev)
@@ -90,7 +59,7 @@ class FeedbackFragment : BaseFragment<FragmentFeedbackBinding, AppCompatActivity
             }
             popupMenu.setOnMenuItemClickListener { item ->
                 b.targetDeviceDropDown.setText(item.title)
-                chatView.getMessageView().removeAll()
+                chatAdapter.clear()
                 val message = messages[item.itemId]
                 currentDeviceId = message.deviceId
                 this@FeedbackFragment.launch { loadMessages() }
@@ -113,10 +82,9 @@ class FeedbackFragment : BaseFragment<FragmentFeedbackBinding, AppCompatActivity
             b.inputLayout.visibility = View.GONE
         }
 
-        messages.forEach {
-            val chatMessage = getChatMessage(it)
-            if (it.received) chatView.receive(chatMessage)
-            else chatView.send(chatMessage)
+        chatAdapter.setItems(messages)
+        if (messages.isNotEmpty()) {
+            b.chatRecyclerView.scrollToPosition(messages.size - 1)
         }
     }
 
@@ -126,16 +94,12 @@ class FeedbackFragment : BaseFragment<FragmentFeedbackBinding, AppCompatActivity
         b.faqText.setOnClickListener { openFaq() }
         b.faqButton.setOnClickListener { openFaq() }
 
-        with(chatView) {
-            setLeftBubbleColor(Utils.getAttr(activity, R.attr.colorSurface))
-            setLeftMessageTextColor(Utils.getAttr(activity, android.R.attr.textColorPrimary))
-            setRightBubbleColor(Utils.getAttr(activity, R.attr.colorPrimary))
-            setRightMessageTextColor(Color.WHITE)
-            setSendButtonColor(Utils.getAttr(activity, R.attr.colorAccent))
-            setSendIcon(R.drawable.ic_action_send)
-            setInputTextHint("Napisz...")
-            setMessageMarginTop(5)
-            setMessageMarginBottom(5)
+        val layoutManager = LinearLayoutManager(context).apply {
+            stackFromEnd = true
+        }
+        b.chatRecyclerView.apply {
+            this.layoutManager = layoutManager
+            adapter = chatAdapter
         }
 
         val messages = withContext(Dispatchers.IO) {
@@ -163,8 +127,7 @@ class FeedbackFragment : BaseFragment<FragmentFeedbackBinding, AppCompatActivity
             }
             b.chatLayout.visibility = View.VISIBLE
             b.inputLayout.visibility = View.GONE
-        }
-        else if (messages.isEmpty()) {
+        } else if (messages.isEmpty()) {
             b.chatLayout.visibility = View.GONE
             b.inputLayout.visibility = View.VISIBLE
         }
@@ -172,47 +135,20 @@ class FeedbackFragment : BaseFragment<FragmentFeedbackBinding, AppCompatActivity
         loadMessages(messages)
 
         b.sendButton.onClick {
-            send(b.textInput.text.toString())
+            send(b.textInput.text?.toString())
         }
-        chatView.setOnClickSendButtonListener {
-            send(chatView.inputText)
+        b.chatSendButton.onClick {
+            send(b.chatInputEditText.text?.toString())
         }
-    }
-
-    inner class User(val id: Int, val userName: String, val image: String?) : IChatUser {
-        private val bitmap by lazy {
-            if (image == null)
-                BitmapFactory.decodeResource(activity.resources, R.drawable.profile_)
-            else
-                Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888).also { bmp ->
-                    launch {
-                        Timber.d("Created image for " + userName)
-                        val request = ImageRequest.Builder(activity)
-                            .data(image)
-                            .target {
-                                val canvas = Canvas(bmp)
-                                it.setBounds(0, 0, bmp.width, bmp.height)
-                                it.draw(canvas)
-                            }
-                            .build()
-                        activity.imageLoader.enqueue(request)
-                    }
-                }
-        }
-        override fun getIcon() = bitmap
-
-        override fun getId() = id.toString()
-        override fun getName() = userName
-        override fun setIcon(bmp: Bitmap) {}
     }
 
     private fun send(text: String?) {
-        if (text?.isEmpty() != false) {
+        if (text.isNullOrBlank()) {
             Toast.makeText(activity, "Podaj treść wiadomości.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (isDev && currentDeviceId == null || currentDeviceId == "szkolny.eu") {
+        if (isDev && (currentDeviceId == null || currentDeviceId == "szkolny.eu")) {
             Toast.makeText(activity, "Wybierz urządzenie docelowe.", Toast.LENGTH_SHORT).show()
             return
         }
@@ -220,9 +156,9 @@ class FeedbackFragment : BaseFragment<FragmentFeedbackBinding, AppCompatActivity
         launch {
             val message = api.runCatching(activity) {
                 val message = api.sendFeedbackMessage(
-                        senderName = App.profile.accountName ?: App.profile.studentNameLong,
-                        targetDeviceId = if (isDev) currentDeviceId else null,
-                        text = text
+                    senderName = App.profile.accountName ?: App.profile.studentNameLong,
+                    targetDeviceId = if (isDev) currentDeviceId else null,
+                    text = text
                 )
                 app.db.feedbackMessageDao().add(message)
                 message
@@ -237,11 +173,12 @@ class FeedbackFragment : BaseFragment<FragmentFeedbackBinding, AppCompatActivity
             b.inputLayout.visibility = View.GONE
 
             b.textInput.text = null
-            b.chatView.inputText = ""
+            b.chatInputEditText.text = null
 
-            val chatMessage = getChatMessage(message)
-            if (message.received) chatView.receive(chatMessage)
-            else chatView.send(chatMessage)
+            chatAdapter.addMessage(message)
+            if (chatAdapter.itemCount > 0) {
+                b.chatRecyclerView.smoothScrollToPosition(chatAdapter.itemCount - 1)
+            }
         }
     }
 

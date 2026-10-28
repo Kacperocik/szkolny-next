@@ -170,4 +170,68 @@
         <item quantity="few">%d tłumaczenia</item>
         <item quantity="other">%d tłumaczeń</item>
     </plurals>
+
+    <plurals name="ongoing_lesson_finished_title_format">
+        <item quantity="one">Koniec zajęć! Jutro jest %d lekcja.</item>
+        <item quantity="few">Koniec zajęć! Jutro są %d lekcje.</item>
+        <item quantity="other">Koniec zajęć! Jutro jest %d lekcji.</item>
+    </plurals>
+
+    <plurals name="messages_selected">
+        <item quantity="one">%d zaznaczona</item>
+        <item quantity="few">%d zaznaczone</item>
+        <item quantity="many">%d zaznaczonych</item>
+        <item quantity="other">%d zaznaczonych</item>
+    </plurals>
+
+    <plurals name="messages_delete_selected_confirmation">
+        <item quantity="one">Czy chcesz usunąć %d wiadomość?</item>
+        <item quantity="few">Czy chcesz usunąć %d wiadomości?</item>
+        <item quantity="many">Czy chcesz usunąć %d wiadomości?</item>
+        <item quantity="other">Czy chcesz usunąć %d wiadomości?</item>
+    </plurals>
+
+    <plurals name="messages_restored">
+        <item quantity="one">Przywrócono %d wiadomość</item>
+        <item quantity="few">Przywrócono %d wiadomości</item>
+        <item quantity="many">Przywrócono %d wiadomości</item>
+        <item quantity="other">Przywrócono %d wiadomości</item>
+    </plurals>
+
+    <plurals name="messages_deleted">
+        <item quantity="one">Usunięto %d wiadomość</item>
+        <item quantity="few">Usunięto %d wiadomości</item>
+        <item quantity="many">Usunięto %d wiadomości</item>
+        <item quantity="other">Usunięto %d wiadomości</item>
+    </plurals>
+
+    <plurals name="search_results_messages">
+        <item quantity="one">Znaleziono %d wiadomość</item>
+        <item quantity="few">Znaleziono %d wiadomości</item>
+        <item quantity="other">Znaleziono %d wiadomości</item>
+    </plurals>
+
+    <plurals name="search_results_events">
+        <item quantity="one">Znaleziono %d wydarzenie</item>
+        <item quantity="few">Znaleziono %d wydarzenia</item>
+        <item quantity="other">Znaleziono %d wydarzeń</item>
+    </plurals>
+
+    <plurals name="search_results_announcements">
+        <item quantity="one">Znaleziono %d ogłoszenie</item>
+        <item quantity="few">Znaleziono %d ogłoszenia</item>
+        <item quantity="other">Znaleziono %d ogłoszeń</item>
+    </plurals>
+
+    <plurals name="search_results_notes">
+        <item quantity="one">Znaleziono %d notatkę</item>
+        <item quantity="few">Znaleziono %d notatki</item>
+        <item quantity="other">Znaleziono %d notatek</item>
+    </plurals>
+
+    <plurals name="search_results_default">
+        <item quantity="one">Znaleziono %d wynik</item>
+        <item quantity="few">Znaleziono %d wyniki</item>
+        <item quantity="other">Znaleziono %d wyników</item>
+    </plurals>
 </resources>

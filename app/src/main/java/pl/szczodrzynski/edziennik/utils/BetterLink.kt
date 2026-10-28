@@ -22,6 +22,7 @@ import android.widget.TextView
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.core.widget.addTextChangedListener
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import pl.szczodrzynski.edziennik.*
 import pl.szczodrzynski.edziennik.data.api.Regexes
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
@@ -68,9 +69,12 @@ object BetterLink {
             2,
             2,
             "Otwórz w przeglądarce"
-        ).setOnMenuItemClickListener {
-            Utils.openUrl(context, url)
-            true
+        ).apply {
+            icon = CommunityMaterial.Icon3.cmd_open_in_new.toDrawable(context)
+            setOnMenuItemClickListener {
+                Utils.openUrl(context, url)
+                true
+            }
         }
     }
 
@@ -80,9 +84,12 @@ object BetterLink {
             3,
             3,
             "Napisz e-mail"
-        ).setOnMenuItemClickListener {
-            Utils.openUrl(context, url)
-            true
+        ).apply {
+            icon = CommunityMaterial.Icon.cmd_email_outline.toDrawable(context)
+            setOnMenuItemClickListener {
+                Utils.openUrl(context, url)
+                true
+            }
         }
     }
 
@@ -94,34 +101,40 @@ object BetterLink {
             4 or FLAG_ACTION,
             4,
             "Utwórz wydarzenie"
-        ).setOnMenuItemClickListener {
-            val intent = Intent(
-                Intent.ACTION_MAIN,
-                "action" to "createManualEvent",
-                "eventDate" to date.stringY_m_d
-            )
-            context.sendBroadcast(intent)
-            true
+        ).apply {
+            icon = CommunityMaterial.Icon.cmd_calendar_plus.toDrawable(context)
+            setOnMenuItemClickListener {
+                val intent = Intent(
+                    Intent.ACTION_MAIN,
+                    "action" to "createManualEvent",
+                    "eventDate" to date.stringY_m_d
+                )
+                context.sendBroadcast(intent)
+                true
+            }
         }
     }
 
     private fun createTeacherItems(menu: MenuBuilder, context: Context, teacherId: Long, fullName: String) {
+        menu.setTitle(fullName)
         if (!(context.applicationContext as App).profile.hasFeature(FeatureType.MESSAGES_INBOX))
             return
-        menu.setTitle(fullName)
         menu.add(
             1,
             5 or FLAG_ACTION,
             5,
             "Napisz wiadomość"
-        ).setOnMenuItemClickListener {
-            val intent = Intent(
-                Intent.ACTION_MAIN,
-                "fragmentId" to NavTarget.MESSAGE_COMPOSE,
-                "messageRecipientId" to teacherId
-            )
-            context.sendBroadcast(intent)
-            true
+        ).apply {
+            icon = CommunityMaterial.Icon.cmd_email_plus_outline.toDrawable(context)
+            setOnMenuItemClickListener {
+                val intent = Intent(
+                    Intent.ACTION_MAIN,
+                    "fragmentId" to NavTarget.MESSAGE_COMPOSE,
+                    "messageRecipientId" to teacherId
+                )
+                context.sendBroadcast(intent)
+                true
+            }
         }
     }
 
@@ -153,6 +166,7 @@ object BetterLink {
 
         val menu = MenuBuilder(context)
         val helper = MenuPopupHelper(context, menu, popupView)
+        helper.setForceShowIcon(true)
         val popup = helper.popup
 
         val spanUrl = span.text()
@@ -176,9 +190,12 @@ object BetterLink {
             )
             else -> createUrlItems(menu, context, spanUrl)
         }
-        menu.add(1, 1000, 1000, "Kopiuj tekst").setOnMenuItemClickListener {
-            spanParameter.copyToClipboard(context)
-            true
+        menu.add(1, 1000, 1000, "Kopiuj tekst").apply {
+            icon = CommunityMaterial.Icon.cmd_clipboard_text_multiple_outline.toDrawable(context)
+            setOnMenuItemClickListener {
+                spanText.toString().copyToClipboard(context)
+                true
+            }
         }
 
         helper.setOnDismissListener { parent.removeView(popupView) }
@@ -207,6 +224,53 @@ object BetterLink {
             it.invoke(helper, 0, 0, false, true)
         }
         return true
+    }
+
+    fun showTeacherMenu(
+        view: View,
+        teacherId: Long,
+        teacherName: String,
+        onActionSelected: (() -> Unit)? = null
+    ) {
+        val context = view.context
+        val menu = MenuBuilder(context)
+        val helper = MenuPopupHelper(context, menu, view)
+        helper.setForceShowIcon(true)
+
+        createTeacherItems(menu, context, teacherId, teacherName)
+
+        menu.add(1, 1000, 1000, "Kopiuj tekst").apply {
+            icon = CommunityMaterial.Icon.cmd_clipboard_text_multiple_outline.toDrawable(context)
+            setOnMenuItemClickListener {
+                teacherName.copyToClipboard(context)
+                true
+            }
+        }
+
+        menu.visibleItems.forEach { item ->
+            if ((item.itemId and FLAG_ACTION) != FLAG_ACTION)
+                return@forEach
+            item.addListener {
+                onActionSelected?.invoke()
+                true
+            }
+        }
+
+        val popup = helper.popup
+        popup::class.java.getDeclaredField("mShowTitle").let {
+            it.isAccessible = true
+            it.set(popup, true)
+        }
+        helper::class.java.getDeclaredMethod(
+            "showPopup",
+            Int::class.java,
+            Int::class.java,
+            Boolean::class.java,
+            Boolean::class.java
+        ).let {
+            it.isAccessible = true
+            it.invoke(helper, 0, 0, false, true)
+        }
     }
 
     fun attach(

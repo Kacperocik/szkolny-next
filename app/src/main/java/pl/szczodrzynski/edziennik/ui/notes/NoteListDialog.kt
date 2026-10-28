@@ -59,6 +59,7 @@ class NoteListDialog(
                     editingNote = it,
                 ).show()
             },
+            embedded = true,
         )
 
         app.db.noteDao().getAllFor(

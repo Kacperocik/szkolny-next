@@ -117,6 +117,7 @@ class LoginChooserAdapter(
 
             model.state = STATE_CLOSED
         }
+        if (notifyAdapter) notifyItemChanged(position)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {

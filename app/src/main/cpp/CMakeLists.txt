@@ -44,3 +44,6 @@ target_link_libraries( # Specifies the target library.
                        # Links the target library to the log library
                        # included in the NDK.
                        ${log-lib} )
+
+# Ensure 16 KB page alignment for Android 15+ compatibility
+target_link_options(szkolny-signing PRIVATE "-Wl,-z,max-page-size=16384")

@@ -17,9 +17,10 @@ import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_NO_GRADE
 import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_POINT_AVG
 import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_POINT_SUM
 import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_YEAR_FINAL
-import pl.szczodrzynski.edziennik.data.db.enums.SchoolType
+import pl.szczodrzynski.edziennik.data.enums.SchoolType
 import pl.szczodrzynski.edziennik.data.db.full.GradeFull
 import pl.szczodrzynski.edziennik.ext.asColoredSpannable
+import pl.szczodrzynski.edziennik.ext.averageOrNull
 import pl.szczodrzynski.edziennik.ext.get
 import pl.szczodrzynski.edziennik.ext.ifNotNull
 import pl.szczodrzynski.edziennik.ext.notEmptyOrNull
@@ -28,6 +29,8 @@ import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
 import pl.szczodrzynski.edziennik.ui.grades.models.GradesAverages
 import pl.szczodrzynski.edziennik.ui.grades.models.GradesSemester
+import pl.szczodrzynski.edziennik.ui.grades.models.GradesStats
+import pl.szczodrzynski.edziennik.ui.grades.models.GradesSubject
 import java.text.DecimalFormat
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.floor
@@ -45,6 +48,8 @@ class GradesManager(val app: App) : CoroutineScope {
         const val YEAR_ALL_GRADES = 4
         const val COLOR_MODE_DEFAULT = 0
         const val COLOR_MODE_WEIGHTED = 1
+        const val SHAPE_MODE_ROUNDED_RECT = 0
+        const val SHAPE_MODE_CIRCLE = 1
         const val UNIVERSITY_AVERAGE_MODE_SIMPLE = 0
         const val UNIVERSITY_AVERAGE_MODE_ECTS = 1
     }
@@ -62,6 +67,8 @@ class GradesManager(val app: App) : CoroutineScope {
         get() = app.profile.config.grades.yearAverageMode
     val colorMode
         get() = app.profile.config.grades.colorMode
+    val shapeMode
+        get() = app.profile.config.grades.shapeMode
     val plusValue
         get() = app.profile.config.grades.plusValue
     val minusValue
@@ -331,6 +338,84 @@ class GradesManager(val app: App) : CoroutineScope {
                 else null
             }
         }
+    }
+
+    /**
+     * Aggregates precomputed subject and semester averages into semester and yearly statistics.
+     * Shared by the grade list and grade simulator.
+     */
+    fun computeGradesStats(items: List<GradesSubject>, stats: GradesStats = GradesStats()): GradesStats {
+        val sem1Expected = mutableListOf<Float>()
+        val sem2Expected = mutableListOf<Float>()
+        val yearlyExpected = mutableListOf<Float>()
+        val sem1Proposed = mutableListOf<Float>()
+        val sem2Proposed = mutableListOf<Float>()
+        val yearlyProposed = mutableListOf<Float>()
+        val sem1Final = mutableListOf<Float>()
+        val sem2Final = mutableListOf<Float>()
+        val yearlyFinal = mutableListOf<Float>()
+
+        val sem1Point = mutableListOf<Float>()
+        val sem2Point = mutableListOf<Float>()
+        val yearlyPoint = mutableListOf<Float>()
+
+        for (item in items) {
+            if (item.isUnknown) {
+                // do not count averages for "unknown" subjects
+                continue
+            }
+            item.semesters.forEach { sem ->
+                calculateAverages(sem.averages)
+                if (sem.number == 1) {
+                    sem.proposedGrade?.value?.let { sem1Proposed += it }
+                    sem.finalGrade?.value?.let {
+                        sem1Final += it
+                        sem1Expected += it
+                    } ?: run {
+                        sem.averages.normalAvg?.let { sem1Expected += getRoundedGrade(it).toFloat() }
+                    }
+                    sem.averages.pointAvgPercent?.let { sem1Point += it }
+                }
+                if (sem.number == 2) {
+                    sem.proposedGrade?.value?.let { sem2Proposed += it }
+                    sem.finalGrade?.value?.let {
+                        sem2Final += it
+                        sem2Expected += it
+                    } ?: run {
+                        sem.averages.normalAvg?.let { sem2Expected += getRoundedGrade(it).toFloat() }
+                    }
+                    sem.averages.pointAvgPercent?.let { sem2Point += it }
+                }
+            }
+            calculateAverages(item.averages, item.semesters)
+            item.proposedGrade?.value?.let { yearlyProposed += it }
+            item.finalGrade?.value?.let {
+                yearlyFinal += it
+                yearlyExpected += it
+            } ?: run {
+                item.averages.normalAvg?.let { yearlyExpected += getRoundedGrade(it).toFloat() }
+            }
+            item.averages.pointAvgPercent?.let { yearlyPoint += it }
+        }
+
+        stats.normalSem1 = sem1Expected.averageOrNull()?.toFloat() ?: 0f
+        stats.normalSem1Proposed = sem1Proposed.averageOrNull()?.toFloat() ?: 0f
+        stats.normalSem1Final = sem1Final.averageOrNull()?.toFloat() ?: 0f
+        stats.sem1NotAllFinal = sem1Final.size < sem1Expected.size
+        stats.normalSem2 = sem2Expected.averageOrNull()?.toFloat() ?: 0f
+        stats.normalSem2Proposed = sem2Proposed.averageOrNull()?.toFloat() ?: 0f
+        stats.normalSem2Final = sem2Final.averageOrNull()?.toFloat() ?: 0f
+        stats.sem2NotAllFinal = sem2Final.size < sem2Expected.size
+        stats.normalYearly = yearlyExpected.averageOrNull()?.toFloat() ?: 0f
+        stats.normalYearlyProposed = yearlyProposed.averageOrNull()?.toFloat() ?: 0f
+        stats.normalYearlyFinal = yearlyFinal.averageOrNull()?.toFloat() ?: 0f
+        stats.yearlyNotAllFinal = yearlyFinal.size < yearlyExpected.size
+
+        stats.pointSem1 = sem1Point.averageOrNull()?.toFloat() ?: 0f
+        stats.pointSem2 = sem2Point.averageOrNull()?.toFloat() ?: 0f
+        stats.pointYearly = yearlyPoint.averageOrNull()?.toFloat() ?: 0f
+
+        return stats
     }
 
     fun getAverageString(context: Context, averages: GradesAverages, nameSemester: Boolean = false, showSemester: Int? = null, noAverageRes: Int? = null): CharSequence? {

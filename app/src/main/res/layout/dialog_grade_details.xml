@@ -67,7 +67,7 @@
                     android:id="@+id/gradeName"
                     android:layout_width="72dp"
                     android:layout_height="72dp"
-                    android:background="@drawable/bg_circle"
+                    android:background="@drawable/bg_rounded_16dp"
                     android:gravity="center"
                     android:padding="8dp"
                     android:text="@{grade.name}"
@@ -139,7 +139,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/dialog_grade_details_teacher"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:id="@+id/teacherName"
@@ -155,7 +156,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/dialog_grade_details_category"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -170,7 +172,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/dialog_grade_details_description"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -186,7 +189,8 @@
                 android:layout_marginTop="8dp"
                 android:isVisible="@{grade.classAverage != null &amp;&amp; grade.classAverage != -1}"
                 android:text="@string/dialog_grade_details_class_average"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -203,7 +207,8 @@
                 android:layout_marginTop="8dp"
                 android:isVisible="@{commentVisible}"
                 android:text="@string/dialog_grade_details_comment"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -219,7 +224,8 @@
                 android:layout_marginTop="8dp"
                 android:isVisible="@{gradeValue != -1}"
                 android:text="@string/dialog_grade_details_value"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -235,7 +241,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/dialog_grade_details_added_date"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -251,7 +258,8 @@
                 android:layout_marginTop="8dp"
                 android:isVisible="@{devMode}"
                 android:text="@string/dialog_grade_details_id"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -276,7 +284,8 @@
                 android:layout_marginTop="8dp"
                 android:isVisible="@{historyVisible}"
                 android:text="@string/dialog_grade_details_history"
-                android:textAppearance="?textAppearanceTitleMedium" />
+                android:textAppearance="?textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <androidx.core.widget.NestedScrollView
                 android:id="@+id/gradeHistoryNest"

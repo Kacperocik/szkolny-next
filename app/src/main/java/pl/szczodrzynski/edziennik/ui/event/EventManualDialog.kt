@@ -4,14 +4,19 @@
 
 package pl.szczodrzynski.edziennik.ui.event
 
+import android.content.DialogInterface.BUTTON_NEUTRAL
+import android.graphics.drawable.GradientDrawable
+import android.transition.ChangeBounds
+import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.google.android.material.color.MaterialColors
-import com.jaredrummler.android.colorpicker.ColorPickerDialog
-import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,6 +25,7 @@ import org.greenrobot.eventbus.ThreadMode
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.core.manager.TextStylingManager.HtmlMode.SIMPLE
 import pl.szczodrzynski.edziennik.core.manager.TextStylingManager.StylingConfigBase
+import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.data.api.edziennik.EdziennikTask
 import pl.szczodrzynski.edziennik.data.api.events.ApiTaskAllFinishedEvent
 import pl.szczodrzynski.edziennik.data.api.events.ApiTaskErrorEvent
@@ -27,6 +33,7 @@ import pl.szczodrzynski.edziennik.data.api.events.ApiTaskFinishedEvent
 import pl.szczodrzynski.edziennik.data.api.szkolny.SzkolnyApi
 import pl.szczodrzynski.edziennik.data.config.AppData
 import pl.szczodrzynski.edziennik.data.db.entity.Event
+import pl.szczodrzynski.edziennik.data.db.entity.EventType
 import pl.szczodrzynski.edziennik.data.db.entity.Metadata
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.data.db.entity.Subject
@@ -43,12 +50,15 @@ import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ext.removeFromParent
 import pl.szczodrzynski.edziennik.ext.setText
 import pl.szczodrzynski.edziennik.ext.setTintColor
+import pl.szczodrzynski.edziennik.ext.toDrawable
+import pl.szczodrzynski.navlib.enableExpressiveImageShapeMorph
 import pl.szczodrzynski.edziennik.ui.base.dialog.BaseDialog
 import pl.szczodrzynski.edziennik.ui.base.dialog.BindingDialog
 import pl.szczodrzynski.edziennik.ui.base.dialog.SimpleDialog
+import pl.szczodrzynski.edziennik.ui.dialogs.ColorPickerDialog
 import pl.szczodrzynski.edziennik.ui.base.views.TimeDropdown.Companion.DISPLAY_LESSONS
 import pl.szczodrzynski.edziennik.ui.dialogs.settings.RegistrationConfigDialog
-import pl.szczodrzynski.edziennik.utils.Anim
+import pl.szczodrzynski.edziennik.ext.moveButtonsToTitleWhenSpaceLimited
 import pl.szczodrzynski.edziennik.utils.html.BetterHtml
 import pl.szczodrzynski.edziennik.utils.models.Date
 import pl.szczodrzynski.edziennik.utils.models.Time
@@ -67,7 +77,12 @@ class EventManualDialog(
 
     override fun getTitleRes() = R.string.dialog_event_manual_title
     override fun inflate(layoutInflater: LayoutInflater) =
-        DialogEventManualV2Binding.inflate(layoutInflater)
+        DialogEventManualV2Binding.inflate(layoutInflater).also { binding ->
+            binding.shareSwitch.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                CommunityMaterial.Icon3.cmd_share_variant.toDrawable(activity, colorAttr = R.attr.colorOnSurfaceVariant),
+                null, null, null,
+            )
+        }
 
     override fun isCancelable() = false
     override fun getPositiveButtonText() = R.string.save
@@ -110,6 +125,11 @@ class EventManualDialog(
     }
 
     override suspend fun onShow() {
+        dialog.moveButtonsToTitleWhenSpaceLimited(
+            neutralIcon = CommunityMaterial.Icon.cmd_delete,
+            destructiveNeutralIcon = true,
+        )
+        getDialogButton(BUTTON_NEUTRAL)?.setTextColor(R.attr.colorError.resolveAttr(activity))
         val data = withContext(Dispatchers.IO) {
             val profile = app.db.profileDao().getByIdNow(profileId) ?: return@withContext null
             AppData.get(profile.loginStoreType)
@@ -119,15 +139,12 @@ class EventManualDialog(
             b.timeDropdownLayout.appendView(b.subjectDropdownLayout)
         }
 
-        b.showMore.onClick { // TODO iconics is broken
-            it.apply {
-                refreshDrawableState()
-
-                if (isChecked)
-                    Anim.expand(b.moreLayout, 200, null)
-                else
-                    Anim.collapse(b.moreLayout, 200, null)
-            }
+        b.showMore.onClick {
+            TransitionManager.beginDelayedTransition(b.mainLayout, ChangeBounds().apply {
+                duration = 200L
+                interpolator = FastOutSlowInInterpolator()
+            })
+            b.moreLayout.isVisible = it.isChecked
         }
 
         textStylingManager.attachToField(
@@ -338,8 +355,8 @@ class EventManualDialog(
             selectDefault(defaultType)
 
             onTypeSelected = {
-                b.typeColor.background.setTintColor(MaterialColors.harmonizeWithPrimary(b.root.context, it.color))
                 customColor = null
+                updateColorPreview(it)
             }
         }
 
@@ -350,11 +367,7 @@ class EventManualDialog(
                 customColor = it.color
         }
 
-        b.typeColor.background.setTintColor(
-            customColor
-                ?: b.typeDropdown.getSelected()?.color
-                ?: Event.COLOR_DEFAULT
-        )
+        updateColorPreview()
 
         // copy IDs from the LessonFull
         defaultLesson?.let {
@@ -362,21 +375,31 @@ class EventManualDialog(
         }
 
         b.typeColor.onClick {
-            val currentColor = customColor
-                ?: b.typeDropdown.getSelected()?.color
-                ?: Event.COLOR_DEFAULT
-            val colorPickerDialog = ColorPickerDialog.newBuilder()
-                    .setColor(currentColor)
-                    .create()
-            colorPickerDialog.setColorPickerDialogListener(
-                    object : ColorPickerDialogListener {
-                        override fun onDialogDismissed(dialogId: Int) {}
-                        override fun onColorSelected(dialogId: Int, color: Int) {
-                            b.typeColor.background.setTintColor(color)
-                            customColor = color
-                        }
-                    })
-            colorPickerDialog.show(activity.supportFragmentManager, "color-picker-dialog")
+            ColorPickerDialog(activity, getEventColor()) { color ->
+                customColor = color
+                updateColorPreview()
+            }.show()
+        }
+        b.typeColor.enableExpressiveImageShapeMorph(pressedCornerRadiusDp = 10f)
+    }
+
+    private fun getEventColor(type: EventType? = b.typeDropdown.getSelected()): Int =
+        app.eventManager.getEventColor(
+            typeId = type?.id,
+            fallbackColor = customColor ?: type?.color ?: Event.COLOR_DEFAULT,
+            profileId = profileId,
+        )
+
+    private fun updateColorPreview(type: EventType? = b.typeDropdown.getSelected()) {
+        val color = MaterialColors.harmonizeWithPrimary(b.root.context, getEventColor(type))
+        val background = b.typeColor.background?.mutate()
+        if (background is GradientDrawable) {
+            // Shape morphing recreates the drawable from its constant state,
+            // which preserves the fill color but discards a color filter.
+            background.clearColorFilter()
+            background.setColor(color)
+        } else {
+            background?.setTintColor(color)
         }
     }
 

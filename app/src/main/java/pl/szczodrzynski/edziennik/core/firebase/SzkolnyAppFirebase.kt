@@ -4,6 +4,7 @@
 
 package pl.szczodrzynski.edziennik.core.firebase
 
+import android.os.Build
 import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
@@ -43,6 +44,10 @@ class SzkolnyAppFirebase(val app: App, val profiles: List<Profile>, val message:
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
+
+    private fun shouldNotify(profileId: Int, type: NotificationType) =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ||
+                type !in app.config[profileId].sync.notificationFilter
 
     init {
         run {
@@ -180,9 +185,7 @@ class SzkolnyAppFirebase(val app: App, val profiles: List<Profile>, val message:
             )
 
             val type = if (event.isHomework) NotificationType.SHARED_HOMEWORK else NotificationType.SHARED_EVENT
-            val notificationFilter = app.config[event.profileId].sync.notificationFilter
-
-            if (!notificationFilter.contains(type) && event.sharedBy != "self" && event.date >= Date.getToday()) {
+            if (shouldNotify(event.profileId, type) && event.sharedBy != "self" && event.date >= Date.getToday()) {
                 val notification = Notification(
                         id = Notification.buildId(event.profileId, type, event.id),
                         title = type.titleRes.resolveString(app),
@@ -215,9 +218,7 @@ class SzkolnyAppFirebase(val app: App, val profiles: List<Profile>, val message:
             val profile = profiles.firstOrNull { it.id == team.profileId } ?: return@forEach
             if (!profile.canShare)
                 return@forEach
-            val notificationFilter = app.config[team.profileId].sync.notificationFilter
-
-            if (!notificationFilter.contains(NotificationType.REMOVED_SHARED_EVENT)) {
+            if (shouldNotify(team.profileId, NotificationType.REMOVED_SHARED_EVENT)) {
                 val notification = Notification(
                         id = Notification.buildId(profile.id, NotificationType.REMOVED_SHARED_EVENT, eventId),
                         title = NotificationType.REMOVED_SHARED_EVENT.titleRes.resolveString(app),
@@ -269,9 +270,7 @@ class SzkolnyAppFirebase(val app: App, val profiles: List<Profile>, val message:
                 return@forEach
 
             val type = NotificationType.SHARED_NOTE
-            val notificationFilter = app.config[note.profileId].sync.notificationFilter
-
-            if (!notificationFilter.contains(type) && note.sharedBy != "self") {
+            if (shouldNotify(note.profileId, type) && note.sharedBy != "self") {
                 val notification = Notification(
                     id = Notification.buildId(note.profileId, type, note.id),
                     title = type.titleRes.resolveString(app),

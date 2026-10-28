@@ -20,22 +20,19 @@
             android:layout_marginTop="16dp"
             android:drawableLeftAutoSize="@{true}"
             android:drawablePadding="8dp"
+            android:gravity="center_vertical"
             android:textAppearance="?textAppearanceTitleLarge"
-            tools:drawableStartCompat="@drawable/ic_grade"
+            android:textColor="?attr/colorSecondary"
+            android:textStyle="bold"
+            tools:drawableStartCompat="@drawable/illustration_grades"
             tools:layout_height="28sp"
             tools:text="Ocena" />
-
-        <View
-            android:id="@+id/divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="4dp"
-            android:background="@drawable/divider" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/ownerItemList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.App.NestedCard"
             tools:itemCount="1"
             tools:listitem="@layout/grades_item_grade" />
     </merge>

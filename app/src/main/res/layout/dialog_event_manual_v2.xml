@@ -8,7 +8,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:id="@+id/mainLayout"
@@ -20,7 +20,7 @@
         android:padding="24dp">
 
         <com.google.android.material.textfield.TextInputLayout
-            style="?textInputFilledDenseStyle"
+            style="?textInputOutlinedDenseStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/dialog_event_manual_date">
@@ -35,7 +35,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/timeDropdownLayout"
-            style="?textInputFilledDenseStyle"
+            style="?textInputOutlinedDenseStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -68,10 +68,11 @@
                 tools:text="2b3T" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/shareSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:drawablePadding="8dp"
             android:text="@string/dialog_event_manual_share_enabled" />
 
         <TextView
@@ -115,6 +116,8 @@
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="2dp"
                 android:background="@drawable/bg_circle"
+                android:clickable="true"
+                android:focusable="true"
                 android:foreground="?selectableItemBackgroundBorderless" />
         </LinearLayout>
 
@@ -143,7 +146,10 @@
             android:id="@+id/showMore"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?selectableItemBackground"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/dialog_option_ripple"
+            android:paddingStart="32dp"
+            android:paddingEnd="8dp"
             android:paddingVertical="16dp"
             android:text="@string/dialog_event_manual_more_options"
             app:iiv_end_checked_color="?android:textColorSecondary"
@@ -156,7 +162,7 @@
         <LinearLayout
             android:id="@+id/moreLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone"
             tools:visibility="visible">

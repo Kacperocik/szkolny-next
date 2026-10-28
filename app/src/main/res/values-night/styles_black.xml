@@ -28,6 +28,18 @@
         <item name="android:colorBackground">#FF000000</item>
     </style>
 
+    <style name="AppTheme.M2.Yellow.Black">
+        <item name="android:colorBackground">#FF000000</item>
+    </style>
+
+    <style name="AppTheme.M2.Orange.Black">
+        <item name="android:colorBackground">#FF000000</item>
+    </style>
+
+    <style name="AppTheme.M2.Brown.Black">
+        <item name="android:colorBackground">#FF000000</item>
+    </style>
+
     <style name="AppTheme.M3.Black">
         <item name="android:colorBackground">#FF000000</item>
     </style>
@@ -49,6 +61,26 @@
     </style>
 
     <style name="AppTheme.M3.Teal.Black">
+        <item name="android:colorBackground">#FF000000</item>
+    </style>
+
+    <style name="AppTheme.M3.Yellow.Black">
+        <item name="android:colorBackground">#FF000000</item>
+    </style>
+
+    <style name="AppTheme.M3.Orange.Black">
+        <item name="android:colorBackground">#FF000000</item>
+    </style>
+
+    <style name="AppTheme.M3.Brown.Black">
+        <item name="android:colorBackground">#FF000000</item>
+    </style>
+
+    <style name="AppTheme.M2.Gray.Black">
+        <item name="android:colorBackground">#FF000000</item>
+    </style>
+
+    <style name="AppTheme.M3.Gray.Black">
         <item name="android:colorBackground">#FF000000</item>
     </style>
 

@@ -6,8 +6,26 @@
     <attr name="timetable_lesson_shifted_source_color" format="color" />
     <attr name="timetable_lesson_shifted_target_color" format="color" />
     <attr name="colorOnPrimaryContainer" format="color" />
+    <attr name="colorCard" format="color" />
+    <attr name="colorCardUnread" format="color" />
+    <attr name="colorCardNested" format="color" />
+    <attr name="colorTabIndicator" format="color" />
+    <attr name="colorOnTabIndicator" format="color" />
     <attr name="materialButtonSecondaryStyle" format="reference" />
+    <attr name="materialButtonConnectedStyle" format="reference" />
     <attr name="materialIconButtonSecondaryStyle" format="reference" />
     <attr name="materialIconButtonContainerStyle" format="reference" />
     <attr name="materialAlertDialogMonospaceTheme" format="reference" />
+
+    <declare-styleable name="ConnectedButtonToggleGroup">
+        <attr name="showCheckIcon" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="NumberStepperView">
+        <attr name="stepperMin" format="float" />
+        <attr name="stepperMax" format="float" />
+        <attr name="stepperValue" format="float" />
+        <attr name="stepperStep" format="float" />
+        <attr name="stepperEditable" format="boolean" />
+    </declare-styleable>
 </resources>

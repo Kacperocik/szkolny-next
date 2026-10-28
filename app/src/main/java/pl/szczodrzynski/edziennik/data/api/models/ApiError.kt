@@ -2,6 +2,8 @@
  * Copyright (c) Kuba Szczodrzyński 2019-9-28.
  */
 
+@file:Suppress("DEPRECATION_ERROR")
+
 package pl.szczodrzynski.edziennik.data.api.models
 
 import android.content.Context

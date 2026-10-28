@@ -5,6 +5,7 @@
 package pl.szczodrzynski.edziennik.ui.search
 
 import android.widget.Filter
+import pl.szczodrzynski.edziennik.data.db.entity.Note
 import pl.szczodrzynski.edziennik.ext.cleanDiacritics
 import java.util.*
 import kotlin.math.min
@@ -58,25 +59,22 @@ class SearchFilter<T : Searchable<T>>(
             return results
         }
 
-        val newItems = allItems.mapNotNull { item ->
-            // get all keyword sets from the entity
+        // 1. Evaluate matching content items (non-header, non-SearchField)
+        val matchingContentItems = mutableListOf<T>()
+        allItems.forEach { item ->
+            if (item is SearchField || item.isCategoryHeader) return@forEach
             val searchKeywords = item.searchKeywords
-            // keep the SearchField and items having no keywords
-            if (item is SearchField || searchKeywords.isEmpty()) {
-                return@mapNotNull item
-            }
+            if (searchKeywords.isEmpty()) return@forEach
+
             item.searchPriority = NO_MATCH
             item.searchHighlightText = null
 
-            // a temporary variable for the loops below
             var matchWeight: Int
-
             searchKeywords.forEachIndexed { priority, keywords ->
                 keywords ?: return@forEachIndexed
                 keywords.forEach { keyword ->
                     matchWeight = getMatchWeight(keyword, prefix)
                     if (matchWeight != NO_MATCH) {
-                        // a match not at the word start boundary should be least prioritized
                         if (matchWeight == 3)
                             matchWeight = 100
                         item.searchPriority = min(item.searchPriority, priority * 10 + matchWeight)
@@ -85,17 +83,38 @@ class SearchFilter<T : Searchable<T>>(
             }
 
             if (item.searchPriority != NO_MATCH) {
-                // the adapter is reversed, the search priority also should be
                 if (adapter.isReversed)
                     item.searchPriority *= -1
                 item.searchHighlightText = prefix.toString()
-                return@mapNotNull item
+                matchingContentItems.add(item)
             }
-            return@mapNotNull null
         }
 
-        results.values = newItems.sorted()
-        results.count = newItems.size
+        // 2. Build final list: SearchField + matching Category Headers + matching Content Items
+        val finalItems = mutableListOf<T>()
+        allItems.forEach { item ->
+            when {
+                item is SearchField -> {
+                    finalItems.add(item)
+                }
+                item.isCategoryHeader -> {
+                    val hasMatchingChild = if (item is Note) {
+                        matchingContentItems.any { it is Note && !it.isCategoryItem && it.ownerType == item.ownerType }
+                    } else {
+                        true
+                    }
+                    if (hasMatchingChild) {
+                        finalItems.add(item)
+                    }
+                }
+                item in matchingContentItems -> {
+                    finalItems.add(item)
+                }
+            }
+        }
+
+        results.values = finalItems.sorted()
+        results.count = finalItems.size
         return results
     }
 

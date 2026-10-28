@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingHorizontal="@dimen/mal_baseline_half">
+    android:padding="16dp">
 
-    <com.mikepenz.materialdrawer.view.BezelImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/mal_item_image"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_margin="@dimen/mal_baseline"
-        android:adjustViewBounds="false"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginEnd="16dp"
         android:contentDescription="@null"
-        android:cropToPadding="false"
         android:scaleType="centerCrop"
-        tools:background="@tools:sample/backgrounds/scenic" />
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+        tools:src="@tools:sample/backgrounds/scenic" />
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginVertical="@dimen/mal_baseline"
-        android:layout_marginEnd="@dimen/mal_baseline"
-        android:layout_marginRight="@dimen/mal_baseline"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -32,13 +32,18 @@
             android:id="@+id/mal_item_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?textAppearanceHeadlineSmall"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textStyle="bold"
             tools:text="Władca Androida" />
 
         <TextView
             android:id="@+id/mal_item_desc"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?android:attr/textColorSecondary"
             tools:text="kubasz" />
     </LinearLayout>
 </LinearLayout>

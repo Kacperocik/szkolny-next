@@ -53,7 +53,7 @@ class HomeLuckyNumberCard(
         holder.root.removeAllViews()
         val b = CardHomeLuckyNumberBinding.inflate(LayoutInflater.from(holder.root.context))
         b.root.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
-            setMargins(8.dp)
+            setMargins(4.dp)
         }
         holder.root += b.root
 

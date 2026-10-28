@@ -17,4 +17,28 @@ class GradesAverages {
 
     var normalAvg: Float? = null
     var pointAvgPercent: Float? = null
+
+    fun reset() {
+        normalSum = 0f
+        normalCount = 0
+        normalWeightedSum = 0f
+        normalWeightedCount = 0f
+        pointSum = 0f
+        pointAvgSum = 0f
+        pointAvgMax = 0f
+        normalAvg = null
+        pointAvgPercent = null
+    }
+
+    fun copyFrom(other: GradesAverages) {
+        normalSum = other.normalSum
+        normalCount = other.normalCount
+        normalWeightedSum = other.normalWeightedSum
+        normalWeightedCount = other.normalWeightedCount
+        pointSum = other.pointSum
+        pointAvgSum = other.pointAvgSum
+        pointAvgMax = other.pointAvgMax
+        normalAvg = other.normalAvg
+        pointAvgPercent = other.pointAvgPercent
+    }
 }

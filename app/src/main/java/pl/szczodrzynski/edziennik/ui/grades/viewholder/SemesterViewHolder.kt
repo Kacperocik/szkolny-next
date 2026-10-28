@@ -61,9 +61,14 @@ class SemesterViewHolder(
             }
         }
 
-        b.editButton.isVisible = !item.hideEditor
-
-        b.average.text = manager.getAverageString(app, item.averages)
+        val liveAverage = manager.getAverageString(app, item.averages)
+        b.average.text = if (adapter.subjectHasPointGrades(item.subjectId))
+            liveAverage
+        else adapter.simulatorAvgText(
+            "sem:${item.subjectId}:${item.number}",
+            liveAverage,
+            stripLabel = true
+        )
         b.proposedGrade.setGrade(item.proposedGrade, manager)
         b.finalGrade.setGrade(item.finalGrade, manager)
     }

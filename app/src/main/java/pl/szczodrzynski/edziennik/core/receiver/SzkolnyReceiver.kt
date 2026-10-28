@@ -8,6 +8,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import pl.szczodrzynski.edziennik.App
+import pl.szczodrzynski.edziennik.core.manager.OngoingLessonNotificationManager
 import pl.szczodrzynski.edziennik.data.api.ApiService
 import pl.szczodrzynski.edziennik.data.api.edziennik.EdziennikTask
 import pl.szczodrzynski.edziennik.data.api.events.requests.ServiceCloseRequest
@@ -25,6 +27,10 @@ class SzkolnyReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         context ?: return
+        if (intent?.action == Intent.ACTION_TIME_CHANGED || intent?.action == Intent.ACTION_TIMEZONE_CHANGED) {
+            val app = context.applicationContext as? App
+            app?.let { OngoingLessonNotificationManager.update(it) }
+        }
         when (intent?.extras?.getString("task", null)) {
             "ServiceCloseRequest" -> ApiService.startAndRequest(context, ServiceCloseRequest())
             "TaskCancelRequest" -> ApiService.startAndRequest(context, TaskCancelRequest(intent.extras?.getInt("taskId", -1) ?: return))

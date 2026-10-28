@@ -5,10 +5,14 @@
 package pl.szczodrzynski.edziennik.ui.timetable
 
 import android.content.Intent
+import android.content.res.Configuration
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
@@ -17,6 +21,7 @@ import pl.szczodrzynski.edziennik.data.db.entity.Lesson
 import pl.szczodrzynski.edziennik.data.db.full.AttendanceFull
 import pl.szczodrzynski.edziennik.data.db.full.LessonFull
 import pl.szczodrzynski.edziennik.databinding.DialogLessonDetailsBinding
+import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ext.setText
 import pl.szczodrzynski.edziennik.ext.toDrawable
@@ -44,6 +49,16 @@ class LessonDetailsDialog(
 
     // TODO put the "add" button in layout for other dialogs as well
     override fun getPositiveButtonText() = R.string.close
+    override fun hasCloseIconWhenSpaceLimited() = true
+    override fun shouldShowCloseIcon() =
+        activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    override fun onCloseIconVisibilityChanged(isVisible: Boolean) {
+        b.lessonTimeContainer.gravity = if (isVisible) Gravity.CENTER_HORIZONTAL else Gravity.RIGHT
+        b.lessonTimeContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            marginEnd = if (isVisible) 32.dp else 0
+        }
+    }
 
     private lateinit var adapter: EventListAdapter
     private val manager
@@ -168,6 +183,7 @@ class LessonDetailsDialog(
 
         adapter = EventListAdapter(
             activity,
+            embedded = true,
             showWeekDay = false,
             showDate = false,
             showType = true,

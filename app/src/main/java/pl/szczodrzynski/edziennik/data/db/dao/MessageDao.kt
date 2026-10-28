@@ -21,8 +21,8 @@ import pl.szczodrzynski.edziennik.data.db.full.MessageFull
 abstract class MessageDao : BaseDao<Message, MessageFull> {
     companion object {
         private const val QUERY = """
-            SELECT 
-            *, 
+            SELECT
+            *,
             teachers.teacherName ||" "|| teachers.teacherSurname AS senderName
             FROM messages
             LEFT JOIN teachers ON teachers.profileId = messages.profileId AND teacherId = senderId
@@ -40,7 +40,7 @@ abstract class MessageDao : BaseDao<Message, MessageFull> {
     abstract override fun getOne(query: SupportSQLiteQuery): LiveData<MessageFull?>
 
     // SELECTIVE UPDATE
-    @UpdateSelective(primaryKeys = ["profileId", "messageId"], skippedColumns = ["messageType", "messageBody", "messageIsPinned", "attachmentIds", "attachmentNames", "attachmentSizes"])
+    @UpdateSelective(primaryKeys = ["profileId", "messageId"], skippedColumns = ["messageType", "messageTypeBeforeDelete", "messageBody", "messageIsPinned", "attachmentIds", "attachmentNames", "attachmentSizes"])
     override fun update(item: Message) = selective.update(item)
     override fun updateAll(items: List<Message>) = selective.updateAll(items)
 

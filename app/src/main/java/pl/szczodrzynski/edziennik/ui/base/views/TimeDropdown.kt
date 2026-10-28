@@ -24,6 +24,7 @@ import pl.szczodrzynski.edziennik.ext.listOfNotEmpty
 import pl.szczodrzynski.edziennik.utils.TextInputDropDown
 import pl.szczodrzynski.edziennik.utils.models.Date
 import pl.szczodrzynski.edziennik.utils.models.Time
+import pl.szczodrzynski.edziennik.utils.models.Week
 
 class TimeDropdown : TextInputDropDown {
     companion object {
@@ -95,12 +96,23 @@ class TimeDropdown : TextInputDropDown {
                 val lessons = db.timetableDao().getAllForDateNow(profileId, lessonsDate!!)
 
                 if (lessons.isEmpty()) {
+                    val date = lessonsDate!!
+                    val weekHasLessons = date.weekDay in Week.SATURDAY..Week.SUNDAY && run {
+                        val monday = date.weekStart
+                        val friday = monday.clone().stepForward(0, 0, 4)
+                        db.timetableDao().getBetweenDatesNow(monday, friday).any {
+                            it.profileId == profileId && it.type != Lesson.TYPE_NO_LESSONS
+                        }
+                    }
                     hours += Item(
                             -2L,
-                            context.getString(R.string.dialog_event_manual_no_timetable),
+                            context.getString(
+                                if (weekHasLessons) R.string.dialog_event_manual_no_lessons
+                                else R.string.dialog_event_manual_no_timetable
+                            ),
                             tag = -2L
                     )
-                    noTimetable = true
+                    noTimetable = !weekHasLessons
                     return@withContext hours
                 }
 

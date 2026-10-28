@@ -9,12 +9,13 @@ import pl.szczodrzynski.edziennik.ui.agenda.BaseEvent
 
 class AgendaEvent(
     val event: EventFull,
-    showBadge: Boolean = !event.seen
+    showBadge: Boolean = !event.seen,
+    color: Int = event.eventColor,
 ) : BaseEvent(
     id = event.id,
     time = event.startTimeCalendar,
-    color = event.eventColor,
+    color = color,
     showBadge = showBadge
 ) {
-    override fun copy() = AgendaEvent(event, showBadge)
+    override fun copy() = AgendaEvent(event, showBadge, color)
 }

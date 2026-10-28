@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="material_mini_drawer_item">56dp</dimen>
+    <dimen name="material_mini_drawer_item_profile_icon_padding">8dp</dimen>
+    <dimen name="nav_mini_drawer_pill_inset_horizontal">6dp</dimen>
+</resources>

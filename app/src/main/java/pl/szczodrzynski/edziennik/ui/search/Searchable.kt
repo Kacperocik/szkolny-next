@@ -6,6 +6,9 @@ package pl.szczodrzynski.edziennik.ui.search
 
 interface Searchable<in T> : Comparable<Searchable<*>> {
 
+    val isCategoryHeader: Boolean
+        get() = false
+
     /**
      * A prioritized list of keywords sets. First items are of the highest priority.
      * Items within a keyword set have the same priority.

@@ -1,0 +1,158 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widgetCurrentLessonRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_transparent">
+
+    <ImageView
+        android:id="@+id/widgetCurrentLessonBodyBg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_background_round_white" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/widgetCurrentLessonProfile"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="12sp"
+                tools:text="Jan Kowalski" />
+
+            <ImageButton
+                android:id="@+id/widgetCurrentLessonRefresh"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/widget_button_ripple"
+                android:contentDescription="@string/widget_refresh" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/widgetCurrentLessonContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/widgetCurrentLessonSubject"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:text="Matematyka" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/widgetCurrentLessonClassroom"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textSize="14sp"
+                    tools:text="sala 12" />
+
+                <TextView
+                    android:id="@+id/widgetCurrentLessonTimeRange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textSize="14sp"
+                    tools:text="8:00 - 8:45" />
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/widgetCurrentLessonProgress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:max="100"
+                android:progress="35"
+                android:progressDrawable="@drawable/widget_current_lesson_progress" />
+
+            <Chronometer
+                android:id="@+id/widgetCurrentLessonTimeLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="2dp"
+                android:format="@string/widget_current_lesson_countdown_left"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="Zostało 12:34" />
+
+            <TextView
+                android:id="@+id/widgetCurrentLessonEventsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:maxLines="1"
+                android:text="@string/widget_current_lesson_events"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widgetCurrentLessonEvent1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textSize="13sp"
+                tools:text="Kartkówka z ułamków" />
+
+            <TextView
+                android:id="@+id/widgetCurrentLessonEvent2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textSize="13sp"
+                tools:visibility="gone" />
+
+            <TextView
+                android:id="@+id/widgetCurrentLessonEvent3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textSize="13sp"
+                tools:visibility="gone" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/widgetCurrentLessonEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/widget_current_lesson_no_lesson"
+            android:textSize="16sp"
+            android:textStyle="italic"
+            android:visibility="gone"
+            tools:visibility="gone" />
+    </LinearLayout>
+</FrameLayout>

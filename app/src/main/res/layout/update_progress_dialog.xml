@@ -64,6 +64,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginVertical="8dp"
+            app:indicatorColor="?attr/colorPrimary"
+            app:trackCornerRadius="8dp"
+            app:trackThickness="4dp"
             tools:progress="33" />
 
         <LinearLayout

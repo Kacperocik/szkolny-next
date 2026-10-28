@@ -4,6 +4,7 @@
 
 package pl.szczodrzynski.edziennik.data.api.task
 
+import android.os.Build
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.api.interfaces.EdziennikCallback
@@ -51,16 +52,18 @@ class SzkolnyTask(val app: App, val syncingProfiles: List<Profile>) : IApiTask(-
         }
         Timber.d("Created ${notificationList.count()} notifications.")
 
-        // filter notifications
-        notificationList
-                .mapNotNull { it.profileId }
-                .distinct()
-                .map { app.config[it].sync.notificationFilter }
-                .forEach { filter ->
-                    filter.forEach { type ->
-                        notificationList.removeAll { it.type == type }
+        // Android 8.0+ filters notifications using system notification channels.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            notificationList
+                    .mapNotNull { it.profileId }
+                    .distinct()
+                    .map { app.config[it].sync.notificationFilter }
+                    .forEach { filter ->
+                        filter.forEach { type ->
+                            notificationList.removeAll { it.type == type }
+                        }
                     }
-                }
+        }
 
         // update the database
         app.db.metadataDao().setAllNotified(true)

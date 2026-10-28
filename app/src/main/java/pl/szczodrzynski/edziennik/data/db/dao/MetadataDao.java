@@ -193,6 +193,9 @@ public abstract class MetadataDao {
     @Query("SELECT profileId, thingType, COUNT(thingId) AS count FROM metadata WHERE seen = 0 GROUP BY profileId, thingType")
     public abstract LiveData<List<UnreadCounter>> getUnreadCounts();
 
+    @Query("SELECT profileId, thingType, COUNT(thingId) AS count FROM metadata WHERE seen = 0 GROUP BY profileId, thingType")
+    public abstract List<UnreadCounter> getUnreadCountsNow();
+
 
 
     @Query("DELETE FROM metadata WHERE profileId = :profileId AND thingType = 1 AND thingId NOT IN (SELECT gradeId FROM grades WHERE profileId = :profileId);")

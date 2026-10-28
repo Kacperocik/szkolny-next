@@ -3,13 +3,21 @@ package pl.szczodrzynski.edziennik.core.work
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.work.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.data.api.edziennik.EdziennikTask
+import pl.szczodrzynski.edziennik.data.api.events.ApiTaskAllFinishedEvent
 import pl.szczodrzynski.edziennik.ext.formatDate
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
-class SyncWorker(val context: Context, val params: WorkerParameters) : Worker(context, params) {
+class SyncWorker(val context: Context, val params: WorkerParameters) : CoroutineWorker(context, params) {
     companion object {
         const val TAG = "SyncWorker"
 
@@ -67,10 +75,30 @@ class SyncWorker(val context: Context, val params: WorkerParameters) : Worker(co
         }
     }
 
-    override fun doWork(): Result {
+    override suspend fun doWork(): Result {
         Timber.d("Running worker ID ${params.id}")
-        EdziennikTask.sync().enqueue(context)
+
+        var isFinished = false
+        val listener = object : Any() {
+            @Subscribe(threadMode = ThreadMode.MAIN)
+            fun onApiTaskAllFinishedEvent(event: ApiTaskAllFinishedEvent) {
+                isFinished = true
+            }
+        }
+        EventBus.getDefault().register(listener)
+
+        val task = EdziennikTask.sync()
+        task.enqueue(context)
+
+        // Wait up to 5 minutes for the task to finish
+        val timeout = System.currentTimeMillis() + 5 * 60 * 1000
+        while (!isFinished && System.currentTimeMillis() < timeout) {
+            delay(1000)
+        }
+
+        EventBus.getDefault().unregister(listener)
+
         rescheduleNext(context as App)
-        return Result.success()
+        return if (isFinished) Result.success() else Result.retry()
     }
 }

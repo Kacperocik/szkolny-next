@@ -47,7 +47,6 @@ class TeachersListFragment : BaseFragment<TeachersListFragmentBinding, MainActiv
                 b.list.apply {
                     setHasFixedSize(true)
                     layoutManager = LinearLayoutManager(context)
-                    addItemDecoration(SimpleDividerItemDecoration(context))
                 }
             }
             adapter.notifyDataSetChanged()

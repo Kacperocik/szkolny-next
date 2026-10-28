@@ -54,7 +54,7 @@ class HomeAvailabilityCard(
         holder.root.removeAllViews()
         val b = CardHomeAvailabilityBinding.inflate(LayoutInflater.from(holder.root.context))
         b.root.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-            setMargins(8.dp)
+            setMargins(4.dp)
         }
         holder.root += b.root
 
@@ -72,7 +72,7 @@ class HomeAvailabilityCard(
             b.homeAvailabilityTitle.text = BetterHtml.fromHtml(activity, status.userMessage.title)
             b.homeAvailabilityText.text = BetterHtml.fromHtml(activity, status.userMessage.contentShort)
             b.homeAvailabilityUpdate.isVisible = false
-            b.homeAvailabilityIcon.setImageResource(R.drawable.ic_sync)
+            b.homeAvailabilityIcon.setImageResource(R.drawable.illustration_sync)
             if (status.userMessage.icon != null)
                 b.homeAvailabilityIcon.load(status.userMessage.icon)
             onInfoClick = {
@@ -84,7 +84,7 @@ class HomeAvailabilityCard(
             b.homeAvailabilityTitle.setText(R.string.home_availability_title)
             b.homeAvailabilityText.setText(R.string.home_availability_text, update.versionName)
             b.homeAvailabilityUpdate.isVisible = !app.buildManager.isPlayRelease
-            b.homeAvailabilityIcon.setImageResource(R.drawable.ic_update)
+            b.homeAvailabilityIcon.setImageResource(R.drawable.illustration_update)
             onInfoClick = {
                 UpdateAvailableDialog(activity, update).show()
             }

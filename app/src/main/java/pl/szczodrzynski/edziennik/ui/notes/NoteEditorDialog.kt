@@ -4,6 +4,7 @@
 
 package pl.szczodrzynski.edziennik.ui.notes
 
+import android.content.DialogInterface.BUTTON_NEUTRAL
 import android.content.DialogInterface.BUTTON_POSITIVE
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +19,7 @@ import pl.szczodrzynski.edziennik.data.db.entity.Noteable
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.databinding.NoteEditorDialogBinding
 import pl.szczodrzynski.edziennik.ext.isNotNullNorBlank
+import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.ext.resolveString
 import pl.szczodrzynski.edziennik.ext.toDrawable
 import pl.szczodrzynski.edziennik.ui.base.dialog.BaseDialog
@@ -118,6 +120,7 @@ class NoteEditorDialog(
     }
 
     override suspend fun onShow() {
+        getDialogButton(BUTTON_NEUTRAL)?.setTextColor(R.attr.colorError.resolveAttr(activity))
         manager.configureHeader(activity, owner, b.header)
 
         topicStylingConfig = StylingConfigBase(editText = b.topic, htmlMode = HtmlMode.SIMPLE)

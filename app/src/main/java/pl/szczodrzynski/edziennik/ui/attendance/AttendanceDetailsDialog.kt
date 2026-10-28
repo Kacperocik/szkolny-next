@@ -10,6 +10,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
+import pl.szczodrzynski.edziennik.core.manager.AttendanceManager.Companion.SHAPE_MODE_CIRCLE
 import pl.szczodrzynski.edziennik.data.db.full.AttendanceFull
 import pl.szczodrzynski.edziennik.databinding.AttendanceDetailsDialogBinding
 import pl.szczodrzynski.edziennik.ext.setTintColor
@@ -29,6 +30,7 @@ class AttendanceDetailsDialog(
         AttendanceDetailsDialogBinding.inflate(layoutInflater)
 
     override fun getPositiveButtonText() = R.string.close
+    override fun hasCloseIconWhenSpaceLimited() = true
 
     override suspend fun onBeforeShow(): Boolean {
         val manager = app.attendanceManager
@@ -36,6 +38,12 @@ class AttendanceDetailsDialog(
         val attendanceColor = manager.getAttendanceColor(attendance)
         b.attendance = attendance
         b.devMode = App.devMode
+        b.attendanceName.setBackgroundResource(
+            if (manager.shapeMode == SHAPE_MODE_CIRCLE)
+                R.drawable.bg_circle
+            else
+                R.drawable.bg_rounded_16dp
+        )
         b.attendanceName.setTextColor(if (ColorUtils.calculateLuminance(attendanceColor) > 0.3) 0xaa000000.toInt() else 0xccffffff.toInt())
         b.attendanceName.background.setTintColor(attendanceColor)
 

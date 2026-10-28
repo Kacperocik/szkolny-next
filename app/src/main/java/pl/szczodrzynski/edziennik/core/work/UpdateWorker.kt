@@ -18,7 +18,7 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
-class UpdateWorker(val context: Context, val params: WorkerParameters) : Worker(context, params), CoroutineScope {
+class UpdateWorker(val context: Context, val params: WorkerParameters) : CoroutineWorker(context, params) {
     companion object {
         const val TAG = "UpdateWorker"
 
@@ -73,11 +73,7 @@ class UpdateWorker(val context: Context, val params: WorkerParameters) : Worker(
         }
     }
 
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
-
-    override fun doWork(): Result {
+    override suspend fun doWork(): Result {
         Timber.d("Running worker ID ${params.id}")
         val app = context as App
         if (!app.config.sync.notifyAboutUpdates) {
@@ -88,7 +84,10 @@ class UpdateWorker(val context: Context, val params: WorkerParameters) : Worker(
             Update.Type.BETA
         else
             Update.Type.RELEASE
-        app.updateManager.checkNowSync(channel, notify = true)
+
+        withContext(Dispatchers.IO) {
+            app.updateManager.checkNowSync(channel, notify = true)
+        }
 
         rescheduleNext(this.context)
         return Result.success()

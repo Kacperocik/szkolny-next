@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.databinding.DialogBellSyncBinding
+import pl.szczodrzynski.edziennik.ext.moveButtonsToTitleWhenSpaceLimited
 import pl.szczodrzynski.edziennik.ext.resolveDrawable
 import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
 import pl.szczodrzynski.edziennik.ui.base.dialog.BindingDialog
@@ -35,6 +36,7 @@ class BellSyncDialog(
         }
 
     override suspend fun onShow() {
+        dialog.moveButtonsToTitleWhenSpaceLimited()
         b.bellSyncButton.setOnClickListener {
             val (bellDiff, multiplier) = actualBellDiff
             val bellDiffText = (if (multiplier == -1) '-' else '+') + bellDiff.stringHMS
@@ -51,8 +53,9 @@ class BellSyncDialog(
             }.show()
         }
 
-        if (Time.diff(Time.getNow(), bellTime) > Time(2, 0, 0)) { // Easter egg ^^
-            b.bellSyncButton.setImageDrawable(R.drawable.ic_bell_wtf.resolveDrawable(app)) // wtf
+        // Show the easter-egg bell when the time difference exceeds two hours.
+        if (Time.diff(Time.getNow(), bellTime) > Time(2, 0, 0)) {
+            b.bellSyncButton.setImageDrawable(R.drawable.illustration_bell_unusual.resolveDrawable(app))
         }
 
         startCoroutineTimer(repeatMillis = 500) {

@@ -13,7 +13,7 @@ import com.danielstone.materialaboutlibrary.util.OpenSourceLicense
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.ext.app
-import pl.szczodrzynski.edziennik.ext.resolveColor
+import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.ext.toDrawable
 
 class SettingsLicenseActivity : MaterialAboutActivity() {
@@ -25,7 +25,7 @@ class SettingsLicenseActivity : MaterialAboutActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         app.uiManager.applyTheme(this)
-        foregroundColor = R.color.primaryText.resolveColor(this)
+        foregroundColor = android.R.attr.textColorPrimary.resolveAttr(this)
         super.onCreate(savedInstanceState)
     }
 
@@ -36,8 +36,8 @@ class SettingsLicenseActivity : MaterialAboutActivity() {
         license: OpenSourceLicense,
         url: String
     ): MaterialAboutCard {
-        return createLicenseCard(this, icon, title, year, copyright, license).also {
-            (it.items[0] as MaterialAboutActionItem).onClickAction =
+        return createLicenseCard(this, icon, title, year, copyright, license).also { card ->
+            (card.items.firstOrNull() as? MaterialAboutActionItem)?.onClickAction =
                 ConvenienceBuilder.createWebsiteOnClickAction(
                     this,
                     Uri.parse(url)
@@ -159,14 +159,6 @@ class SettingsLicenseActivity : MaterialAboutActivity() {
         ),
 
         license(
-            "Material Number Sliding Picker",
-            "2019",
-            "Alessandro Crugnola",
-            OpenSourceLicense.MIT,
-            "https://github.com/kuba2k2/NumberSlidingPicker"
-        ),
-
-        license(
             "RecyclerTabLayout",
             "2017",
             "nshmura",
@@ -207,27 +199,11 @@ class SettingsLicenseActivity : MaterialAboutActivity() {
         ),
 
         license(
-            "Android Swipe Layout",
-            "2014",
-            "代码家",
-            OpenSourceLicense.MIT,
-            "https://github.com/daimajia/AndroidSwipeLayout"
-        ),
-
-        license(
             "CircularProgressIndicator",
             "2018",
             "Anton Kozyriatskyi",
             OpenSourceLicense.APACHE_2,
             "https://github.com/antonKozyriatskyi/CircularProgressIndicator"
-        ),
-
-        license(
-            "ChatMessageView",
-            "2019",
-            "Tsubasa Nakayama",
-            OpenSourceLicense.APACHE_2,
-            "https://github.com/bassaer/ChatMessageView"
         ),
 
         license(
@@ -263,35 +239,11 @@ class SettingsLicenseActivity : MaterialAboutActivity() {
         ),
 
         license(
-            "material-intro",
-            "2017",
-            "Jan Heinrich Reimer",
-            OpenSourceLicense.MIT,
-            "https://github.com/heinrichreimer/material-intro"
-        ),
-
-        license(
-            "Color Picker",
-            "2016 Jared Rummler,",
-            "2015 Daniel Nilsson",
-            OpenSourceLicense.APACHE_2,
-            "https://github.com/jaredrummler/ColorPicker"
-        ),
-
-        license(
             "PowerPermission",
             "2020",
             "Qifan Yang",
             OpenSourceLicense.APACHE_2,
             "https://github.com/underwindfall/PowerPermission"
-        ),
-
-        license(
-            "JsonViewer",
-            "2017",
-            "smuyyh",
-            OpenSourceLicense.APACHE_2,
-            "https://github.com/smuyyh/JsonViewer"
         ),
 
         license(
@@ -303,19 +255,11 @@ class SettingsLicenseActivity : MaterialAboutActivity() {
         ),
 
         license(
-            "Barcode Scanner (ZXing)",
-            "2014",
-            "Dushyanth Maguluru",
+            "ZXing Android Embedded",
+            "2022",
+            "JourneyApps",
             OpenSourceLicense.APACHE_2,
-            "https://github.com/dm77/barcodescanner"
-        ),
-
-        license(
-            "AutoFitTextView",
-            "2014",
-            "Grantland Chew",
-            OpenSourceLicense.APACHE_2,
-            "https://github.com/grantland/android-autofittextview"
+            "https://github.com/journeyapps/zxing-android-embedded"
         ),
 
         license(
@@ -348,6 +292,30 @@ class SettingsLicenseActivity : MaterialAboutActivity() {
             "2011 Android Open Source Project",
             OpenSourceLicense.APACHE_2,
             "https://github.com/amitshekhariitbhu/Android-Debug-Database"
+        ),
+
+        license(
+            "MaterialDrawer",
+            "2021",
+            "Mike Penz",
+            OpenSourceLicense.APACHE_2,
+            "https://github.com/mikepenz/MaterialDrawer"
+        ),
+
+        license(
+            "FlexboxLayout",
+            "2016-2021",
+            "Google Inc.",
+            OpenSourceLicense.APACHE_2,
+            "https://github.com/google/flexbox-layout"
+        ),
+
+        license(
+            "Volley",
+            "2012-2021",
+            "The Android Open Source Project",
+            OpenSourceLicense.APACHE_2,
+            "https://github.com/google/volley"
         )
     )
 

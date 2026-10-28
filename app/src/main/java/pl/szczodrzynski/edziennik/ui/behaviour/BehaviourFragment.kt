@@ -1,9 +1,9 @@
 package pl.szczodrzynski.edziennik.ui.behaviour
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.color.MaterialColors
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.App.Companion.profileId
 import pl.szczodrzynski.edziennik.MainActivity
@@ -14,6 +14,7 @@ import pl.szczodrzynski.edziennik.data.enums.FeatureType
 import pl.szczodrzynski.edziennik.data.enums.MetadataType
 import pl.szczodrzynski.edziennik.databinding.FragmentBehaviourBinding
 import pl.szczodrzynski.edziennik.ext.resolveAttr
+import pl.szczodrzynski.edziennik.ext.resolveColor
 import pl.szczodrzynski.edziennik.ui.base.fragment.BaseFragment
 import java.util.Locale
 
@@ -24,7 +25,7 @@ class BehaviourFragment : BaseFragment<FragmentBehaviourBinding, MainActivity>(
     override fun getScrollingView() = b.noticesView
     override fun getMarkAsReadType() = MetadataType.NOTICE
     override fun getSyncParams() = FeatureType.BEHAVIOUR to null
-    
+
     private var displayMode = MODE_YEAR
     private var noticeList: List<NoticeFull>? = null
 
@@ -89,14 +90,18 @@ class BehaviourFragment : BaseFragment<FragmentBehaviourBinding, MainActivity>(
             b.noticesView.visibility = View.GONE
             b.noticesNoData.visibility = View.VISIBLE
         }
+        val greenColor = MaterialColors.harmonizeWithPrimary(activity, R.color.md_green_600.resolveColor(activity))
+        val redColor = MaterialColors.harmonizeWithPrimary(activity, R.color.md_red_600.resolveColor(activity))
+        val blueColor = MaterialColors.harmonizeWithPrimary(activity, R.color.md_blue_500.resolveColor(activity))
+
         b.noticesPraisesCount.text = String.format(Locale.getDefault(), "%d", praisesCount)
+        b.noticesPraisesCount.setTextColor(greenColor)
+
         b.noticesWarningsCount.text = String.format(Locale.getDefault(), "%d", warningsCount)
+        b.noticesWarningsCount.setTextColor(redColor)
+
         b.noticesOtherCount.text = String.format(Locale.getDefault(), "%d", otherCount)
-        if (warningsCount >= 3) {
-            b.noticesWarningsCount.setTextColor(Color.RED)
-        } else {
-            b.noticesWarningsCount.setTextColor(android.R.attr.textColorPrimary.resolveAttr(activity))
-        }
+        b.noticesOtherCount.setTextColor(blueColor)
     }
 
     companion object {

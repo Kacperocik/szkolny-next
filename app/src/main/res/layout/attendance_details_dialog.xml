@@ -105,7 +105,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/attendance_details_teacher"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:id="@+id/teacherName"
@@ -121,7 +122,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/attendance_details_type"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -136,7 +138,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/attendance_details_date"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -151,7 +154,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/attendance_details_time"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -167,7 +171,8 @@
                 android:layout_marginTop="8dp"
                 android:isVisible="@{attendance.lessonTopic != null}"
                 android:text="@string/attendance_details_lesson_topic"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -183,7 +188,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/attendance_details_is_counted"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?textAppearanceLabelMedium"
+                android:textColor="?attr/colorSecondary" />
 
             <TextView
                 android:id="@+id/attendanceIsCounted"
@@ -211,7 +217,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="@string/attendance_details_id"
-                        android:textAppearance="?textAppearanceLabelMedium" />
+                        android:textAppearance="?textAppearanceLabelMedium"
+                        android:textColor="?attr/colorSecondary" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -233,7 +240,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="@string/attendance_details_type_id"
-                        android:textAppearance="?textAppearanceLabelMedium" />
+                        android:textAppearance="?textAppearanceLabelMedium"
+                        android:textColor="?attr/colorSecondary" />
 
                     <TextView
                         android:layout_width="match_parent"

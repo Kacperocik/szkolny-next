@@ -21,7 +21,9 @@ import pl.szczodrzynski.edziennik.data.db.entity.Subject
 import pl.szczodrzynski.edziennik.data.db.entity.Teacher
 import pl.szczodrzynski.edziennik.databinding.TeacherItemBinding
 import pl.szczodrzynski.edziennik.ext.*
+import com.google.android.material.shape.ShapeAppearanceModel
 import pl.szczodrzynski.edziennik.data.enums.NavTarget
+import pl.szczodrzynski.navlib.enableExpressiveImageShapeMorph
 import kotlin.coroutines.CoroutineContext
 
 class TeachersAdapter(
@@ -52,6 +54,24 @@ class TeachersAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
         val b = holder.b
+
+        val isFirst = position == 0
+        val isLast = position == itemCount - 1
+
+        val shapeOverlay = when {
+            isFirst && isLast -> R.style.ShapeAppearance_Material3_Corner_GroupSingle
+            isFirst -> R.style.ShapeAppearance_Material3_Corner_GroupTop
+            isLast -> R.style.ShapeAppearance_Material3_Corner_GroupBottom
+            else -> R.style.ShapeAppearance_Material3_Corner_GroupMiddle
+        }
+        b.root.shapeAppearanceModel = ShapeAppearanceModel.builder(activity, shapeOverlay, 0).build()
+        b.root.enableExpressiveCardShapeMorph()
+        b.image.enableExpressiveImageShapeMorph(pressedCornerRadiusDp = 10f)
+
+        b.root.onClick {
+            Toast.makeText(activity, item.fullName, Toast.LENGTH_SHORT).show()
+            onItemClick?.invoke(item)
+        }
 
         b.name.text = item.fullName
         b.image.setImageBitmap(item.image)

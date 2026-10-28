@@ -2,10 +2,16 @@
   ~ Copyright (c) Kuba Szczodrzyński 2020-5-4.
   -->
 
-<LinearLayout
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="?attr/colorCard"
+    app:cardElevation="0dp"
+    app:cardPreventCornerOverlap="false"
+    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupSingle"
+    app:strokeWidth="0dp">
 
     <TextView
         android:layout_width="match_parent"
@@ -14,4 +20,4 @@
         android:gravity="center"
         android:text="@string/attendance_empty_text"
         android:textAppearance="?textAppearanceBodyLarge" />
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

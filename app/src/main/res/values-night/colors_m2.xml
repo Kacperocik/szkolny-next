@@ -29,4 +29,19 @@
     <!-- TEAL THEME - DARK -->
     <color name="windowBackgroundTeal">#ff0f2833</color>
     <color name="colorSurfaceTeal">#ff1f3741</color>
+
+    <!-- YELLOW THEME - DARK -->
+    <color name="windowBackgroundYellow">#ff332c0f</color>
+    <color name="colorSurfaceYellow">#ff413a1f</color>
+
+    <!-- ORANGE THEME - DARK -->
+    <color name="windowBackgroundOrange">#ff331e0f</color>
+    <color name="colorSurfaceOrange">#ff412c1f</color>
+
+    <!-- BROWN THEME - DARK -->
+    <color name="windowBackgroundBrown">#ff241b18</color>
+    <color name="colorSurfaceBrown">#ff332825</color>
+
+    <color name="windowBackgroundGray">#ff1a1a1a</color>
+    <color name="colorSurfaceGray">#ff2c2c2c</color>
 </resources>

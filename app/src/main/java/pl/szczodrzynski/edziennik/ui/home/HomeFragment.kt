@@ -4,15 +4,22 @@
 
 package pl.szczodrzynski.edziennik.ui.home
 
+import android.content.res.Configuration
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
+import androidx.core.view.children
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial.Icon
 import eu.szkolny.font.SzkolnyFont
 import kotlinx.coroutines.Dispatchers
@@ -22,11 +29,15 @@ import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
 import pl.szczodrzynski.edziennik.databinding.FragmentHomeBinding
+import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ext.hasUIFeature
+import pl.szczodrzynski.edziennik.ext.toDrawable
 import pl.szczodrzynski.edziennik.ext.onClick
+import pl.szczodrzynski.edziennik.ext.spinGear360
 import pl.szczodrzynski.edziennik.ui.base.fragment.BaseFragment
 import pl.szczodrzynski.edziennik.ui.dialogs.settings.HomeConfigDialog
 import pl.szczodrzynski.edziennik.ui.dialogs.settings.StudentNumberDialog
+import pl.szczodrzynski.edziennik.ui.home.cards.HomeAnnouncementsCard
 import pl.szczodrzynski.edziennik.ui.home.cards.HomeArchiveCard
 import pl.szczodrzynski.edziennik.ui.home.cards.HomeAvailabilityCard
 import pl.szczodrzynski.edziennik.ui.home.cards.HomeEventsCard
@@ -34,13 +45,15 @@ import pl.szczodrzynski.edziennik.ui.home.cards.HomeGradesCard
 import pl.szczodrzynski.edziennik.ui.home.cards.HomeLuckyNumberCard
 import pl.szczodrzynski.edziennik.ui.home.cards.HomeNotesCard
 import pl.szczodrzynski.edziennik.ui.home.cards.HomeTimetableCard
+import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetGroup
 import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetPrimaryItem
-import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetSeparatorItem
 
 class HomeFragment : BaseFragment<FragmentHomeBinding, MainActivity>(
     inflater = FragmentHomeBinding::inflate,
 ) {
     companion object {
+        private const val TWO_COLUMNS_MIN_WIDTH_DP = 720
+
         fun swapCards(fromPosition: Int, toPosition: Int, cardAdapter: HomeCardAdapter): Boolean {
             val fromCard = cardAdapter.items[fromPosition]
             val toCard = cardAdapter.items[toPosition]
@@ -100,10 +113,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, MainActivity>(
                 activity.bottomSheet.close()
                 StudentNumberDialog(activity, app.profile).show()
             },
-        BottomSheetSeparatorItem(true),
         BottomSheetPrimaryItem(true)
             .withTitle(R.string.menu_mark_everything_as_read)
             .withIcon(Icon.cmd_eye_check_outline)
+            .withGroup(BottomSheetGroup.ACTIONS)
             .withOnClickListener {
                 activity.bottomSheet.close()
                 launch(Dispatchers.IO) {
@@ -131,16 +144,20 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, MainActivity>(
             manager.requestNotificationsPermission(activity, 0, false) {}
         }
 
+        b.configureCards.icon = Icon.cmd_cog_outline.toDrawable(activity)
         val homeCardsLocked = app.profile.config.ui.homeCardsLocked
         if (homeCardsLocked) {
             b.configHintText.setText(R.string.home_configure_locked)
-            b.configureCards.setText(R.string.home_configure_settings)
+        } else {
+            b.configHintText.setText(R.string.home_configure_notice)
         }
         b.configureCards.onClick {
-            if (homeCardsLocked)
-                HomeConfigDialog(activity, reloadOnDismiss = true).show()
-            else
-                HomeCardsDialog(activity, reloadOnDismiss = true).show()
+            HomeConfigDialog(activity, reloadOnDismiss = true).show()
+        }
+        b.configureCards.setOnLongClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            b.configureCards.spinGear360()
+            true
         }
 
         val cards = app.profile.config.ui.homeCards.filter { it.profileId == app.profile.id }.toMutableList()
@@ -167,6 +184,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, MainActivity>(
                 HomeCard.CARD_TIMETABLE -> HomeTimetableCard(it.cardId, app, activity, this, app.profile)
                 HomeCard.CARD_GRADES -> HomeGradesCard(it.cardId, app, activity, this, app.profile)
                 HomeCard.CARD_EVENTS -> HomeEventsCard(it.cardId, app, activity, this, app.profile)
+                HomeCard.CARD_ANNOUNCEMENTS -> HomeAnnouncementsCard(it.cardId, app, activity, this, app.profile)
                 HomeCard.CARD_NOTES -> HomeNotesCard(it.cardId, app, activity, this, app.profile)
                 else -> null
             } as HomeCard?
@@ -180,14 +198,45 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, MainActivity>(
             items.add(0, HomeAvailabilityCard(102, app, activity, this, app.profile))
         }
 
-        val adapter = HomeCardAdapter(items)
-        b.list.layoutManager = LinearLayoutManager(activity)
+        val list = b.list
+        val layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
+        var isMovingCard = false
+        val rebalanceCards = Runnable {
+            if (layoutManager.spanCount > 1 && !isMovingCard)
+                layoutManager.invalidateSpanAssignments()
+        }
+        val scheduleRebalance = {
+            // Cards load their content asynchronously. Forget the columns chosen for
+            // their initially empty views and place them using their actual heights.
+            // Coalesce size changes and wait until the current layout has finished.
+            if (layoutManager.spanCount > 1) {
+                list.removeCallbacks(rebalanceCards)
+                list.postOnAnimation(rebalanceCards)
+            }
+        }
+        val adapter = HomeCardAdapter(
+            items,
+            isCardsLocked = { app.profile.config.ui.homeCardsLocked },
+            onCardSizeChanged = scheduleRebalance,
+        )
+        b.list.layoutManager = layoutManager
         b.list.adapter = adapter
         b.list.isNestedScrollingEnabled = false
+        updateColumns()
+        b.scrollView.addOnLayoutChangeListener { _, left, _, right, _, oldLeft, _, oldRight, _ ->
+            if (right - left != oldRight - oldLeft)
+                b.list.post { updateColumns() }
+        }
 
         if (!homeCardsLocked) {
-            val itemTouchHelper = ItemTouchHelper(CardItemTouchHelperCallback(adapter) {
+            val autoScroller = HomeCardDragAutoScroller(b.list, b.scrollView)
+            val itemTouchHelper = ItemTouchHelper(CardItemTouchHelperCallback(
+                adapter,
+                onDragStateChanged = autoScroller::setDragging,
+            ) {
                 canRefreshDisabled = !it
+                isMovingCard = !it
+                if (it) scheduleRebalance()
             })
             adapter.itemTouchHelper = itemTouchHelper
             b.list.setAccessibilityDelegateCompat(object : RecyclerViewAccessibilityDelegate(b.list) {
@@ -226,5 +275,31 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, MainActivity>(
             })
             itemTouchHelper.attachToRecyclerView(b.list)
         }
+    }
+
+    /**
+     * Shows the cards in two columns in landscape, but only if each
+     * column is at least as wide as a typical phone screen.
+     */
+    private fun updateColumns() {
+        if (!isAdded) return
+        val layoutManager = b.list.layoutManager as? StaggeredGridLayoutManager ?: return
+        val adapter = b.list.adapter as? HomeCardAdapter ?: return
+        val widthDp = b.scrollView.width / resources.displayMetrics.density
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val spanCount = if (isLandscape && widthDp >= TWO_COLUMNS_MIN_WIDTH_DP) 2 else 1
+        if (layoutManager.spanCount == spanCount) return
+
+        // keep the outer margins at 16dp, with a 16dp gap between the columns
+        val cardMargin = if (spanCount > 1) 8.dp else 16.dp
+        b.list.updatePadding(left = 16.dp - cardMargin, right = 16.dp - cardMargin)
+        adapter.cardHorizontalMargin = cardMargin
+        b.list.children.forEach {
+            it.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = cardMargin
+                rightMargin = cardMargin
+            }
+        }
+        layoutManager.spanCount = spanCount
     }
 }

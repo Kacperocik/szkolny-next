@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rounded progress bar for the current lesson widget. Base colors are
+     replaced at runtime with the widget theme color
+     (setProgressTintList / setProgressBackgroundTintList), so they only
+     matter on API < 31 where tinting is unavailable. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <corners android:radius="10dp" />
+            <solid android:color="#FFE0E0E0" />
+        </shape>
+    </item>
+
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle">
+                <corners android:radius="10dp" />
+                <solid android:color="#FF757575" />
+            </shape>
+        </clip>
+    </item>
+
+</layer-list>

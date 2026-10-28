@@ -14,6 +14,7 @@ import com.mikepenz.iconics.view.IconicsTextView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import pl.szczodrzynski.edziennik.App
+import pl.szczodrzynski.edziennik.Binding
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.entity.Note
 import pl.szczodrzynski.edziennik.data.db.entity.Note.OwnerType
@@ -146,7 +147,9 @@ class NoteManager(private val app: App) {
         item: Noteable,
     ): RecyclerView.Adapter<*>? {
         return when (item) {
-            is AnnouncementFull -> AnnouncementsAdapter(activity, mutableListOf(item), null)
+            is AnnouncementFull -> AnnouncementsAdapter(activity, embedded = true, onClick = null).also {
+                it.setAllItems(listOf(item))
+            }
 
             is AttendanceFull -> AttendanceAdapter(
                 activity,
@@ -169,6 +172,7 @@ class NoteManager(private val app: App) {
 
             is EventFull -> EventListAdapter(
                 activity = activity,
+                embedded = true,
                 simpleMode = true,
                 showDate = true,
                 showTypeColor = false,
@@ -198,6 +202,7 @@ class NoteManager(private val app: App) {
                 activity = activity,
                 teachers = listOf(),
                 showNotes = false,
+                embedded = true,
                 onMessageClick = null,
             ).also {
                 it.setAllItems(listOf(item))
@@ -260,16 +265,16 @@ class NoteManager(private val app: App) {
     }
 
     fun getOwnerTypeImage(owner: OwnerType) = when (owner) {
-        OwnerType.ANNOUNCEMENT -> R.drawable.ic_announcement
-        OwnerType.ATTENDANCE -> R.drawable.ic_attendance
-        OwnerType.BEHAVIOR -> R.drawable.ic_behavior
-        OwnerType.DAY -> R.drawable.ic_calendar_day
-        OwnerType.EVENT -> R.drawable.ic_calendar_event
+        OwnerType.ANNOUNCEMENT -> R.drawable.illustration_announcements
+        OwnerType.ATTENDANCE -> R.drawable.illustration_attendance
+        OwnerType.BEHAVIOR -> R.drawable.illustration_behaviour
+        OwnerType.DAY -> R.drawable.illustration_day
+        OwnerType.EVENT -> R.drawable.illustration_event
         OwnerType.EVENT_SUBJECT -> TODO()
-        OwnerType.GRADE -> R.drawable.ic_grade
-        OwnerType.LESSON -> R.drawable.ic_timetable
+        OwnerType.GRADE -> R.drawable.illustration_grades
+        OwnerType.LESSON -> R.drawable.illustration_lesson
         OwnerType.LESSON_SUBJECT -> TODO()
-        OwnerType.MESSAGE -> R.drawable.ic_message
+        OwnerType.MESSAGE -> R.drawable.illustration_messages_received
         OwnerType.NONE -> throw Exception("NONE is not a valid OwnerType.")
     }
 
@@ -280,10 +285,11 @@ class NoteManager(private val app: App) {
     ) {
         if (noteOwner == null) {
             b.title.isVisible = false
-            b.divider.isVisible = false
             b.ownerItemList.isVisible = false
             return
         }
+        b.title.isVisible = true
+        b.ownerItemList.isVisible = true
         b.ownerItemList.apply {
             adapter = getAdapterForItem(activity, noteOwner)
             isNestedScrollingEnabled = false
@@ -292,11 +298,12 @@ class NoteManager(private val app: App) {
         }
 
         b.title.setText(getOwnerTypeText(noteOwner.getNoteType()))
-        b.title.setCompoundDrawables(
+        b.title.setCompoundDrawablesWithIntrinsicBounds(
             getOwnerTypeImage(noteOwner.getNoteType()).resolveDrawable(activity),
             null,
             null,
             null,
         )
+        Binding.drawableLeftAutoSize(b.title, enable = true)
     }
 }

@@ -26,6 +26,7 @@ class RegisterUnavailableDialog(
         DialogRegisterUnavailableBinding.inflate(layoutInflater)
 
     override fun getPositiveButtonText() = R.string.close
+    override fun hasCloseIconWhenSpaceLimited() = true
 
     override suspend fun onBeforeShow(): Boolean {
         if (!status.available && status.userMessage != null)

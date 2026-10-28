@@ -97,7 +97,7 @@
                 android:gravity="center"
                 android:text="@string/dialog_day_no_events"
                 android:textAppearance="?textAppearanceHeadlineSmall"
-                app:drawableTopCompat="@drawable/ic_no_events" />
+                app:drawableTopCompat="@drawable/illustration_event_checked_compact" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -113,6 +113,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:clipToPadding="false"
+            android:theme="@style/ThemeOverlay.App.NestedCard"
             tools:listitem="@layout/event_list_item"
             tools:visibility="visible" />
 

@@ -45,4 +45,30 @@
     <color name="windowBackgroundTealFull">#ff004d40</color> <!-- Teal 900 -->
     <color name="colorSurfaceTealFull">#00695c</color> <!-- Teal 800 -->
 
+    <!-- YELLOW THEME - LIGHT -->
+    <color name="windowBackgroundYellow">#fffffde7</color>
+    <color name="colorSurfaceYellow">#fffffff9</color>
+    <!-- YELLOW THEME - FULL -->
+    <color name="windowBackgroundYellowFull">#fff57f17</color>
+    <color name="colorSurfaceYellowFull">#fffbc02d</color>
+
+    <!-- ORANGE THEME - LIGHT -->
+    <color name="windowBackgroundOrange">#ffffebcc</color>
+    <color name="colorSurfaceOrange">#fffff0d9</color>
+    <!-- ORANGE THEME - FULL -->
+    <color name="windowBackgroundOrangeFull">#ffe65100</color> <!-- Orange 900 -->
+    <color name="colorSurfaceOrangeFull">#ffef6c00</color> <!-- Orange 800 -->
+
+    <!-- BROWN THEME - LIGHT -->
+    <color name="windowBackgroundBrown">#ffefebe9</color>
+    <color name="colorSurfaceBrown">#fff5f2f0</color>
+    <!-- BROWN THEME - FULL -->
+    <color name="windowBackgroundBrownFull">#ff3e2723</color> <!-- Brown 900 -->
+    <color name="colorSurfaceBrownFull">#ff4e342e</color> <!-- Brown 800 -->
+
+    <color name="windowBackgroundGray">#ffeceff1</color>
+    <color name="colorSurfaceGray">#fff5f5f5</color>
+    <color name="windowBackgroundGrayFull">#ff212121</color>
+    <color name="colorSurfaceGrayFull">#ff424242</color>
+
 </resources>

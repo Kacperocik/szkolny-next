@@ -140,10 +140,36 @@ class MessageManager(private val app: App) {
     }
 
     suspend fun markAsDeleted(message: Message) {
+        if (!message.isDeleted)
+            message.typeBeforeDelete = message.type
         message.type = Message.TYPE_DELETED
         withContext(Dispatchers.Default) {
             app.db.messageDao().replace(message)
         }
+    }
+
+    suspend fun restore(message: Message) {
+        if (!message.isDeleted)
+            return
+        message.type = message.typeBeforeDelete ?: guessTypeBeforeDelete(message)
+        message.typeBeforeDelete = null
+        withContext(Dispatchers.Default) {
+            app.db.messageDao().replace(message)
+        }
+    }
+
+    /**
+     * For messages deleted in the e-register, or before the original type was stored.
+     * Sent messages have no sender, and have known recipients (received ones only
+     * have the user as an unknown recipient).
+     */
+    private fun guessTypeBeforeDelete(message: Message): Int {
+        if (message.senderId != null)
+            return Message.TYPE_RECEIVED
+        val recipients = (message as? MessageFull)?.recipients
+        if (recipients?.any { it.id != -1L } == true)
+            return Message.TYPE_SENT
+        return Message.TYPE_RECEIVED
     }
 
     suspend fun deleteDraft(profileId: Int, messageId: Long) {

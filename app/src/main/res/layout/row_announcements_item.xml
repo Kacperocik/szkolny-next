@@ -1,27 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/announcementsItem"
+    android:id="@+id/announcementsItemCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="8dp"
-    android:layout_marginBottom="8dp"
-    android:background="?attr/selectableItemBackground"
-    android:orientation="vertical">
+    android:layout_marginBottom="2dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="?attr/colorCard"
+    app:cardElevation="0dp"
+    app:cardPreventCornerOverlap="false"
+    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupSingle"
+    app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/announcementsItemImage"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@tools:sample/avatars" />
@@ -31,28 +39,39 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textAppearance="?textAppearanceBodyLarge"
-            app:layout_constraintEnd_toStartOf="@+id/announcementsItemDate"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?android:attr/textColorPrimary"
+            app:layout_constraintEnd_toStartOf="@+id/announcementsItemUnread"
             app:layout_constraintStart_toEndOf="@+id/announcementsItemImage"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Janusz Kowalski" />
 
+        <View
+            android:id="@+id/announcementsItemUnread"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/unread_red_circle"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/announcementsItemDate"
+            app:layout_constraintEnd_toStartOf="@+id/announcementsItemDate"
+            app:layout_constraintTop_toTopOf="@+id/announcementsItemDate"
+            tools:visibility="visible" />
+
         <TextView
             android:id="@+id/announcementsItemTitle"
             android:layout_width="0dp"
-            android:layout_height="20dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
+            android:layout_marginTop="2dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
             android:ellipsize="end"
             android:maxLines="1"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?android:attr/textColorSecondary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/announcementsItemImage"
             app:layout_constraintTop_toBottomOf="@+id/announcementsItemSender"
@@ -63,30 +82,30 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            android:autoLink="all"
+            android:autoLink="none"
+            android:clickable="false"
+            android:focusable="false"
             android:ellipsize="end"
             android:singleLine="true"
-            android:textAppearance="?textAppearanceBodySmall"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?android:attr/textColorSecondary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/announcementsItemImage"
             app:layout_constraintTop_toBottomOf="@+id/announcementsItemTitle"
-            tools:text="mam sposób na czytanie wiadomości tak żebyście tego nie widzieli i potem myślicie że mam 263 nieprzeczytane wiadomości" />
+            tools:text="mam sposób na czytanie wiadomości..." />
 
         <TextView
             android:id="@+id/announcementsItemDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:textAppearance="?textAppearanceLabelMedium"
+            android:textAppearance="?attr/textAppearanceLabelMedium"
+            android:textColor="?attr/colorSecondary"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="18 lut 2018" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

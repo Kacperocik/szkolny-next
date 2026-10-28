@@ -2,8 +2,7 @@
   ~ Copyright (c) Kacper Ziubryniewicz 2020-1-20
   -->
 
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -14,7 +13,7 @@
             type="boolean" />
     </data>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -22,283 +21,891 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
 
+            <!-- Grade settings -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="6dp"
                 android:text="@string/grades_config_title"
-                android:textAppearance="?textAppearanceTitleMedium" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
 
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardCustomPlus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="4dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:isVisible="@{!isUniversity}">
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:isVisible="@{!isUniversity}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupTop"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-                <CheckBox
-                    android:id="@+id/customPlusCheckBox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minHeight="0dp"
-                    android:text="@string/grades_config_plus_value" />
-
-                <it.sephiroth.android.library.numberpicker.NumberPicker
-                    android:id="@+id/customPlusValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    app:picker_disableGestures="true"
-                    app:picker_max="1.0"
-                    app:picker_min="0.0"
-                    app:picker_orientation="horizontal"
-                    app:picker_stepSize="0.01" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:isVisible="@{!isUniversity}">
-
-                <CheckBox
-                    android:id="@+id/customMinusCheckBox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minHeight="0dp"
-                    android:text="@string/grades_config_minus_value" />
-
-                <it.sephiroth.android.library.numberpicker.NumberPicker
-                    android:id="@+id/customMinusValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    app:picker_disableGestures="true"
-                    app:picker_max="1.0"
-                    app:picker_min="0.0"
-                    app:picker_orientation="horizontal"
-                    app:picker_stepSize="0.01" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="8dp"
-                android:background="@drawable/divider"
-                android:isVisible="@{!isUniversity}" />
-
-            <CheckBox
-                android:id="@+id/dontCountGrades"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="0dp"
-                android:text="@string/grades_config_dont_count_grades"
-                android:isVisible="@{!isUniversity}" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="?textInputOutlinedDenseStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:enabled="@{dontCountGrades.checked}"
-                android:hint="@string/grades_config_dont_count_hint"
-                app:placeholderText="@string/grades_config_dont_count_placeholder"
-                android:isVisible="@{!isUniversity}">
-
-                <pl.szczodrzynski.edziennik.utils.TextInputKeyboardEdit
-                    android:id="@+id/dontCountGradesText"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    tools:text="nb, 0, +, -, bz" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:orientation="vertical"
+                    android:paddingStart="12dp"
+                    android:paddingTop="12dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="12dp">
 
-            <CheckBox
-                android:id="@+id/hideImproved"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.checkbox.MaterialCheckBox
+                            android:id="@+id/customPlusCheckBox"
+                            style="@style/AppStyle.SettingsCheckBox"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/grades_config_plus_value"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+
+                    <pl.szczodrzynski.edziennik.ui.base.views.NumberStepperView
+                        android:id="@+id/customPlusValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="8dp"
+                        app:stepperEditable="true"
+                        app:stepperMax="1"
+                        app:stepperMin="0"
+                        app:stepperStep="0.01"
+                        app:stepperValue="0.5" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardCustomMinus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:minHeight="32dp"
-                android:text="@string/grades_config_dont_show_improved" />
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:isVisible="@{!isUniversity}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-            <CheckBox
-                android:id="@+id/hideNoGrade"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="32dp"
-                android:text="@string/grades_config_hide_no_grade"
-                android:isVisible="@{isUniversity}" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal"
-                android:isVisible="@{!isUniversity}">
-
-                <CheckBox
-                    android:id="@+id/averageWithoutWeight"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minHeight="32dp"
-                    android:text="@string/grades_config_average_without_weight" />
+                    android:orientation="vertical"
+                    android:paddingStart="12dp"
+                    android:paddingTop="12dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="12dp">
 
-                <com.mikepenz.iconics.view.IconicsImageView
-                    android:id="@+id/averageWithoutWeightHelp"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:background="?selectableItemBackgroundBorderless"
-                    android:scaleType="centerInside"
-                    app:iiv_color="?android:textColorSecondary"
-                    app:iiv_icon="cmd-help-circle-outline"
-                    app:iiv_size="24dp"
-                    tools:src="@android:drawable/ic_menu_help" />
-            </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-            <CheckBox
-                android:id="@+id/countEctsInProgress"
+                        <com.google.android.material.checkbox.MaterialCheckBox
+                            android:id="@+id/customMinusCheckBox"
+                            style="@style/AppStyle.SettingsCheckBox"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/grades_config_minus_value"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+
+                    <pl.szczodrzynski.edziennik.ui.base.views.NumberStepperView
+                        android:id="@+id/customMinusValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="8dp"
+                        app:stepperEditable="true"
+                        app:stepperMax="1"
+                        app:stepperMin="0"
+                        app:stepperStep="0.01"
+                        app:stepperValue="0.25" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardDontCount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="32dp"
-                android:text="@string/grades_config_ects_in_progress"
-                android:isVisible="@{isUniversity}" />
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:isVisible="@{!isUniversity}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.checkbox.MaterialCheckBox
+                            android:id="@+id/dontCountGrades"
+                            style="@style/AppStyle.SettingsCheckBox"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/grades_config_dont_count_grades"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="?textInputOutlinedDenseStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:enabled="@{dontCountGrades.checked}"
+                        android:hint="@string/grades_config_dont_count_hint"
+                        app:placeholderText="@string/grades_config_dont_count_placeholder">
+
+                        <pl.szczodrzynski.edziennik.utils.TextInputKeyboardEdit
+                            android:id="@+id/dontCountGradesText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            tools:text="nb, 0, +, -, bz" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardHideImproved"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/hideImproved"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/grades_config_dont_show_improved"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?android:attr/textColorPrimary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardHideNoGrade"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:isVisible="@{isUniversity}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/hideNoGrade"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/grades_config_hide_no_grade"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?android:attr/textColorPrimary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAverageWithoutWeight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:isVisible="@{!isUniversity}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupBottom"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/averageWithoutWeight"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/grades_config_average_without_weight"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?android:attr/textColorPrimary" />
+
+                    <com.mikepenz.iconics.view.IconicsImageView
+                        android:id="@+id/averageWithoutWeightHelp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:scaleType="centerInside"
+                        app:iiv_color="?android:textColorSecondary"
+                        app:iiv_icon="cmd-help-circle-outline"
+                        app:iiv_size="24dp"
+                        tools:src="@android:drawable/ic_menu_help" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardCountEctsInProgress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:isVisible="@{isUniversity}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupBottom"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/countEctsInProgress"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/grades_config_ects_in_progress"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?android:attr/textColorPrimary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Grade sorting -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="6dp"
                 android:text="@string/menu_grades_sort_mode"
-                android:textAppearance="?textAppearanceTitleMedium" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
 
             <RadioGroup
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp">
+                android:layout_height="wrap_content">
 
-                <RadioButton
-                    android:id="@+id/sortGradesByDateRadio"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardSortByDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:text="@string/dialog_grades_config_sort_by_date" />
+                    android:layout_marginBottom="1dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupTop"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
 
-                <RadioButton
-                    android:id="@+id/sortGradesBySubjectRadio"
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/sortGradesByDateRadio"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/dialog_grades_config_sort_by_date"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardSortBySubject"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:text="@string/dialog_grades_config_sort_by_subject" />
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupBottom"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/sortGradesBySubjectRadio"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/dialog_grades_config_sort_by_subject"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </RadioGroup>
 
+            <!-- Grade colors -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:paddingHorizontal="4dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="6dp"
                 android:text="@string/menu_grades_color_mode"
-                android:textAppearance="?textAppearanceTitleMedium" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
 
             <RadioGroup
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp">
+                android:layout_height="wrap_content">
 
-                <RadioButton
-                    android:id="@+id/gradeColorFromERegister"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardColorFromERegister"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:text="@string/dialog_grades_config_color_from_eregister" />
+                    android:layout_marginBottom="1dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupTop"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
 
-                <RadioButton
-                    android:id="@+id/gradeColorByValue"
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/gradeColorFromERegister"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/dialog_grades_config_color_from_eregister"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardColorByValue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:text="@string/dialog_grades_config_color_by_value" />
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupBottom"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/gradeColorByValue"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/dialog_grades_config_color_by_value"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </RadioGroup>
 
+            <!-- Grade shapes -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:paddingHorizontal="4dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="6dp"
+                android:text="@string/menu_grades_shape_mode"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardShapeRoundedRect"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="1dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupTop"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/gradeShapeRoundedRect"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/dialog_grades_config_shape_rounded_rect"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardShapeCircle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupBottom"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/gradeShapeCircle"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/dialog_grades_config_shape_circle"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </RadioGroup>
+
+            <!-- Average calculation -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:isVisible="@{!isUniversity}"
+                android:paddingHorizontal="4dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="6dp"
                 android:text="@string/menu_grades_average_mode"
-                android:textAppearance="?textAppearanceTitleMedium"
-                android:isVisible="@{!isUniversity}" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
 
             <RadioGroup
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:isVisible="@{!isUniversity}">
 
-                <RadioButton
-                    android:id="@+id/gradeAverageMode4"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardAvg4"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:text="@string/settings_register_avg_mode_4" />
+                    android:layout_marginBottom="1dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupTop"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
 
-                <RadioButton
-                    android:id="@+id/gradeAverageMode0"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:text="@string/settings_register_avg_mode_0" />
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
-                <RadioButton
-                    android:id="@+id/gradeAverageMode1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:text="@string/settings_register_avg_mode_1" />
+                        <RadioButton
+                            android:id="@+id/gradeAverageMode4"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
 
-                <RadioButton
-                    android:id="@+id/gradeAverageMode2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:text="@string/settings_register_avg_mode_2" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/settings_register_avg_mode_4"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                <RadioButton
-                    android:id="@+id/gradeAverageMode3"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardAvg0"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:text="@string/settings_register_avg_mode_3" />
+                    android:layout_marginBottom="1dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/gradeAverageMode0"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/settings_register_avg_mode_0"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardAvg1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="1dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/gradeAverageMode1"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/settings_register_avg_mode_1"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardAvg2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="1dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/gradeAverageMode2"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/settings_register_avg_mode_2"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardAvg3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupBottom"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/gradeAverageMode3"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/settings_register_avg_mode_3"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </RadioGroup>
 
+            <!-- University average calculation -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="4dp"
-                style="@style/TextAppearance.AppCompat.Small"
+                android:isVisible="@{isUniversity}"
+                android:paddingHorizontal="4dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="6dp"
                 android:text="@string/menu_grades_university_average_mode"
-                android:isVisible="@{isUniversity}" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
 
             <RadioGroup
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:isVisible="@{isUniversity}">
 
-                <RadioButton
-                    android:id="@+id/gradeUniversityAverageMode1"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardUnivAvg1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:text="@string/settings_register_university_avg_mode_1"/>
+                    android:layout_marginBottom="1dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupTop"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
 
-                <RadioButton
-                    android:id="@+id/gradeUniversityAverageMode0"
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/gradeUniversityAverageMode1"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/settings_register_university_avg_mode_1"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardUnivAvg0"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:text="@string/settings_register_university_avg_mode_0"/>
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorCard"
+                    app:cardElevation="0dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupBottom"
+                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        style="@style/AppStyle.SettingsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <RadioButton
+                            android:id="@+id/gradeUniversityAverageMode0"
+                            style="@style/AppStyle.SettingsRadioButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/settings_register_university_avg_mode_0"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </RadioGroup>
+
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </layout>

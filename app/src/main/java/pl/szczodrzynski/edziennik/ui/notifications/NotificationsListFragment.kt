@@ -47,14 +47,20 @@ class NotificationsListFragment : BaseFragment<NotificationsListFragmentBinding,
 
     override suspend fun onViewReady(savedInstanceState: Bundle?) {
         val adapter = NotificationsAdapter(activity) { notification ->
-            val intent = Intent("android.intent.action.MAIN")
+            val intent = Intent()
             notification.fillIntent(intent)
 
-            Timber.d("notification with item " + notification.navTarget + " extras " + if (intent.extras == null) "null" else intent.extras!!.toString())
-            if (notification.profileId != null && notification.profileId != -1 && notification.profileId != app.profile.id && context is Activity) {
+            Timber.d("notification with item " + notification.navTarget + " extras " + intent.extras.toString())
+            if (notification.profileId != null && notification.profileId != -1 && notification.profileId != app.profile.id) {
                 Toast.makeText(app, app.getString(R.string.toast_changing_profile), Toast.LENGTH_LONG).show()
             }
-            app.sendBroadcast(intent)
+
+            val targetProfileId = notification.profileId?.takeIf { it != -1 }
+            activity.navigate(
+                profileId = targetProfileId,
+                navTarget = notification.navTarget,
+                args = intent.extras
+            )
         }
 
         app.db.notificationDao().getAll().observe(viewLifecycleOwner, Observer { items ->
@@ -67,7 +73,6 @@ class NotificationsListFragment : BaseFragment<NotificationsListFragmentBinding,
                 b.list.apply {
                     setHasFixedSize(true)
                     layoutManager = LinearLayoutManager(context)
-                    addItemDecoration(SimpleDividerItemDecoration(context))
                 }
             }
             adapter.notifyDataSetChanged()

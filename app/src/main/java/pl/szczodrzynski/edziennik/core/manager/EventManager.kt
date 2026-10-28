@@ -19,6 +19,7 @@ import pl.szczodrzynski.edziennik.ext.join
 import pl.szczodrzynski.edziennik.ext.resolveColor
 import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
 import pl.szczodrzynski.edziennik.ext.toDrawable
+import pl.szczodrzynski.edziennik.utils.html.BetterHtml
 import kotlin.coroutines.CoroutineContext
 
 class EventManager(val app: App) : CoroutineScope {
@@ -26,6 +27,39 @@ class EventManager(val app: App) : CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Default
+
+    fun getEventColor(typeId: Long?, fallbackColor: Int, profileId: Int = app.profile.id): Int {
+        typeId?.let { id ->
+            app.config[profileId].ui.agendaEventColors
+                .get(id.toString())
+                ?.takeIf { it.isJsonPrimitive }
+                ?.asInt
+        }?.let { return it }
+        return fallbackColor
+    }
+
+    fun getEventColor(event: EventFull): Int =
+        getEventColor(event.type, event.eventColor, event.profileId)
+
+    fun getLessonChangesColor(profileId: Int = app.profile.id): Int =
+        getSpecialColor(profileId, COLOR_KEY_LESSON_CHANGES, DEFAULT_LESSON_CHANGES_COLOR)
+
+    fun getTeacherAbsenceColor(profileId: Int = app.profile.id): Int =
+        getSpecialColor(profileId, COLOR_KEY_TEACHER_ABSENCE, DEFAULT_TEACHER_ABSENCE_COLOR)
+
+    companion object {
+        const val COLOR_KEY_LESSON_CHANGES = "lessonChanges"
+        const val COLOR_KEY_TEACHER_ABSENCE = "teacherAbsence"
+        val DEFAULT_LESSON_CHANGES_COLOR = 0xff78909c.toInt()
+        val DEFAULT_TEACHER_ABSENCE_COLOR = 0xffff1744.toInt()
+
+        fun getSpecialColor(profileId: Int, key: String, fallbackColor: Int): Int {
+            return App.config[profileId].ui.agendaEventColors
+                .get(key)
+                ?.takeIf { it.isJsonPrimitive }
+                ?.asInt ?: fallbackColor
+        }
+    }
 
     /*    _    _ _____    _____                 _  __ _
          | |  | |_   _|  / ____|               (_)/ _(_)
@@ -53,15 +87,24 @@ class EventManager(val app: App) : CoroutineScope {
         val topicSpan = event.getNoteSubstituteText(showNotes) ?: event.topicHtml
         val hasReplacingNotes = event.hasReplacingNotes()
 
-        title.text = listOfNotNull(
+        val typeText = if (showType) "<b>${event.typeName ?: "wydarzenie"}</b> " else null
+        val subjectText = if (showSubject && event.subjectLongName != null) "<b>${event.subjectLongName}</b> " else null
+
+        val prefixText = listOfNotNull(
             if (event.addedManually && !event.isSharedReceived) "{cmd-calendar-edit} " else null,
             if (event.isSharedReceived) "{cmd-share-variant} " else null,
             if (event.hasNotes() && hasReplacingNotes && showNotes) "{cmd-swap-horizontal} " else null,
             if (event.hasNotes() && !hasReplacingNotes && showNotes) "{cmd-playlist-edit} " else null,
-            if (showType) "${event.typeName ?: "wydarzenie"} - " else null,
-            if (showSubject) event.subjectLongName?.plus(" - ") else null,
+            typeText,
+            subjectText,
+        ).joinToString("")
+
+        val formattedPrefix = BetterHtml.fromHtml(title.context, prefixText)
+
+        title.text = listOfNotNull(
+            formattedPrefix.takeIf { it.isNotBlank() },
             topicSpan,
-        ).concat()
+        ).concat(delimiter = " ")
 
         title.setCompoundDrawables(
             null,

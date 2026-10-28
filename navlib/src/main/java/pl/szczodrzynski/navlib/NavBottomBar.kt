@@ -5,6 +5,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -104,8 +106,15 @@ class NavBottomBar @JvmOverloads constructor(
         elevation = 0f
     }
 
-    private fun setFabParams() {
+    internal fun setFabParams() {
         fabExtendedView.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+            val margin = (16 * resources.displayMetrics.density).toInt()
+            val toolbarHeight = if (::navView.isInitialized && navView.toolbarAtBottom && navView.toolbar.enable) {
+                navView.toolbar.measure(MATCH_PARENT, WRAP_CONTENT)
+                navView.toolbar.measuredHeight
+            } else 0
+            val bottomMargin = margin + toolbarHeight
+            setMargins(margin, margin, margin, bottomMargin)
             if (enable) {
                 anchorId = this@NavBottomBar.id
                 anchorGravity = fabGravity or Gravity.TOP
@@ -122,6 +131,18 @@ class NavBottomBar @JvmOverloads constructor(
                     FAB_ALIGNMENT_MODE_CENTER
         }
         setFabVisibility()
+    }
+
+    fun hideFab() {
+        if (fabEnable && ::fabExtendedView.isInitialized) {
+            fabExtendedView.hide()
+        }
+    }
+
+    fun showFab() {
+        if (fabEnable && ::fabExtendedView.isInitialized) {
+            fabExtendedView.show()
+        }
     }
 
     private fun setFabVisibility() =

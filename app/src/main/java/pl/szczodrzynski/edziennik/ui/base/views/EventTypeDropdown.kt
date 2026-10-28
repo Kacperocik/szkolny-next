@@ -7,9 +7,11 @@ package pl.szczodrzynski.edziennik.ui.base.views
 import android.content.Context
 import android.util.AttributeSet
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import pl.szczodrzynski.edziennik.data.db.AppDb
+import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.data.db.entity.EventType
 import pl.szczodrzynski.edziennik.ext.toDrawable
 import pl.szczodrzynski.edziennik.utils.TextInputDropDown
@@ -29,17 +31,21 @@ class EventTypeDropdown : TextInputDropDown {
     }
 
     suspend fun loadItems() {
+        val app = context.applicationContext as App
         val types = withContext(Dispatchers.Default) {
             val list = mutableListOf<Item>()
             val types = db.eventTypeDao().getAllNow(profileId)
                 .sortedBy { it.order }
 
             list += types.map {
+                val color = app.eventManager.getEventColor(it.id, it.color, profileId)
                 Item(
                     id = it.id,
                     text = it.name,
                     tag = it,
-                    icon = CommunityMaterial.Icon.cmd_circle.toDrawable(it.color),
+                    icon = CommunityMaterial.Icon.cmd_circle.toDrawable(
+                        MaterialColors.harmonizeWithPrimary(context, color)
+                    ),
                 )
             }
 

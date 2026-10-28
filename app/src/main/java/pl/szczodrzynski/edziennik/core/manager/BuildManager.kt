@@ -57,7 +57,13 @@ class BuildManager(val app: App) : CoroutineScope {
         get() {
             val info = app.packageManager.getApplicationInfo(app.packageName, PackageManager.GET_META_DATA)
             val metadata = info.metaData
-            return metadata?.getString("buildTimestamp")?.toLongOrNull() ?: 0
+            val raw = metadata?.getString("buildTimestamp")?.toLongOrNull() ?: 0L
+            if (raw > 0) return raw
+            return try {
+                app.packageManager.getPackageInfo(app.packageName, 0).lastUpdateTime
+            } catch (_: Exception) {
+                System.currentTimeMillis()
+            }
         }
 
     val gitHash = BuildConfig.GIT_INFO["hash"]
@@ -230,9 +236,11 @@ class BuildManager(val app: App) : CoroutineScope {
             call.execute()
         }.getOrNull() ?: return@withContext false
 
+        @Suppress("DEPRECATION_ERROR")
         if (response.code() != 200)
             return@withContext false
 
+        @Suppress("DEPRECATION_ERROR")
         val json = runCatching {
             response.body()?.string()?.toJsonObject()
         }.getOrNull() ?: return@withContext false

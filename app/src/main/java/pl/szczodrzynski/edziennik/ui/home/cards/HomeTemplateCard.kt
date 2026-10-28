@@ -43,7 +43,7 @@ class HomeTemplateCard(
         holder.root.removeAllViews()
         val b = CardHomeTemplateBinding.inflate(LayoutInflater.from(holder.root.context))
         b.root.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-            setMargins(8.dp)
+            setMargins(4.dp)
         }
         holder.root += b.root
 

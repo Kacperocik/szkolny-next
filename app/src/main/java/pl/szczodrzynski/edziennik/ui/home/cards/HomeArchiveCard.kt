@@ -48,7 +48,7 @@ class HomeArchiveCard(
         holder.root.removeAllViews()
         val b = CardHomeArchiveBinding.inflate(LayoutInflater.from(holder.root.context))
         b.root.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-            setMargins(8.dp)
+            setMargins(4.dp)
         }
         holder.root += b.root
 
@@ -74,7 +74,6 @@ class HomeArchiveCard(
                         )
                         positive(R.string.ok) {
                             activity.drawer.profileSelectionOpen()
-                            activity.drawer.open()
                         }
                     }.show()
                     return@launch

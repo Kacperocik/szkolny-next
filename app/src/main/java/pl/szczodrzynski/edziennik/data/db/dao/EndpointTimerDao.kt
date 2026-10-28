@@ -22,6 +22,9 @@ interface EndpointTimerDao {
     @Query("SELECT * FROM endpointTimers WHERE profileId = :profileId")
     fun getAllNow(profileId: Int): List<EndpointTimer>
 
+    @Query("SELECT MAX(endpointLastSync) FROM endpointTimers WHERE profileId = :profileId")
+    fun getLastSyncNow(profileId: Int): Long?
+
     @Query("DELETE FROM endpointTimers WHERE profileId = :profileId")
     fun clear(profileId: Int)
 

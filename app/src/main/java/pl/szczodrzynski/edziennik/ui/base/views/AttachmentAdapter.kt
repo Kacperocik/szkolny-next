@@ -20,6 +20,7 @@ import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.entity.Event
 import pl.szczodrzynski.edziennik.data.db.entity.Message
 import pl.szczodrzynski.edziennik.databinding.AttachmentListItemBinding
+import pl.szczodrzynski.edziennik.ext.enableExpressiveChipShapeMorph
 import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ext.onLongClick
 import pl.szczodrzynski.edziennik.ext.toDrawable
@@ -47,6 +48,7 @@ class AttachmentAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val view = AttachmentListItemBinding.inflate(inflater, parent, false)
+        view.chip.enableExpressiveChipShapeMorph()
         return ViewHolder(view)
     }
 
@@ -61,12 +63,13 @@ class AttachmentAdapter(
             "xls", "xlsx", "ods" -> SzkolnyFont.Icon.szf_file_excel_outline
             "ppt", "pptx", "odp" -> SzkolnyFont.Icon.szf_file_powerpoint_outline
             "pdf" -> SzkolnyFont.Icon.szf_file_pdf_outline
-            "mp3", "wav", "aac" -> SzkolnyFont.Icon.szf_file_music_outline
+            "mp3", "wav", "aac", "m4a", "ogg", "opus", "amr" -> SzkolnyFont.Icon.szf_file_music_outline
             "mp4", "avi", "3gp", "mkv", "flv" -> SzkolnyFont.Icon.szf_file_video_outline
-            "jpg", "jpeg", "png", "bmp", "gif" -> SzkolnyFont.Icon.szf_file_image_outline
+            "jpg", "jpeg", "png", "bmp", "gif", "webp", "heic", "heif", "jxl" -> SzkolnyFont.Icon.szf_file_image_outline
             "zip", "rar", "tar", "7z" -> SzkolnyFont.Icon.szf_zip_box_outline
-            "html", "cpp", "c", "h", "css", "java", "py" -> SzkolnyFont.Icon.szf_file_code_outline
-            else -> CommunityMaterial.Icon2.cmd_file_document_outline
+            "html", "cpp", "c", "h", "css", "java", "py", "cs", "js", "ts", "kt", "json", "xml", "sql" -> SzkolnyFont.Icon.szf_file_code_outline
+            "txt", "csv", "md", "log" -> CommunityMaterial.Icon2.cmd_file_document_outline
+            else -> CommunityMaterial.Icon2.cmd_file_outline
         }
 
         b.chip.text = if (item.isDownloading) {

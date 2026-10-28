@@ -112,7 +112,7 @@ class EventFull(
     var notified = false
 
     val eventColor
-        get() = color ?: typeColor ?: 0xff2196f3.toInt()
+        get() = color?.takeIf { it != -1 } ?: typeColor?.takeIf { it != -1 } ?: 0xff2196f3.toInt()
 
     @Relation(parentColumn = "eventId", entityColumn = "noteOwnerId", entity = Note::class)
     override lateinit var notes: MutableList<Note>

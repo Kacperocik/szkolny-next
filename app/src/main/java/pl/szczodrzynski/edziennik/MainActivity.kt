@@ -1,20 +1,29 @@
 package pl.szczodrzynski.edziennik
 
+import android.animation.ValueAnimator
 import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Gravity
+import android.graphics.Outline
+import android.view.HapticFeedbackConstants
 import android.view.View
+import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.activity.BackEventCompat
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
@@ -26,6 +35,7 @@ import androidx.navigation.NavOptions
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.danimahardhika.cafebar.CafeBar
 import com.danimahardhika.cafebar.CafeBarTheme
+import com.google.android.material.color.MaterialColors
 import com.jetradarmobile.snowfall.SnowfallView
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.materialdrawer.model.DividerDrawerItem
@@ -70,11 +80,13 @@ import pl.szczodrzynski.edziennik.data.enums.FeatureType
 import pl.szczodrzynski.edziennik.data.enums.NavTarget
 import pl.szczodrzynski.edziennik.data.enums.NavTargetLocation
 import pl.szczodrzynski.edziennik.databinding.ActivitySzkolnyBinding
+import pl.szczodrzynski.edziennik.ext.hideKeyboard
 import pl.szczodrzynski.edziennik.ext.JsonObject
 import pl.szczodrzynski.edziennik.ext.getAppData
 import pl.szczodrzynski.edziennik.ext.getEnum
 import pl.szczodrzynski.edziennik.ext.getIntOrNull
 import pl.szczodrzynski.edziennik.ext.hasUIFeature
+import pl.szczodrzynski.edziennik.ext.spinGear360
 import pl.szczodrzynski.edziennik.ext.isBeforeYear
 import pl.szczodrzynski.edziennik.ext.keys
 import pl.szczodrzynski.edziennik.ext.putExtras
@@ -88,6 +100,7 @@ import pl.szczodrzynski.edziennik.ext.toImageHolder
 import pl.szczodrzynski.edziennik.ui.base.dialog.SimpleDialog
 import pl.szczodrzynski.edziennik.ui.dialogs.ChangelogDialog
 import pl.szczodrzynski.edziennik.ui.dialogs.ErrorDetailsDialog
+import pl.szczodrzynski.edziennik.ui.dialogs.settings.ProfilesDialog
 import pl.szczodrzynski.edziennik.ui.dialogs.settings.ProfileConfigDialog
 import pl.szczodrzynski.edziennik.ui.dialogs.sync.RegisterUnavailableDialog
 import pl.szczodrzynski.edziennik.ui.dialogs.sync.ServerMessageDialog
@@ -98,17 +111,22 @@ import pl.szczodrzynski.edziennik.ui.event.EventManualDialog
 import pl.szczodrzynski.edziennik.ui.login.LoginActivity
 import pl.szczodrzynski.edziennik.ui.main.ErrorSnackbar
 import pl.szczodrzynski.edziennik.ui.main.MainSnackbar
+import pl.szczodrzynski.edziennik.ui.messages.compose.MessagesComposeFragment
 import pl.szczodrzynski.edziennik.ui.messages.list.MessagesFragment
+import pl.szczodrzynski.edziennik.ui.settings.navigateSettingsHierarchy
 import pl.szczodrzynski.edziennik.ui.timetable.TimetableFragment
 import pl.szczodrzynski.edziennik.utils.BigNightUtil
 import pl.szczodrzynski.edziennik.utils.PausedNavigationData
 import pl.szczodrzynski.edziennik.utils.Utils
 import pl.szczodrzynski.edziennik.utils.appManagerIntentList
 import pl.szczodrzynski.edziennik.utils.models.Date
+import pl.szczodrzynski.edziennik.utils.models.Time
 import pl.szczodrzynski.navlib.NavView
+import pl.szczodrzynski.navlib.SystemBarsUtil
 import pl.szczodrzynski.navlib.bottomsheet.NavBottomSheet
+import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetGroup
 import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetPrimaryItem
-import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetSeparatorItem
+import pl.szczodrzynski.navlib.bottomsheet.items.IBottomSheetItem
 import pl.szczodrzynski.navlib.drawer.NavDrawer
 import pl.szczodrzynski.navlib.drawer.items.DrawerPrimaryItem
 import timber.log.Timber
@@ -174,18 +192,178 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         setContentView(b.root)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            ViewCompat.setOnApplyWindowInsetsListener(b.rootFrame) { view: View, insets: WindowInsetsCompat ->
-                val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                view.setPadding(bars.left, bars.top, bars.right, 0)
-                b.navView.bottomSheet.setPadding(0, 0, 0, bars.bottom)
-                b.swipeRefreshLayout.setPadding(0, 0, 0, bars.bottom)
-                b.nightlyText.updateLayoutParams<FrameLayout.LayoutParams> {
-                    this.bottomMargin = 8.dp + bars.bottom
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackStarted(backEvent: BackEventCompat) {
+                if (bottomSheet.isOpen) {
+                    // the sheet closes itself, no preview
+                    return
                 }
-                insets
+                if (App.config.ui.openDrawerOnBackPressed && !drawer.isOpen && !drawer.fixedDrawerEnabled()) {
+                    // the drawer will slide in following the finger
+                    predictiveDrawerReturnAnimator?.cancel()
+                    predictiveDrawerReturnAnimator = null
+                    predictiveDrawerFraction = 0f
+                    predictiveDrawerActive = true
+                    return
+                }
+                if (!shouldPredictSubpageBack()) {
+                    return
+                }
+                val parentTarget = navTarget.popTo ?: navBackStack.lastOrNull()?.first ?: return
+                val pages = fragmentManager.fragments.filter { it.id == R.id.fragment && it.isAdded && !it.isRemoving }
+                val subpage = pages.lastOrNull { navTarget.fragmentClass?.isInstance(it) == true }?.view ?: return
+                val parent = pages.lastOrNull { parentTarget.fragmentClass?.isInstance(it) == true }?.view ?: return
+                predictiveSubpageView = subpage
+                predictiveParentView = parent
+                predictiveSubpageView?.animate()?.cancel()
+                predictiveParentView?.animate()?.cancel()
+                predictiveCornerRadius = 0f
+                predictiveBackActive = true
+
+                predictiveSubpageView?.outlineProvider = predictiveOutlineProvider
+                predictiveSubpageView?.clipToOutline = true
+                predictiveSubpageView?.invalidateOutline()
+                // Opaque for the gesture duration: otherwise the parent page
+                // would bleed through the transparent subpage (ghosting).
+                predictiveSubpageView?.setBackgroundColor(
+                    android.R.attr.colorBackground.resolveAttr(this@MainActivity)
+                )
+
+                predictiveParentView?.let { parent ->
+                    parent.visibility = View.VISIBLE
+                    parent.pivotX = parent.width / 2f
+                    parent.pivotY = parent.height / 2f
+                    parent.scaleX = predictiveParentStartScale
+                    parent.scaleY = predictiveParentStartScale
+                    parent.alpha = predictiveParentStartAlpha
+                }
             }
-        }
+
+            override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+                if (predictiveDrawerActive) {
+                    if (backEvent.swipeEdge != BackEventCompat.EDGE_LEFT) {
+                        return
+                    }
+                    predictiveDrawerFraction = backEvent.progress.coerceIn(0f, 1f)
+                    drawer.setSlideOffset(predictiveDrawerFraction)
+                    return
+                }
+                val subpage = predictiveSubpageView
+                if (!predictiveBackActive || subpage == null) {
+                    return
+                }
+                val progress = backEvent.progress // 0.0 to 1.0
+                val direction = if (backEvent.swipeEdge == BackEventCompat.EDGE_LEFT) 1f else -1f
+                predictiveDirection = direction
+
+                // Leaving page follows the finger across the whole screen...
+                subpage.translationX = direction * progress * subpage.width
+
+                // ...rounding its corners while it goes.
+                predictiveCornerRadius = progress * predictiveMaxCornerPx
+                subpage.invalidateOutline()
+
+                // Page underneath scales up and fades in.
+                predictiveParentView?.let { parent ->
+                    val parentScale =
+                        predictiveParentStartScale + progress * (1f - predictiveParentStartScale)
+                    parent.scaleX = parentScale
+                    parent.scaleY = parentScale
+                    parent.alpha =
+                        predictiveParentStartAlpha + progress * (1f - predictiveParentStartAlpha)
+                }
+            }
+
+            override fun handleOnBackPressed() {
+                if (predictiveDrawerActive) {
+                    predictiveDrawerActive = false
+                    predictiveDrawerFraction = 0f
+                    // continues smoothly from the finger position
+                    drawer.open()
+                    return
+                }
+                if (predictiveFinishing) {
+                    // finish animation already running: swallow extra presses
+                    return
+                }
+                if (!predictiveBackActive) {
+                    handleBackPress()
+                    return
+                }
+                predictiveBackActive = false
+                val subpage = predictiveSubpageView
+                if (subpage == null) {
+                    handleBackPress()
+                    return
+                }
+                predictiveFinishing = true
+                // Glide the page the rest of the way off-screen, then navigate.
+                // No snap-back: the transaction detaches the translated view and
+                // its exit animation plays off-screen, invisible.
+                subpage.animate()
+                    .translationX(predictiveDirection * subpage.width)
+                    .setDuration(180L)
+                    .withEndAction {
+                        predictiveFinishing = false
+                        subpage.background = null
+                        predictiveJustFinished = true
+                        handleBackPress()
+                        predictiveJustFinished = false
+                    }
+                    .start()
+                predictiveParentView?.animate()
+                    ?.scaleX(1f)
+                    ?.scaleY(1f)
+                    ?.alpha(1f)
+                    ?.setDuration(180L)
+                    ?.start()
+            }
+
+            override fun handleOnBackCancelled() {
+                if (predictiveDrawerActive) {
+                    predictiveDrawerActive = false
+                    val startFraction = predictiveDrawerFraction
+                    predictiveDrawerFraction = 0f
+                    predictiveDrawerReturnAnimator?.cancel()
+                    predictiveDrawerReturnAnimator =
+                        ValueAnimator.ofFloat(startFraction, 0f).apply {
+                            duration = 200L
+                            addUpdateListener {
+                                drawer.setSlideOffset(it.animatedValue as Float)
+                            }
+                            start()
+                        }
+                    return
+                }
+                val subpage = predictiveSubpageView
+                if (!predictiveBackActive || subpage == null) {
+                    return
+                }
+                predictiveBackActive = false
+                subpage.animate()
+                    .translationX(0f)
+                    .setDuration(200L)
+                    .withEndAction {
+                        subpage.clipToOutline = false
+                        predictiveCornerRadius = 0f
+                        subpage.invalidateOutline()
+                        subpage.background = null
+                    }
+                    .start()
+
+                predictiveParentView?.animate()
+                    ?.scaleX(predictiveParentStartScale)
+                    ?.scaleY(predictiveParentStartScale)
+                    ?.alpha(predictiveParentStartAlpha)
+                    ?.setDuration(200L)
+                    ?.withEndAction {
+                        // subpage stays on top: hide the main page again
+                        predictiveParentView?.visibility = View.GONE
+                        resetFragmentTransform(predictiveParentView)
+                    }
+                    ?.start()
+            }
+        })
 
         mainSnackbar.setCoordinator(b.navView.coordinator, b.navView.bottomBar)
         errorSnackbar.setCoordinator(b.navView.coordinator, b.navView.bottomBar)
@@ -200,20 +378,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         navLoading = true
 
         b.navView.apply {
-            drawer.init(this@MainActivity)
-
+            toolbarAtBottom = app.config.ui.toolbarAtBottom
             val statusBarColor = android.R.attr.colorBackground.resolveAttr(context)
-            // fix for setting status bar color to window color, outside of navlib
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                window.statusBarColor = statusBarColor
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && ColorUtils.calculateLuminance(statusBarColor) > 0.6
-            ) {
-                @Suppress("deprecation")
-                window.decorView.systemUiVisibility =
-                    window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-            }
+            configSystemBarsUtil(SystemBarsUtil(this@MainActivity).apply {
+                this.statusBarColor = statusBarColor
+                this.appFullscreen = app.config.ui.appFullscreen
+                commit()
+            })
+            drawer.init(this@MainActivity)
 
             toolbar.apply {
                 enable = true
@@ -237,16 +409,64 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
 
             drawer.apply {
+                appFullscreen = app.config.ui.appFullscreen
+                accountHeaderVisible = app.config.ui.drawerHeaderVisible
                 setAccountHeaderBackground(app.config.ui.headerBackground)
+
+                drawerTargetResolver = { id ->
+                    val navTarget = NavTarget.entries.firstOrNull { it.id == id }
+                    var current: NavTarget? = navTarget
+                    var resultId = id
+                    while (current != null) {
+                        if (current.location in listOf(
+                                NavTargetLocation.DRAWER,
+                                NavTargetLocation.DRAWER_BOTTOM,
+                                NavTargetLocation.DRAWER_MORE
+                            )
+                        ) {
+                            resultId = current.id
+                            break
+                        }
+                        current = current.popTo
+                    }
+                    resultId
+                }
 
                 drawerProfileListEmptyListener = {
                     onProfileListEmptyEvent(ProfileListEmptyEvent())
                 }
                 drawerItemSelectedListener = { id, _, item ->
-                    if (item is ExpandableDrawerItem)
+                    if (item is ExpandableDrawerItem) {
                         false
-                    else
-                        navigate(navTarget = NavTarget.getById(id))
+                    } else {
+                        val target = NavTarget.getById(id)
+                        if (target != null) {
+                            navigate(navTarget = target)
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                }
+                drawerItemReselectListener = { id, _, _ ->
+                    val target = NavTarget.getById(id)
+                    if (target != null && target != navTarget) {
+                        navigate(navTarget = target)
+                    } else {
+                        false
+                    }
+                }
+                drawerItemLongClickListener = { id, _, _, view ->
+                    if (NavTarget.getById(id) == NavTarget.SETTINGS) {
+                        view?.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        val iconView = view?.findViewById<View>(com.mikepenz.materialdrawer.R.id.material_drawer_icon)
+                            ?: view?.findViewById<View>(pl.szczodrzynski.navlib.R.id.material_drawer_icon)
+                            ?: view
+                        iconView?.spinGear360()
+                        true
+                    } else {
+                        false
+                    }
                 }
                 drawerProfileSelectedListener = { id, _, _, _ ->
                     // why is this negated -_-
@@ -266,9 +486,27 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         false
                     }
                 }
+                drawerProfileImageClickListener = { id, _, current, _ ->
+                    if (current) {
+                        drawer.close()
+                        ProfilesDialog(this@MainActivity).show()
+                        true
+                    } else {
+                        !navigate(profileId = id)
+                        drawer.close()
+                        true
+                    }
+                }
                 drawerProfileImageLongClickListener = drawerProfileLongClickListener
-                drawerProfileSettingClickListener = this@MainActivity.profileSettingClickListener
+                drawerProfileSettingClickListener = { id, view -> onProfileSettingClick(id, view) }
+                drawerProfileSelectionClickListener = {
+                    ProfilesDialog(this@MainActivity).show()
+                }
 
+                fixedDrawerCollapsed = app.config.ui.fixedDrawerCollapsed
+                fixedDrawerCollapsedChangedListener = { collapsed ->
+                    app.config.ui.fixedDrawerCollapsed = collapsed
+                }
                 miniDrawerVisibleLandscape = null
                 miniDrawerVisiblePortrait = app.config.ui.miniMenuVisible
             }
@@ -310,11 +548,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
 
         swipeRefreshLayout.setOnRefreshListener { launch { syncCurrentFeature() } }
-        swipeRefreshLayout.setColorSchemeResources(
-            R.color.md_blue_500,
-            R.color.md_amber_500,
-            R.color.md_green_500
-        )
 
         SyncWorker.scheduleNext(app)
         UpdateWorker.scheduleNext(app)
@@ -365,12 +598,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             // force an AppSync after update
             app.config.sync.lastAppSync = 0L
             ChangelogDialog(this).show()
-            if (app.config.appVersion < 170) {
-                //Intent intent = new Intent(this, ChangelogIntroActivity.class);
-                //startActivity(intent);
-            } else {
-                app.config.appVersion = BuildConfig.VERSION_CODE
-            }
+            app.config.appVersion = BuildConfig.VERSION_CODE
         }
 
         // RATE SNACKBAR
@@ -413,26 +641,30 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         // CONTEXT MENU ITEMS
         bottomSheet.removeAllItems()
-        bottomSheet.appendItems(
+
+        val staticItems = mutableListOf<IBottomSheetItem<*>>()
+        staticItems.add(
             BottomSheetPrimaryItem(false)
                 .withTitle(R.string.menu_sync)
                 .withIcon(CommunityMaterial.Icon.cmd_download_outline)
+                .withGroup(BottomSheetGroup.ACTIONS)
                 .withOnClickListener {
                     bottomSheet.close()
                     SyncViewListDialog(this, navTarget).show()
-                },
-            BottomSheetSeparatorItem(false),
+                }
         )
+
         for (target in NavTarget.values()) {
             if (target.location != NavTargetLocation.BOTTOM_SHEET)
                 continue
             if (target.devModeOnly && !App.devMode)
                 continue
-            bottomSheet += target.toBottomSheetItem(this)
+            staticItems.add(target.toBottomSheetItem(this))
         }
+        bottomSheet.appendItems(*staticItems.toTypedArray())
     }
 
-    private var profileSettingClickListener = { itemId: Int, _: View? ->
+    fun onProfileSettingClick(itemId: Int, view: View? = null): Boolean {
         when (val item = NavTarget.getById(itemId)) {
             NavTarget.PROFILE_ADD -> {
                 requestHandler.requestLogin()
@@ -460,7 +692,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 navigate(navTarget = item)
             }
         }
-        false
+        return false
     }
 
     /*     _____
@@ -576,8 +808,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         swipeRefreshLayout.isRefreshing = true
         if (event.profileId == App.profileId) {
             navView.toolbar.apply {
+                setSubtitleTextColor(MaterialColors.getColor(this, R.attr.colorSecondary))
                 subtitle = getString(R.string.toolbar_subtitle_syncing)
             }
+            navView.showToolbarProgress()
         }
     }
 
@@ -592,6 +826,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     fun onApiTaskProgressEvent(event: ApiTaskProgressEvent) {
         if (event.profileId == App.profileId) {
             navView.toolbar.apply {
+                setSubtitleTextColor(MaterialColors.getColor(this, R.attr.colorSecondary))
                 subtitle = if (event.progress < 0f)
                     event.progressText ?: ""
                 else
@@ -602,16 +837,38 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     )
 
             }
+            navView.showToolbarProgress(event.progress)
+        }
+    }
+
+    fun updateLastSyncSubtitle() {
+        if (swipeRefreshLayout.isRefreshing) return
+        navView.hideToolbarProgress()
+        val profileId = App.profileId
+        if (profileId == 0) {
+            navView.toolbar.subtitle = null
+            return
+        }
+        val lastSync = app.config[profileId].sync.lastSuccessfulSync.takeIf { it > 0 }
+            ?: app.db.endpointTimerDao().getLastSyncNow(profileId)?.takeIf { it > 0 }
+        if (lastSync != null) {
+            val dateStr = Date.fromMillis(lastSync).formattedString
+            val timeStr = Time.fromMillis(lastSync).stringHM
+            navView.toolbar.setSubtitleTextColor(MaterialColors.getColor(navView.toolbar, R.attr.colorSecondary))
+            navView.toolbar.subtitle = "$dateStr, $timeStr"
+        } else {
+            navView.toolbar.subtitle = null
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     fun onApiTaskFinishedEvent(event: ApiTaskFinishedEvent) {
         EventBus.getDefault().removeStickyEvent(event)
+        if (event.profileId > 0) {
+            app.config[event.profileId].sync.lastSuccessfulSync = System.currentTimeMillis()
+        }
         if (event.profileId == App.profileId) {
-            navView.toolbar.apply {
-                subtitle = "Gotowe"
-            }
+            updateLastSyncSubtitle()
         }
     }
 
@@ -619,6 +876,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     fun onApiTaskAllFinishedEvent(event: ApiTaskAllFinishedEvent) {
         EventBus.getDefault().removeStickyEvent(event)
         swipeRefreshLayout.isRefreshing = false
+        updateLastSyncSubtitle()
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
@@ -629,9 +887,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 return
             ErrorDetailsDialog(this, listOf(event.error)).show()
         }
-        navView.toolbar.apply {
-            subtitle = "Gotowe"
-        }
+        updateLastSyncSubtitle()
         mainSnackbar.dismiss()
         errorSnackbar.addError(event.error).show()
     }
@@ -839,6 +1095,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
         EventBus.getDefault().register(this)
+        updateLastSyncSubtitle()
         super.onResume()
     }
 
@@ -931,12 +1188,35 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         return true
     }
 
+    private fun resolveNavTarget(target: NavTarget): NavTarget {
+        if (target == NavTarget.AGENDA && !app.config.labOldAgenda) {
+            return NavTarget.AGENDA_NEW
+        }
+        if (target == NavTarget.AGENDA_NEW && app.config.labOldAgenda) {
+            return NavTarget.AGENDA
+        }
+        return target
+    }
+
     private fun navigateImpl(
         profile: Profile,
-        navTarget: NavTarget,
+        rawNavTarget: NavTarget,
         args: Bundle?,
         profileChanged: Boolean,
     ) {
+        hideKeyboard()
+        if (rawNavTarget == NavTarget.MESSAGE &&
+            resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE &&
+            profile.config.ui.messagesTwoColumnLandscape
+        ) {
+            if (args?.containsKey("sentDate") == true) {
+                MessagesFragment.pageSelection = 1
+            }
+            MessagesFragment.pendingDetailArgs = args
+            navigateImpl(profile, NavTarget.MESSAGES, args, profileChanged)
+            return
+        }
+        val navTarget = resolveNavTarget(rawNavTarget)
         Timber.d("navigateImpl(profileId = ${profile.id}, target = ${navTarget.name}, args = $args)")
 
         if (navTarget.featureType != null && !profile.hasUIFeature(navTarget.featureType)) {
@@ -983,18 +1263,30 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         bottomSheet.close()
         bottomSheet.removeAllContextual()
         drawer.close()
-        if (drawer.getSelection() != navTarget.id)
-            drawer.setSelection(navTarget.id, fireOnClick = false)
+        val drawerSelectionId = when (navTarget) {
+            NavTarget.SETTINGS_THEME,
+            NavTarget.SETTINGS_REGISTER,
+            NavTarget.SETTINGS_SYNC,
+            NavTarget.SETTINGS_ABOUT -> NavTarget.SETTINGS.id
+            NavTarget.MESSAGE,
+            NavTarget.MESSAGE_COMPOSE -> NavTarget.MESSAGES.id
+            else -> navTarget.id
+        }
+        if (drawer.getSelection() != drawerSelectionId)
+            drawer.setSelection(drawerSelectionId, fireOnClick = false)
         navView.toolbar.setTitle(navTarget.titleRes ?: navTarget.nameRes)
+        updateLastSyncSubtitle()
         navView.bottomBar.fabEnable = false
         navView.bottomBar.fabExtended = false
         navView.bottomBar.setFabOnClickListener(null)
 
-        Timber.d("Navigating from ${this.navTarget.name} to ${navTarget.name}")
+        val previousNavTarget = this.navTarget
+        Timber.d("Navigating from ${previousNavTarget.name} to ${navTarget.name}")
 
         val fragment = navTarget.fragmentClass?.getDeclaredConstructor()?.newInstance() ?: return
         fragment.arguments = arguments
         val transaction = fragmentManager.beginTransaction()
+        var isPop = false
 
         if (navTarget == this.navTarget) {
             // just reload the current target
@@ -1007,10 +1299,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 if (it == -1)
                     return@let navTarget
                 // pop the back stack up until that target
-                transaction.setCustomAnimations(
-                    R.anim.task_close_enter,
-                    R.anim.task_close_exit
-                )
+                isPop = true
+                if (!predictiveJustFinished) {
+                    transaction.setCustomAnimations(
+                        R.anim.task_close_enter,
+                        R.anim.task_close_exit
+                    )
+                }
 
                 // navigating grades_add -> grades
                 // navTarget == grades_add
@@ -1055,8 +1350,57 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             Timber.d(" - $index: ${item.first.name}")
         }
 
-        transaction.replace(R.id.fragment, fragment)
+        val stackedFragments = fragmentManager.fragments.filter { it.id == R.id.fragment }
+        val currentFrag = fragmentManager.findFragmentById(R.id.fragment)
+        val isSendingMessage = navTarget == NavTarget.MESSAGE && previousNavTarget == NavTarget.MESSAGE_COMPOSE
+        val existingFrag = if (isPop && !profileChanged && !isSendingMessage) {
+            navTarget.fragmentClass.let { cls -> stackedFragments.lastOrNull { cls.isInstance(it) } }
+        } else {
+            null
+        }
+        when {
+            existingFrag != null && existingFrag != currentFrag -> {
+                val existingIndex = stackedFragments.indexOf(existingFrag)
+                for (i in existingIndex + 1 until stackedFragments.size) {
+                    transaction.remove(stackedFragments[i])
+                }
+                transaction.show(existingFrag)
+            }
+            isSendingMessage && !profileChanged -> {
+                val messagesFrag = stackedFragments.lastOrNull { it is MessagesFragment }
+                if (messagesFrag != null) {
+                    val messagesIndex = stackedFragments.indexOf(messagesFrag)
+                    for (i in messagesIndex + 1 until stackedFragments.size) {
+                        transaction.remove(stackedFragments[i])
+                    }
+                    transaction.hide(messagesFrag)
+                    transaction.add(R.id.fragment, fragment)
+                } else {
+                    transaction.replace(R.id.fragment, fragment)
+                }
+            }
+            fragmentManager.navigateSettingsHierarchy(
+                transaction, R.id.fragment, previousNavTarget, navTarget, fragment, profileChanged,
+            ) -> Unit
+            currentFrag != null && !profileChanged && (
+                (navTarget == NavTarget.MESSAGE && previousNavTarget == NavTarget.MESSAGES) ||
+                (navTarget == NavTarget.MESSAGE_COMPOSE)
+            ) -> {
+                // Keep the parent available beneath the transparent subpage for predictive back.
+                transaction.add(R.id.fragment, fragment)
+                transaction.hide(currentFrag)
+            }
+            else -> {
+                stackedFragments.forEach {
+                    if (it != currentFrag) {
+                        transaction.remove(it)
+                    }
+                }
+                transaction.replace(R.id.fragment, fragment)
+            }
+        }
         transaction.commitAllowingStateLoss()
+        resetFragmentTransform(findViewById(R.id.fragment))
 
         // TASK DESCRIPTION
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -1102,7 +1446,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
     fun navigateUp(skipBeforeNavigate: Boolean = false) {
         if (!popBackStack(skipBeforeNavigate)) {
-            super.onBackPressed()
+            finish()
         }
     }
 
@@ -1126,6 +1470,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             navView.bottomBar.fabExtended = false
         }, 3000)
     }
+
+    fun hideFab() = navView.bottomBar.hideFab()
+    fun showFab() = navView.bottomBar.showFab()
 
     fun setAppBackground() {
         try {
@@ -1158,7 +1505,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             it.nameRes = target.nameRes
             it.descriptionRes = target.descriptionRes ?: -1
             it.icon = target.icon?.toImageHolder()
-            it.hiddenInMiniDrawer = !app.config.ui.miniMenuButtons.contains(target)
+            val inMiniMenu = app.config.ui.miniMenuButtons.contains(target) ||
+                    ((target == NavTarget.AGENDA || target == NavTarget.AGENDA_NEW) &&
+                     (app.config.ui.miniMenuButtons.contains(NavTarget.AGENDA) || app.config.ui.miniMenuButtons.contains(NavTarget.AGENDA_NEW)))
+            it.hiddenInMiniDrawer = !inMiniMenu
             if (it is DrawerPrimaryItem)
                 it.appTitle = target.titleRes?.resolveString(this)
             if (/* it is ColorfulBadgeable && */ target.badgeType != null)
@@ -1180,6 +1530,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         Timber.d("setDrawerItems() app.profile = ${app.profile}")
         val drawerItems = arrayListOf<IDrawerItem<*>>()
         val drawerItemsMore = arrayListOf<IDrawerItem<*>>()
+        val drawerItemsMoreFallback = arrayListOf<IDrawerItem<*>>()
         val drawerItemsBottom = arrayListOf<IDrawerItem<*>>()
         val drawerProfiles = arrayListOf<ProfileSettingDrawerItem>()
 
@@ -1189,12 +1540,33 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             if (target.featureType != null && !app.profile.hasUIFeature(target.featureType))
                 continue
 
-            when (target.location) {
+            val isOldAgenda = app.config.labOldAgenda
+            if (target == NavTarget.AGENDA && !isOldAgenda) continue
+            if (target == NavTarget.AGENDA_NEW && isOldAgenda) continue
+
+            val targetLocation = if (target == NavTarget.AGENDA && isOldAgenda) NavTargetLocation.DRAWER else target.location
+
+            val isTargetInMore = target in app.config.ui.drawerMoreButtons ||
+                    ((target == NavTarget.AGENDA || target == NavTarget.AGENDA_NEW) &&
+                     (NavTarget.AGENDA in app.config.ui.drawerMoreButtons || NavTarget.AGENDA_NEW in app.config.ui.drawerMoreButtons))
+
+            when (targetLocation) {
                 NavTargetLocation.DRAWER -> {
-                    drawerItems += createDrawerItem(target, level = 1)
+                    if (isTargetInMore) {
+                        drawerItemsMore += createDrawerItem(target, level = 2)
+                    } else {
+                        drawerItems += createDrawerItem(target, level = 1)
+                    }
                 }
                 NavTargetLocation.DRAWER_MORE -> {
-                    drawerItemsMore += createDrawerItem(target, level = 2)
+                    when {
+                        target in NavTarget.drawerMoreConfigurableTargets && !isTargetInMore ->
+                            drawerItems += createDrawerItem(target, level = 1)
+                        target in NavTarget.drawerMoreConfigurableTargets ->
+                            drawerItemsMore += createDrawerItem(target, level = 2)
+                        else ->
+                            drawerItemsMoreFallback += createDrawerItem(target, level = 2)
+                    }
                 }
                 NavTargetLocation.DRAWER_BOTTOM -> {
                     drawerItemsBottom += createDrawerItem(target, level = 1)
@@ -1211,13 +1583,22 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
         }
 
-        drawerItems += ExpandableDrawerItem().also {
-            it.identifier = -1L
-            it.nameRes = R.string.menu_more
-            it.icon = CommunityMaterial.Icon.cmd_dots_horizontal.toImageHolder()
-            it.subItems = drawerItemsMore.toMutableList()
-            it.isSelectedBackgroundAnimated = false
-            it.isSelectable = false
+        if (drawerItemsMore.isEmpty()) {
+            drawerItems += drawerItemsMoreFallback.mapNotNull {
+                NavTarget.getById(it.identifier.toInt())?.let { target ->
+                    createDrawerItem(target, level = 1)
+                }
+            }
+        } else {
+            drawerItemsMore += drawerItemsMoreFallback
+            drawerItems += ExpandableDrawerItem().also {
+                it.identifier = -1L
+                it.nameRes = R.string.menu_more
+                it.icon = CommunityMaterial.Icon.cmd_dots_horizontal.toImageHolder()
+                it.subItems = drawerItemsMore.toMutableList()
+                it.isSelectedBackgroundAnimated = false
+                it.isSelectable = false
+            }
         }
         drawerItems += DividerDrawerItem()
         drawerItems += drawerItemsBottom
@@ -1230,7 +1611,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         drawer.addProfileSettings(*drawerProfiles.toTypedArray())
     }
 
-    override fun onBackPressed() {
+    fun handleBackPress() {
         if (App.config.ui.openDrawerOnBackPressed) {
             if (drawer.isOpen)
                 navigateUp()
@@ -1240,6 +1621,67 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             if (!navView.onBackPressed())
                 navigateUp()
         }
+    }
+
+    private var predictiveBackActive = false
+    private var predictiveFinishing = false
+    private var predictiveJustFinished = false
+    private var predictiveDirection = 1f
+    private var predictiveDrawerActive = false
+    private var predictiveDrawerFraction = 0f
+    private var predictiveDrawerReturnAnimator: ValueAnimator? = null
+    private var predictiveSubpageView: View? = null
+    private var predictiveParentView: View? = null
+    private var predictiveCornerRadius = 0f
+    private val predictiveParentStartScale = 0.95f
+    private val predictiveParentStartAlpha = 0.7f
+    private val predictiveMaxCornerPx
+        get() = 28f * resources.displayMetrics.density
+    private val predictiveOutlineProvider = object : ViewOutlineProvider() {
+        override fun getOutline(view: View, outline: Outline) {
+            outline.setRoundRect(0, 0, view.width, view.height, predictiveCornerRadius)
+        }
+    }
+
+    private fun shouldPredictSubpageBack(): Boolean {
+        if (predictiveFinishing) {
+            return false
+        }
+        val isSettingsSubpage = navTarget in setOf(
+            NavTarget.SETTINGS_THEME,
+            NavTarget.SETTINGS_REGISTER,
+            NavTarget.SETTINGS_SYNC,
+            NavTarget.SETTINGS_ABOUT,
+        )
+        val isMessagesSubpage = navTarget in setOf(
+            NavTarget.MESSAGE,
+            NavTarget.MESSAGE_COMPOSE,
+        )
+        if (!isSettingsSubpage && !isMessagesSubpage) {
+            return false
+        }
+        // drawer and bottom sheet handle back themselves (they close instead)
+        if (drawer.isOpen || bottomSheet.isOpen) {
+            return false
+        }
+        val currentFrag = fragmentManager.findFragmentById(R.id.fragment)
+        if (currentFrag is MessagesComposeFragment && currentFrag.hasUnsavedChanges()) {
+            return false
+        }
+        return true
+    }
+
+    private fun resetFragmentTransform(view: View?) {
+        view?.translationX = 0f
+        view?.scaleX = 1f
+        view?.scaleY = 1f
+        view?.alpha = 1f
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        // go through the dispatcher, so that fragments' callbacks can intercept it
+        onBackPressedDispatcher.onBackPressed()
     }
 
     fun error(error: ApiError) = errorSnackbar.addError(error).show()

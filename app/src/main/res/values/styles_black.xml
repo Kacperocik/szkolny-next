@@ -16,6 +16,12 @@
 
     <style name="AppTheme.M2.Teal.Black" />
 
+    <style name="AppTheme.M2.Yellow.Black" />
+
+    <style name="AppTheme.M2.Orange.Black" />
+
+    <style name="AppTheme.M2.Brown.Black" />
+
     <style name="AppTheme.M3.Black" />
 
     <style name="AppTheme.M3.Red.Black" />
@@ -27,5 +33,15 @@
     <style name="AppTheme.M3.Purple.Black" />
 
     <style name="AppTheme.M3.Teal.Black" />
+
+    <style name="AppTheme.M3.Yellow.Black" />
+
+    <style name="AppTheme.M3.Orange.Black" />
+
+    <style name="AppTheme.M3.Brown.Black" />
+
+    <style name="AppTheme.M2.Gray.Black" />
+
+    <style name="AppTheme.M3.Gray.Black" />
 
 </resources>

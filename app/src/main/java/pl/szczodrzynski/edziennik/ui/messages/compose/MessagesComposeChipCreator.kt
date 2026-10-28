@@ -133,7 +133,7 @@ class MessagesComposeChipCreator(
                 if (isChecked) {
                     val chipInfoList = mutableListOf<ChipInfo>()
                     teacher.image =
-                        MessagesUtils.getProfileImage(48, 24, 16, 12, 1, teacher.fullName)
+                        MessagesUtils.getProfileImage(48, 24, 16, 12, 1, false, teacher.fullName)
                     chipInfoList.add(ChipInfo(teacher.fullName, teacher))
                     nacho.addTextWithChips(chipInfoList)
                 } else {

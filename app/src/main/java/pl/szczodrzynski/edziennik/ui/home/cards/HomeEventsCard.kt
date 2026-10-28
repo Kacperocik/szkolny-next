@@ -30,7 +30,6 @@ import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ui.dialogs.settings.HomeConfigDialog
 import pl.szczodrzynski.edziennik.ui.event.EventDetailsDialog
 import pl.szczodrzynski.edziennik.ui.event.EventListAdapter
-import pl.szczodrzynski.edziennik.ui.event.EventManualDialog
 import pl.szczodrzynski.edziennik.ui.home.HomeCard
 import pl.szczodrzynski.edziennik.ui.home.HomeCardAdapter
 import pl.szczodrzynski.edziennik.ui.home.HomeFragment
@@ -60,22 +59,15 @@ class HomeEventsCard(
         holder.root.removeAllViews()
         val b = CardHomeEventsBinding.inflate(LayoutInflater.from(holder.root.context))
         b.root.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-            setMargins(8.dp)
+            setMargins(4.dp)
         }
         holder.root += b.root
 
-        b.settings.setImageDrawable(
-            IconicsDrawable(activity, CommunityMaterial.Icon.cmd_cog_outline).apply {
-                colorAttr(activity, R.attr.colorIcon)
-                sizeDp = 24
-            }
-        )
-        b.settings.onClick {
-            HomeConfigDialog(activity, reloadOnDismiss = true).show()
-        }
+        b.settings.visibility = View.GONE
 
         adapter = EventListAdapter(
                 activity,
+                embedded = true,
                 simpleMode = true,
                 showWeekDay = true,
                 showDate = true,
@@ -88,13 +80,6 @@ class HomeEventsCard(
                     EventDetailsDialog(
                             activity,
                             it
-                    ).show()
-                },
-                onEventEditClick = {
-                    EventManualDialog(
-                            activity,
-                            it.profileId,
-                            editingEvent = it
                     ).show()
                 }
         )

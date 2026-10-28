@@ -83,12 +83,21 @@ class GradeView : AppCompatTextView {
                 0xccffffff.toInt()
         })
 
-        //typeface = Typeface.create("sans-serif-light", Typeface.NORMAL)
+        val isCircle = manager.shapeMode == GradesManager.SHAPE_MODE_CIRCLE
+
         setBackgroundResource(when (grade.type) {
             TYPE_SEMESTER1_PROPOSED,
             TYPE_SEMESTER2_PROPOSED,
-            TYPE_YEAR_PROPOSED -> if (bigView) R.drawable.bg_rounded_8dp_outline else R.drawable.bg_rounded_4dp_outline
-            else -> if (bigView) R.drawable.bg_rounded_8dp else R.drawable.bg_rounded_4dp
+            TYPE_YEAR_PROPOSED -> when {
+                isCircle -> R.drawable.bg_circle_outline
+                bigView -> R.drawable.bg_rounded_8dp_outline
+                else -> R.drawable.bg_rounded_4dp_outline
+            }
+            else -> when {
+                isCircle -> R.drawable.bg_circle
+                bigView -> R.drawable.bg_rounded_8dp
+                else -> R.drawable.bg_rounded_4dp
+            }
         })
         background.setTintColor(gradeColor)
         gravity = Gravity.CENTER
@@ -105,13 +114,28 @@ class GradeView : AppCompatTextView {
         }
         else {
             setTextSize(COMPLEX_UNIT_SP, 14f)
-            setPadding(5.dp, 0, 5.dp, 0)
-            layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+            val isTextualPeriodGrade = periodGradesTextual && grade.type in setOf(
+                TYPE_SEMESTER1_PROPOSED,
+                TYPE_SEMESTER2_PROPOSED,
+                TYPE_SEMESTER1_FINAL,
+                TYPE_SEMESTER2_FINAL,
+                TYPE_YEAR_PROPOSED,
+                TYPE_YEAR_FINAL,
+            )
+            val useFixedCircleSize = isCircle && !isTextualPeriodGrade
+            setPadding(if (useFixedCircleSize) 1.dp else 5.dp, 0, if (useFixedCircleSize) 1.dp else 5.dp, 0)
+            val size = if (useFixedCircleSize) 20.dp else WRAP_CONTENT
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
                 setMargins(0, 0, 5.dp, 0)
             }
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
-            measure(WRAP_CONTENT, WRAP_CONTENT)
+            if (useFixedCircleSize) {
+                val exactSize = MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY)
+                measure(exactSize, exactSize)
+            } else {
+                measure(WRAP_CONTENT, WRAP_CONTENT)
+            }
         }
     }
 

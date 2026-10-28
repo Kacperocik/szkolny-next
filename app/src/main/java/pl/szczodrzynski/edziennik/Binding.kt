@@ -29,8 +29,17 @@ object Binding {
 
     private fun resizeDrawable(textView: TextView, index: Int, size: Int) {
         val drawables = textView.compoundDrawables
-        drawables[index]?.setBounds(0, 0, size, size)
-        textView.setCompoundDrawables(drawables[0], drawables[1], drawables[2], drawables[3])
+        val relative = textView.compoundDrawablesRelative
+        if (drawables[index] != null) {
+            drawables[index]?.setBounds(0, 0, size, size)
+            textView.setCompoundDrawables(drawables[0], drawables[1], drawables[2], drawables[3])
+
+        } else if (relative[index] != null) {
+            relative[index]?.setBounds(0, 0, size, size)
+            textView.setCompoundDrawablesRelative(relative[0], relative[1], relative[2], relative[3])
+        }
+
+
     }
 
     @JvmStatic

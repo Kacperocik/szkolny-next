@@ -33,11 +33,15 @@
                 android:background="@drawable/recaptcha_checkbox_border"
                 android:foreground="?selectableItemBackgroundBorderless">
 
-                <ProgressBar
+                <com.google.android.material.loadingindicator.LoadingIndicator
                     android:id="@+id/progress"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    app:containerHeight="24dp"
+                    app:containerWidth="24dp"
+                    app:indicatorColor="#1a73e8"
+                    app:indicatorSize="20dp" />
             </FrameLayout>
 
             <TextView

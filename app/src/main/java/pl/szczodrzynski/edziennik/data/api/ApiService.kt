@@ -7,6 +7,8 @@ package pl.szczodrzynski.edziennik.data.api
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.O
 import android.os.IBinder
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -23,6 +25,7 @@ import pl.szczodrzynski.edziennik.data.api.task.IApiTask
 import pl.szczodrzynski.edziennik.data.api.task.SzkolnyTask
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.ext.toApiError
+import pl.szczodrzynski.edziennik.ui.widgets.WidgetUpdater
 import timber.log.Timber
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -32,10 +35,28 @@ class ApiService : Service() {
         const val TAG = "ApiService"
         const val NOTIFICATION_API_CHANNEL_ID = "pl.szczodrzynski.edziennik.SYNC"
         fun start(context: Context) {
-            context.startService(Intent(context, ApiService::class.java))
+            try {
+                Intent(context, ApiService::class.java).let {
+                    if (SDK_INT >= O)
+                        context.startForegroundService(it)
+                    else
+                        context.startService(it)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to start ApiService")
+            }
         }
         fun startAndRequest(context: Context, request: Any) {
-            context.startService(Intent(context, ApiService::class.java))
+            try {
+                Intent(context, ApiService::class.java).let {
+                    if (SDK_INT >= O)
+                        context.startForegroundService(it)
+                    else
+                        context.startService(it)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to start ApiService")
+            }
             EventBus.getDefault().postSticky(request)
         }
 
@@ -78,6 +99,7 @@ class ApiService : Service() {
             lastEventTime = System.currentTimeMillis()
             Timber.d("Task $taskRunningId (profile $taskProfileId) finished in ${System.currentTimeMillis()-taskStartTime}")
             EventBus.getDefault().postSticky(ApiTaskFinishedEvent(taskProfileId))
+            WidgetUpdater.updateAll(app)
             clearTask()
 
             notification.setIdle().post()

@@ -27,13 +27,14 @@
         tools:padding="32dp">
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/lessonCard"
             style="?materialCardViewFilledStyle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:paddingLeft="8dp"
             android:paddingTop="8dp"
-            app:cardBackgroundColor="?colorSurfaceContainerHigh"
+            app:cardBackgroundColor="?attr/colorCard"
             tools:layout_height="90dp">
 
             <LinearLayout
@@ -61,9 +62,6 @@
                         android:ellipsize="end"
                         android:maxLines="@{annotationVisible ? 1 : 2}"
                         android:textAppearance="?textAppearanceTitleMedium"
-                        app:autoSizeMaxTextSize="16sp"
-                        app:autoSizeMinTextSize="12sp"
-                        app:autoSizeTextType="uniform"
                         tools:maxLines="2"
                         tools:text="pracownia urządzeń techniki komputerowej" />
 
@@ -164,7 +162,7 @@
                             android:layout_height="wrap_content"
                             android:ellipsize="end"
                             android:singleLine="true"
-                            tools:text="8:10 - 8:55 • 015 językowa → 016 językowa" />
+                            tools:text="015 językowa → 016 językowa • 8:10 - 8:55" />
 
                         <TextView
                             android:id="@+id/detailsSecond"

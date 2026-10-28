@@ -4,11 +4,19 @@
 
 package pl.szczodrzynski.edziennik
 
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
 import androidx.multidex.MultiDexApplication
+import pl.szczodrzynski.edziennik.ext.applyExpressiveShapeMorphToButtons
 import androidx.work.Configuration
 import cat.ereza.customactivityoncrash.config.CaocConfig
 import com.chuckerteam.chucker.api.ChuckerCollector
@@ -16,6 +24,8 @@ import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.chuckerteam.chucker.api.RetentionManager
 import com.google.gson.Gson
 import com.mikepenz.iconics.Iconics
+import com.qifan.powerpermission.PowerPermission
+import com.qifan.powerpermission.core.PermissionFragment
 import im.wangchao.mhttp.MHttp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +45,7 @@ import pl.szczodrzynski.edziennik.core.manager.LoggingManager
 import pl.szczodrzynski.edziennik.core.manager.MessageManager
 import pl.szczodrzynski.edziennik.core.manager.NoteManager
 import pl.szczodrzynski.edziennik.core.manager.NotificationManager
+import pl.szczodrzynski.edziennik.core.manager.OngoingLessonNotificationManager
 import pl.szczodrzynski.edziennik.core.manager.PermissionManager
 import pl.szczodrzynski.edziennik.core.manager.ShortcutManager
 import pl.szczodrzynski.edziennik.core.manager.TextStylingManager
@@ -55,6 +66,7 @@ import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.data.enums.LoginType
 import pl.szczodrzynski.edziennik.network.SSLProviderInstaller
 import pl.szczodrzynski.edziennik.ui.main.CrashActivity
+import pl.szczodrzynski.edziennik.ui.widgets.WidgetUpdater
 import pl.szczodrzynski.edziennik.utils.PermissionChecker
 import pl.szczodrzynski.edziennik.utils.Utils
 import timber.log.Timber
@@ -189,6 +201,44 @@ class App : MultiDexApplication(), Configuration.Provider, CoroutineScope {
           \___/|_| |_|\_____|_|  \___|\__,_|\__\__*/
     override fun onCreate() {
         super.onCreate()
+        // askPermissions() is the only caller of PowerPermission.init(). A restored
+        // PermissionFragment reads that configuration in onAttach, which runs inside
+        // Activity.onCreate — before any permission request in this process.
+        PowerPermission.init()
+
+        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
+            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+                if (activity is FragmentActivity) {
+                    if (savedInstanceState != null) {
+                        // The fragment's request callback is not saved. Leaving it in
+                        // place crashes when a permission result is delivered.
+                        removeRestoredPermissionFragments(activity.supportFragmentManager)
+                    }
+                    activity.supportFragmentManager.registerFragmentLifecycleCallbacks(
+                        object : FragmentManager.FragmentLifecycleCallbacks() {
+                            override fun onFragmentViewCreated(
+                                fm: FragmentManager,
+                                f: Fragment,
+                                v: View,
+                                savedInstanceState: Bundle?
+                            ) {
+                                v.applyExpressiveShapeMorphToButtons()
+                            }
+                        },
+                        true
+                    )
+                }
+            }
+
+            override fun onActivityStarted(activity: Activity) {}
+            override fun onActivityResumed(activity: Activity) {
+                activity.window?.decorView?.applyExpressiveShapeMorphToButtons()
+            }
+            override fun onActivityPaused(activity: Activity) {}
+            override fun onActivityStopped(activity: Activity) {}
+            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+            override fun onActivityDestroyed(activity: Activity) {}
+        })
 
         // initialize Timber to enable basic logging
         Timber.plant(loggingManager.logcatTree)
@@ -206,7 +256,7 @@ class App : MultiDexApplication(), Configuration.Provider, CoroutineScope {
         devMode = config.devMode ?: BuildConfig.DEBUG
         if (config.devModePassword != null)
             checkDevModePassword()
-        enableChucker = config.enableChucker ?: devMode
+        enableChucker = config.enableChucker
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         CaocConfig.Builder.create()
@@ -217,7 +267,7 @@ class App : MultiDexApplication(), Configuration.Provider, CoroutineScope {
             .logErrorOnRestart(true)
             .trackActivities(true)
             .minTimeBetweenCrashesMs(60 * 1000)
-            .errorDrawable(R.drawable.ic_rip)
+            .errorDrawable(CrashActivity.randomErrorIllustration())
             .restartActivity(MainActivity::class.java)
             .errorActivity(CrashActivity::class.java)
             .apply()
@@ -243,7 +293,7 @@ class App : MultiDexApplication(), Configuration.Provider, CoroutineScope {
             loggingManager.cleanupHyperLogDatabase()
             notificationManager.registerAllChannels()
             shortcutManager.createShortcuts()
-            
+
             if (config.appVersionCore < BuildConfig.VERSION_CODE) {
                 // force syncing all endpoints on update
                 db.endpointTimerDao().clear()
@@ -263,11 +313,26 @@ class App : MultiDexApplication(), Configuration.Provider, CoroutineScope {
                 UpdateWorker.scheduleNext(this@App, false)
             else
                 UpdateWorker.cancelNext(this@App)
+
+            OngoingLessonNotificationManager.update(this@App)
         }
 
         db.metadataDao().countUnseen().observeForever { count: Int ->
             if (unreadBadgesAvailable)
                 unreadBadgesAvailable = ShortcutBadger.applyCount(this@App, count)
+        }
+    }
+
+    private fun removeRestoredPermissionFragments(fm: FragmentManager) {
+        val fragments = fm.fragments.toList()
+        val stale = fragments.filterIsInstance<PermissionFragment>()
+        if (stale.isNotEmpty()) {
+            fm.beginTransaction().apply {
+                stale.forEach { remove(it) }
+            }.commitNowAllowingStateLoss()
+        }
+        fragments.filter { it !is PermissionFragment && it.isAdded }.forEach { child ->
+            removeRestoredPermissionFragments(child.childFragmentManager)
         }
     }
 
@@ -288,6 +353,13 @@ class App : MultiDexApplication(), Configuration.Provider, CoroutineScope {
             Toast.makeText(this, R.string.app_cannot_load_data, Toast.LENGTH_LONG).show()
             exitProcess(0)
         }
+        OngoingLessonNotificationManager.update(this)
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        uiManager.applyNightMode()
+        WidgetUpdater.updateAll(createConfigurationContext(newConfig))
     }
 
     private fun profileLoadById(profileId: Int): Boolean {

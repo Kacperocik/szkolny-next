@@ -25,10 +25,11 @@
             android:paddingBottom="@dimen/customactivityoncrash_activity_vertical_margin">
 
             <ImageView
-                android:layout_width="96dp"
-                android:layout_height="96dp"
+                android:id="@+id/crash_illustration"
+                android:layout_width="@dimen/illustration_size"
+                android:layout_height="@dimen/illustration_size"
                 android:contentDescription="@null"
-                app:srcCompat="@drawable/ic_rip" />
+                tools:srcCompat="@drawable/illustration_error_gear" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -43,6 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/customactivityoncrash_activity_vertical_margin"
+                android:layout_marginBottom="@dimen/customactivityoncrash_activity_vertical_margin"
                 android:gravity="center"
                 android:text="@string/crash_notice"
                 android:textColor="@android:color/holo_red_dark"

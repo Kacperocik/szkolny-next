@@ -11,21 +11,22 @@ import kotlinx.coroutines.launch
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.ui.login.LoginActivity
+import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetGroup
 import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetPrimaryItem
-import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetSeparatorItem
 
 internal fun BaseFragment<*, *>.setupMainActivity(activity: MainActivity) {
     val items = getBottomSheetItems().toMutableList()
-    getMarkAsReadType()?.let { metadataType ->
-        if (items.isNotEmpty())
-            items += BottomSheetSeparatorItem(true)
+
+    val markAsReadType = getMarkAsReadType()
+    if (markAsReadType != null) {
         items += BottomSheetPrimaryItem(true)
             .withTitle(R.string.menu_mark_as_read)
             .withIcon(CommunityMaterial.Icon.cmd_eye_check_outline)
+            .withGroup(BottomSheetGroup.ACTIONS)
             .withOnClickListener {
                 activity.bottomSheet.close()
                 launch(Dispatchers.IO) {
-                    app.db.metadataDao().setAllSeen(app.profileId, metadataType, true)
+                    app.db.metadataDao().setAllSeen(app.profileId, markAsReadType, true)
                 }
                 Toast.makeText(
                     activity,

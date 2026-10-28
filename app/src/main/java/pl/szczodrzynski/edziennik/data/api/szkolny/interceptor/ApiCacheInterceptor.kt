@@ -2,6 +2,8 @@
  * Copyright (c) Kuba Szczodrzyński 2021-3-29.
  */
 
+@file:Suppress("DEPRECATION_ERROR")
+
 package pl.szczodrzynski.edziennik.data.api.szkolny.interceptor
 
 import okhttp3.*

@@ -7,11 +7,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ProgressBar
+    <com.google.android.material.loadingindicator.LoadingIndicator
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
+        app:indicatorColor="?attr/colorPrimary"
         tools:visibility="gone" />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

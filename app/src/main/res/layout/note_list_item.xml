@@ -2,19 +2,30 @@
   ~ Copyright (c) Kuba Szczodrzyński 2021-10-23.
   -->
 
-<FrameLayout
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/noteItemCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?selectableItemBackground">
+    android:layout_marginBottom="2dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="?attr/colorCard"
+    app:cardElevation="0dp"
+    app:cardPreventCornerOverlap="false"
+    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupSingle"
+    app:strokeWidth="0dp"
+    android:clipToOutline="true">
 
     <LinearLayout
         android:id="@+id/colorLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="8dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -29,30 +40,35 @@
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="4"
-                android:minLines="2"
-                android:textAppearance="?textAppearanceBodyLarge"
-                tools:text="Temat notatki. Ale może też\nbyć treść tutaj." />            <!-- cmd_pencil_outline -->
+                android:minLines="1"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?android:attr/textColorPrimary"
+                tools:text="Temat notatki. Ale może też być treść tutaj." />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/editButton"
                 style="?materialIconButtonSecondaryStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_marginLeft="4dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
                 android:fontFamily="@font/community_material_font_v5_8_55"
-                android:minWidth="0dp"
+                android:padding="0dp"
                 android:text="\uf2f4"
                 android:textSize="20sp"
-                tools:visibility="gone" />
+                app:iconPadding="0dp"
+                tools:visibility="visible" />
         </LinearLayout>
 
         <com.mikepenz.iconics.view.IconicsTextView
             android:id="@+id/addedBy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:ellipsize="middle"
             android:singleLine="true"
-            android:textAppearance="?textAppearanceBodySmall"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorSecondary"
+            android:textStyle="bold"
             tools:text="Jakub Szczodrzyński • 23 października" />
     </LinearLayout>
-</FrameLayout>
+</com.google.android.material.card.MaterialCardView>

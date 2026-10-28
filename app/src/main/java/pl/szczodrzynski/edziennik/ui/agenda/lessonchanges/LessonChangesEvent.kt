@@ -4,6 +4,7 @@
 
 package pl.szczodrzynski.edziennik.ui.agenda.lessonchanges
 
+import pl.szczodrzynski.edziennik.core.manager.EventManager
 import pl.szczodrzynski.edziennik.ui.agenda.BaseEvent
 import pl.szczodrzynski.edziennik.utils.models.Date
 
@@ -15,7 +16,11 @@ class LessonChangesEvent(
 ) : BaseEvent(
     id = date.value.toLong(),
     time = date.asCalendar,
-    color = 0xff78909c.toInt(),
+    color = EventManager.getSpecialColor(
+        profileId,
+        EventManager.COLOR_KEY_LESSON_CHANGES,
+        EventManager.DEFAULT_LESSON_CHANGES_COLOR
+    ),
     showBadge = false,
     showItemBadge = showBadge
 ) {

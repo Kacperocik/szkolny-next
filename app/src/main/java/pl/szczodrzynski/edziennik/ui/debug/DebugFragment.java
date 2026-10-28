@@ -5,19 +5,24 @@
 package pl.szczodrzynski.edziennik.ui.debug;
 
 import android.os.Bundle;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.Gson;
-import com.yuyh.jsonviewer.library.JsonRecyclerView;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +38,8 @@ import timber.log.Timber;
 
 public class DebugFragment extends Fragment {
     App app;
+    private final Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -197,38 +204,92 @@ public class DebugFragment extends Fragment {
                 return Log.getStackTraceString(e);
             }
         }
-        return app.getGson().toJson(target);
+        try {
+            return app.getGson().toJson(target);
+        } catch (Throwable t) {
+            Timber.e(t);
+            return Log.getStackTraceString(t);
+        }
+    }
+
+    private static CharSequence highlightJson(String prettyJson) {
+        if (prettyJson == null || prettyJson.isEmpty()) {
+            return "";
+        }
+        SpannableStringBuilder spannable = new SpannableStringBuilder(prettyJson);
+
+        Pattern keyPattern = Pattern.compile("\"([^\"\\\\]|\\\\.)*\"(?=\\s*:)");
+        Pattern stringPattern = Pattern.compile("\"([^\"\\\\]|\\\\.)*\"(?!\\s*:)");
+        Pattern numberPattern = Pattern.compile("\\b-?\\d+(\\.\\d+)?([eE][+-]?\\d+)?\\b");
+        Pattern boolNullPattern = Pattern.compile("\\b(true|false|null)\\b");
+
+        int colorKey = 0xFFAB47BC;     // Material Light Purple
+        int colorString = 0xFF66BB6A;  // Material Light Green
+        int colorNumber = 0xFF42A5F5;  // Material Light Blue
+        int colorBool = 0xFFEC407A;    // Material Light Pink
+
+        Matcher keyMatcher = keyPattern.matcher(prettyJson);
+        while (keyMatcher.find()) {
+            spannable.setSpan(new ForegroundColorSpan(colorKey), keyMatcher.start(), keyMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        Matcher stringMatcher = stringPattern.matcher(prettyJson);
+        while (stringMatcher.find()) {
+            spannable.setSpan(new ForegroundColorSpan(colorString), stringMatcher.start(), stringMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        Matcher numberMatcher = numberPattern.matcher(prettyJson);
+        while (numberMatcher.find()) {
+            spannable.setSpan(new ForegroundColorSpan(colorNumber), numberMatcher.start(), numberMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        Matcher boolMatcher = boolNullPattern.matcher(prettyJson);
+        while (boolMatcher.find()) {
+            spannable.setSpan(new ForegroundColorSpan(colorBool), boolMatcher.start(), boolMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        return spannable;
+    }
+
+    private void displayJson(TextView tvJson, String rawJson) {
+        if (rawJson == null) {
+            tvJson.setText("");
+            return;
+        }
+        try {
+            JsonElement je = JsonParser.parseString(rawJson);
+            String pretty = prettyGson.toJson(je);
+            tvJson.setText(highlightJson(pretty));
+        } catch (Throwable t) {
+            tvJson.setText(rawJson);
+        }
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         getView().findViewById(R.id.debugRegister).setOnClickListener(v -> {
             String text = ((TextInputEditText) getView().findViewById(R.id.runText)).getText().toString();
-            JsonRecyclerView mRecyclerView = getView().findViewById(R.id.rv_json);
+            TextView tvJson = getView().findViewById(R.id.tv_json);
             String result = runCommand(app, "run " + text);
-            try {
-                mRecyclerView.bindJson(result);
-            }
-            catch (Exception e) {
-                new MaterialAlertDialogBuilder(getActivity(), R.style.AppStyle_M3_MaterialAlertDialog_Monospace)
-                        .setTitle("Result")
-                        .setMessage(result)
-                        .setPositiveButton(R.string.ok, null)
-                        .show();
-            }
-            mRecyclerView.setTextSize(20);
+            displayJson(tvJson, result);
         });
         getView().findViewById(R.id.debugAppconfig).setOnClickListener(v -> {
-            JsonRecyclerView mRecyclerView = getView().findViewById(R.id.rv_json);
-            // bind json
-            mRecyclerView.bindJson(new Gson().toJson(app.getConfig()));
-            mRecyclerView.setTextSize(20);
+            TextView tvJson = getView().findViewById(R.id.tv_json);
+            try {
+                displayJson(tvJson, prettyGson.toJson(app.getConfig().getValues()));
+            } catch (Throwable t) {
+                Timber.e(t);
+                tvJson.setText(Log.getStackTraceString(t));
+            }
         });
         getView().findViewById(R.id.debugAppprofile).setOnClickListener(v -> {
-            JsonRecyclerView mRecyclerView = getView().findViewById(R.id.rv_json);
-            // bind json
-            mRecyclerView.bindJson(new Gson().toJson(app.getProfile()));
-            mRecyclerView.setTextSize(20);
+            TextView tvJson = getView().findViewById(R.id.tv_json);
+            try {
+                displayJson(tvJson, prettyGson.toJson(app.getProfile()));
+            } catch (Throwable t) {
+                Timber.e(t);
+                tvJson.setText(Log.getStackTraceString(t));
+            }
         });
     }
 

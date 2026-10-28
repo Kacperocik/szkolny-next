@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.MainActivity
+import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.entity.Attendance
 import pl.szczodrzynski.edziennik.data.db.full.AttendanceFull
 import pl.szczodrzynski.edziennik.databinding.AttendanceListFragmentBinding
@@ -41,7 +42,7 @@ class AttendanceListFragment : BaseFragment<AttendanceListFragmentBinding, MainA
         val adapter = AttendanceAdapter(activity, viewType)
         var firstRun = true
 
-        app.db.attendanceDao().getAll(App.profileId).observe(this@AttendanceListFragment, Observer { items -> this@AttendanceListFragment.launch {
+        app.db.attendanceDao().getAll(App.profileId).observe(viewLifecycleOwner, Observer { items -> this@AttendanceListFragment.launch {
             if (!isAdded) return@launch
 
             items.forEach {
@@ -66,6 +67,10 @@ class AttendanceListFragment : BaseFragment<AttendanceListFragmentBinding, MainA
 
             // show/hide relevant views
             b.progressBar.isVisible = false
+            b.noData.setText(
+                if (items.isEmpty()) R.string.attendances_no_data
+                else R.string.attendances_only_present
+            )
             if (adapter.items.isEmpty()) {
                 b.list.isVisible = false
                 b.noData.isVisible = true

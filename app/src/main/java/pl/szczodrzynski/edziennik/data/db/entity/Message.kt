@@ -43,6 +43,13 @@ open class Message(
     @ColumnInfo(name = "messageIsPinned")
     var isStarred: Boolean = false
 
+    /**
+     * The original [type] of a message moved to [TYPE_DELETED] in the app,
+     * used to restore it. Null if not deleted, or deleted in the e-register.
+     */
+    @ColumnInfo(name = "messageTypeBeforeDelete")
+    var typeBeforeDelete: Int? = null
+
     val isReceived
         get() = type == TYPE_RECEIVED
     val isSent

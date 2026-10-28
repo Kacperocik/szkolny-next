@@ -18,6 +18,10 @@ import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
 import kotlin.coroutines.CoroutineContext
 
 class AttendanceManager(val app: App) : CoroutineScope {
+    companion object {
+        const val SHAPE_MODE_ROUNDED_RECT = 0
+        const val SHAPE_MODE_CIRCLE = 1
+    }
 
     private val job = Job()
     override val coroutineContext: CoroutineContext
@@ -25,6 +29,8 @@ class AttendanceManager(val app: App) : CoroutineScope {
 
     val useSymbols
         get() = app.profile.config.attendance.useSymbols
+    val shapeMode
+        get() = app.profile.config.attendance.shapeMode
 
     fun getTypeShort(baseType: Int): String {
         return when (baseType) {

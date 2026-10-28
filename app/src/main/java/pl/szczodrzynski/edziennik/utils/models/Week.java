@@ -17,6 +17,10 @@ public class Week {
     public static int SATURDAY = 5;
     public static int SUNDAY = 6;
 
+    private static final int[] MONTH_OFFSETS = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+    private static Locale cachedLocale = null;
+    private static final String[] cachedDayNames = new String[7];
+
     public static pl.szczodrzynski.edziennik.utils.models.Date getNearestWeekDayDate(int day)
     {
         Calendar c = Calendar.getInstance();
@@ -41,11 +45,20 @@ public class Week {
 
     public static int getWeekDayFromDate(pl.szczodrzynski.edziennik.utils.models.Date date)
     {
-        Calendar c = Calendar.getInstance();
-        c.set(date.year, date.month - 1, date.day);
-        int weekDay = c.get(Calendar.DAY_OF_WEEK);
-        weekDay = (weekDay - 2 < 0 ? 6 : weekDay - 2);
-        return weekDay;
+        int y = date.year;
+        int m = date.month;
+        int d = date.day;
+        if (m < 1 || m > 12) {
+            Calendar c = Calendar.getInstance();
+            c.set(date.year, date.month - 1, date.day);
+            int weekDay = c.get(Calendar.DAY_OF_WEEK);
+            return (weekDay - 2 < 0 ? 6 : weekDay - 2);
+        }
+        if (m < 3) {
+            y -= 1;
+        }
+        int dow = (y + y / 4 - y / 100 + y / 400 + MONTH_OFFSETS[m - 1] + d) % 7;
+        return (dow + 6) % 7;
     }
 
     public static int getWeekDayFromDate(String dateStr)
@@ -74,11 +87,26 @@ public class Week {
 
     // stock code incoming...
     public static String getFullDayName(int day) {
-        Calendar c = Calendar.getInstance();
+        Locale currentLocale = Locale.getDefault();
+        if (day >= 0 && day < 7) {
+            synchronized (cachedDayNames) {
+                if (!currentLocale.equals(cachedLocale)) {
+                    Calendar c = Calendar.getInstance(currentLocale);
+                    c.set(2011, 7, 1, 0, 0, 0);
+                    for (int i = 0; i < 7; i++) {
+                        cachedDayNames[i] = String.format(currentLocale, "%tA", c);
+                        c.add(Calendar.DAY_OF_MONTH, 1);
+                    }
+                    cachedLocale = currentLocale;
+                }
+                return cachedDayNames[day];
+            }
+        }
+        Calendar c = Calendar.getInstance(currentLocale);
         // date doesn't matter - it has to be a Monday
         // I new that first August 2011 is one ;-)
         c.set(2011, 7, 1, 0, 0, 0);
         c.add(Calendar.DAY_OF_MONTH, day);
-        return String.format("%tA", c);
+        return String.format(currentLocale, "%tA", c);
     }
 }

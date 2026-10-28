@@ -2,45 +2,67 @@
   ~ Copyright (c) Kuba Szczodrzyński 2021-4-14.
   -->
 
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scrollView"
+    <TextView
+        android:id="@+id/dayHeader"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/timetable_multi_day_header_height"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceTitleSmall"
         android:visibility="gone"
-        tools:visibility="visible">
+        tools:text="Poniedziałek, 20.10"
+        tools:visibility="visible" />
 
-        <FrameLayout
-            android:id="@+id/dayFrame"
+    <FrameLayout
+        android:id="@+id/contentFrame"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            tools:visibility="visible">
 
-            <View
-                android:id="@+id/timeIndicatorMarker"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginHorizontal="8dp"
-                android:background="@drawable/timetable_marker_triangle"
-                tools:layout_marginTop="92.5dp" />
-
-            <View
-                android:id="@+id/timeIndicator"
+            <FrameLayout
+                android:id="@+id/dayFrame"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="8dp"
-                android:background="?colorTertiary"
-                tools:layout_marginTop="100dp" />
-        </FrameLayout>
-    </androidx.core.widget.NestedScrollView>
+                android:layout_height="wrap_content">
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
-</FrameLayout>
+                <View
+                    android:id="@+id/timeIndicatorMarker"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="@drawable/timetable_marker_triangle"
+                    tools:layout_marginTop="92.5dp" />
+
+                <View
+                    android:id="@+id/timeIndicator"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="?colorTertiary"
+                    tools:layout_marginTop="100dp" />
+            </FrameLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.loadingindicator.LoadingIndicator
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:indicatorColor="?attr/colorPrimary" />
+    </FrameLayout>
+</LinearLayout>

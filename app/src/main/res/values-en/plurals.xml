@@ -64,4 +64,54 @@
         <item quantity="one">%d translation</item>
         <item quantity="other">%d translations</item>
     </plurals>
+
+    <plurals name="ongoing_lesson_finished_title_format">
+        <item quantity="one">Classes over! Tomorrow is %d lesson.</item>
+        <item quantity="other">Classes over! Tomorrow are %d lessons.</item>
+    </plurals>
+
+    <plurals name="messages_selected">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+
+    <plurals name="messages_delete_selected_confirmation">
+        <item quantity="one">Do you want to delete %d message?</item>
+        <item quantity="other">Do you want to delete %d messages?</item>
+    </plurals>
+
+    <plurals name="messages_restored">
+        <item quantity="one">Restored %d message</item>
+        <item quantity="other">Restored %d messages</item>
+    </plurals>
+
+    <plurals name="messages_deleted">
+        <item quantity="one">Deleted %d message</item>
+        <item quantity="other">Deleted %d messages</item>
+    </plurals>
+
+    <plurals name="search_results_messages">
+        <item quantity="one">Found %d message</item>
+        <item quantity="other">Found %d messages</item>
+    </plurals>
+
+    <plurals name="search_results_events">
+        <item quantity="one">Found %d event</item>
+        <item quantity="other">Found %d events</item>
+    </plurals>
+
+    <plurals name="search_results_announcements">
+        <item quantity="one">Found %d announcement</item>
+        <item quantity="other">Found %d announcements</item>
+    </plurals>
+
+    <plurals name="search_results_notes">
+        <item quantity="one">Found %d note</item>
+        <item quantity="other">Found %d notes</item>
+    </plurals>
+
+    <plurals name="search_results_default">
+        <item quantity="one">Found %d result</item>
+        <item quantity="other">Found %d results</item>
+    </plurals>
 </resources>

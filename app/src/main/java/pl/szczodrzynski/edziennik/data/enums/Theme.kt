@@ -66,6 +66,46 @@ enum class Theme(
             (Type.M3 to Mode.FULL) to R.style.AppTheme_M3_Teal_Full,
             (Type.M3 to Mode.CLASSIC) to R.style.AppTheme_M3_Teal_Classic,
         ),
+    ),
+    YELLOW(
+        nameRes = R.string.theme_yellow,
+        styleRes = mapOf(
+            (Type.M2 to Mode.DAYNIGHT) to R.style.AppTheme_M2_Yellow,
+            (Type.M2 to Mode.FULL) to R.style.AppTheme_M2_Yellow_Full,
+            (Type.M3 to Mode.DAYNIGHT) to R.style.AppTheme_M3_Yellow,
+            (Type.M3 to Mode.FULL) to R.style.AppTheme_M3_Yellow_Full,
+            (Type.M3 to Mode.CLASSIC) to R.style.AppTheme_M3_Yellow_Classic,
+        ),
+    ),
+    ORANGE(
+        nameRes = R.string.theme_orange,
+        styleRes = mapOf(
+            (Type.M2 to Mode.DAYNIGHT) to R.style.AppTheme_M2_Orange,
+            (Type.M2 to Mode.FULL) to R.style.AppTheme_M2_Orange_Full,
+            (Type.M3 to Mode.DAYNIGHT) to R.style.AppTheme_M3_Orange,
+            (Type.M3 to Mode.FULL) to R.style.AppTheme_M3_Orange_Full,
+            (Type.M3 to Mode.CLASSIC) to R.style.AppTheme_M3_Orange_Classic,
+        ),
+    ),
+    BROWN(
+        nameRes = R.string.theme_brown,
+        styleRes = mapOf(
+            (Type.M2 to Mode.DAYNIGHT) to R.style.AppTheme_M2_Brown,
+            (Type.M2 to Mode.FULL) to R.style.AppTheme_M2_Brown_Full,
+            (Type.M3 to Mode.DAYNIGHT) to R.style.AppTheme_M3_Brown,
+            (Type.M3 to Mode.FULL) to R.style.AppTheme_M3_Brown_Full,
+            (Type.M3 to Mode.CLASSIC) to R.style.AppTheme_M3_Brown_Classic,
+        ),
+    ),
+    GRAY(
+        nameRes = R.string.theme_gray,
+        styleRes = mapOf(
+            (Type.M2 to Mode.DAYNIGHT) to R.style.AppTheme_M2_Gray,
+            (Type.M2 to Mode.FULL) to R.style.AppTheme_M2_Gray_Full,
+            (Type.M3 to Mode.DAYNIGHT) to R.style.AppTheme_M3_Gray,
+            (Type.M3 to Mode.FULL) to R.style.AppTheme_M3_Gray_Full,
+            (Type.M3 to Mode.CLASSIC) to R.style.AppTheme_M3_Gray_Classic,
+        ),
     );
 
     enum class Type {
@@ -77,5 +117,26 @@ enum class Theme(
         DAYNIGHT,
         FULL,
         CLASSIC,
+    }
+
+    fun intensityOverlay(intensity: Int, type: Type, mode: Mode): Int {
+        if (type != Type.M3 || mode != Mode.DAYNIGHT || this == DEFAULT) return 0
+        val vivid = when (intensity) {
+            0 -> false
+            2 -> true
+            else -> return 0
+        }
+        return when (this) {
+            RED -> if (vivid) R.style.ThemeOverlay_AppTheme_Intensity_Vivid_Red else R.style.ThemeOverlay_AppTheme_Intensity_Subtle_Red
+            GREEN -> if (vivid) R.style.ThemeOverlay_AppTheme_Intensity_Vivid_Green else R.style.ThemeOverlay_AppTheme_Intensity_Subtle_Green
+            BLUE -> if (vivid) R.style.ThemeOverlay_AppTheme_Intensity_Vivid_Blue else R.style.ThemeOverlay_AppTheme_Intensity_Subtle_Blue
+            PURPLE -> if (vivid) R.style.ThemeOverlay_AppTheme_Intensity_Vivid_Purple else R.style.ThemeOverlay_AppTheme_Intensity_Subtle_Purple
+            TEAL -> if (vivid) R.style.ThemeOverlay_AppTheme_Intensity_Vivid_Teal else R.style.ThemeOverlay_AppTheme_Intensity_Subtle_Teal
+            YELLOW -> if (vivid) R.style.ThemeOverlay_AppTheme_Intensity_Vivid_Yellow else R.style.ThemeOverlay_AppTheme_Intensity_Subtle_Yellow
+            ORANGE -> if (vivid) R.style.ThemeOverlay_AppTheme_Intensity_Vivid_Orange else R.style.ThemeOverlay_AppTheme_Intensity_Subtle_Orange
+            BROWN -> if (vivid) R.style.ThemeOverlay_AppTheme_Intensity_Vivid_Brown else R.style.ThemeOverlay_AppTheme_Intensity_Subtle_Brown
+            GRAY -> if (vivid) R.style.ThemeOverlay_AppTheme_Intensity_Vivid_Gray else R.style.ThemeOverlay_AppTheme_Intensity_Subtle_Gray
+            DEFAULT -> 0
+        }
     }
 }

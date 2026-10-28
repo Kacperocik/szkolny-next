@@ -41,7 +41,7 @@ class NoteCategoryViewHolder(
         val ownerType = item.ownerType ?: return
 
         title.setText(manager.getOwnerTypeText(ownerType))
-        title.setCompoundDrawables(
+        title.setCompoundDrawablesWithIntrinsicBounds(
             manager.getOwnerTypeImage(ownerType).resolveDrawable(activity),
             null,
             null,

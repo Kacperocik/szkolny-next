@@ -24,7 +24,8 @@
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:materialDrawerDrawCircularShadow="false" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/material_drawer_name"

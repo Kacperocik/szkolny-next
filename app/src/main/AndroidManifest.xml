@@ -15,14 +15,16 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <!-- PowerPermission uses minSdk 21, it's safe to override as it is used only in >= 23 -->
     <uses-sdk
-        tools:overrideLibrary="com.qifan.powerpermission.coroutines, com.qifan.powerpermission.core, com.mikepenz:materialdrawer, com.mikepenz.iconics.typeface.library.navlibfont, androidx.appcompat.resources, androidx.appcompat, com.google.android.gms.wearable, com.google.android.gms.base, com.google.firebase.crashlytics, com.google.firebase.sessions, com.google.firebase.ktx, com.google.firebase, com.google.android.gms.tasks, com.google.android.gms.common, com.google.firebase.components" />
+        tools:overrideLibrary="com.google.android.material, com.qifan.powerpermission.coroutines, com.qifan.powerpermission.core, com.mikepenz:materialdrawer, com.mikepenz.iconics.typeface.library.navlibfont, androidx.appcompat.resources, androidx.appcompat, com.google.android.gms.wearable, com.google.android.gms.base, com.google.firebase.crashlytics, com.google.firebase.sessions, com.google.firebase.ktx, com.google.firebase, com.google.android.gms.tasks, com.google.android.gms.common, com.google.firebase.components" />
 
     <application
         android:name=".App"
         android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher_v5"
         android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.M3.Blue"
@@ -51,6 +53,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.timetable.TimetableFullscreenActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="false"
+            android:screenOrientation="sensorLandscape" />
 
         <!--
              __          ___     _            _
@@ -78,6 +85,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -98,6 +106,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
             </intent-filter>
 
             <meta-data
@@ -112,11 +121,31 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
             </intent-filter>
 
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_lucky_number_info" />
+        </receiver>
+        <!-- CURRENT LESSON -->
+        <receiver android:name=".ui.widgets.currentlesson.WidgetCurrentLessonProvider"
+            android:label="@string/widget_current_lesson_title"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_current_lesson_info" />
         </receiver>
 
         <!--               _   _       _ _   _
@@ -131,10 +160,6 @@
             android:process=":error_activity"
             android:exported="false"
             android:theme="@style/DeadTheme" />
-        <activity android:name=".ui.intro.ChangelogIntroActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:exported="false"
-            android:theme="@style/Theme.Intro" />
         <activity android:name=".ui.login.LoginActivity"
             android:configChanges="orientation|screenSize"
             android:launchMode="singleTop"
@@ -151,10 +176,6 @@
             android:configChanges="orientation|keyboardHidden"
             android:exported="false"
             android:theme="@style/AppTheme.M3" />
-        <activity android:name="com.canhub.cropper.CropImageActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:exported="false"
-            android:theme="@style/Base.Theme.AppCompat" />
         <activity android:name=".ui.login.oauth.OAuthLoginActivity"
             android:configChanges="orientation|keyboardHidden"
             android:exported="false"
@@ -163,6 +184,10 @@
             android:configChanges="orientation|keyboardHidden"
             android:exported="false"
             android:theme="@style/Theme.MaterialComponents.Light.DarkActionBar" />
+        <activity android:name=".ui.crop.AppCropImageActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:exported="false"
+            android:theme="@style/AppTheme.M3" />
         <activity android:name=".ui.main.BuildInvalidActivity" android:exported="false" />
 
         <!--  _____               _
@@ -189,6 +214,8 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="pl.szczodrzynski.edziennik.SZKOLNY_MAIN" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
 

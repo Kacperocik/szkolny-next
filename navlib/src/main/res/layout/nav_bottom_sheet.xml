@@ -13,11 +13,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#99000000"
-        android:visibility="invisible"
         android:clickable="true"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        tools:visibility="gone" />
+        android:focusable="true"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/bs_view"
@@ -26,7 +25,8 @@
         android:layout_gravity="center_horizontal"
         android:maxWidth="600dp"
         app:behavior_hideable="true"
-        app:behavior_peekHeight="auto"
+        app:behavior_skipCollapsed="true"
+        app:behavior_peekHeight="0dp"
         app:layout_behavior="@string/bottom_sheet_behavior"
         tools:visibility="visible">
 

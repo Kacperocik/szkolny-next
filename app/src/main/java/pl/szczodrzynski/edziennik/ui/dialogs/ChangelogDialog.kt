@@ -19,6 +19,7 @@ class ChangelogDialog(
 
     override fun getTitleRes() = R.string.whats_new
     override fun getPositiveButtonText() = R.string.close
+    override fun hasCloseIconWhenSpaceLimited() = true
 
     override fun getRootView(): ScrollView {
         val textView = TextView(activity)

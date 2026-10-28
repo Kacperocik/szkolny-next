@@ -12,6 +12,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.plusAssign
 import androidx.core.view.setMargins
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import kotlinx.coroutines.*
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.MainActivity
@@ -19,8 +20,10 @@ import pl.szczodrzynski.edziennik.data.db.entity.Note
 import pl.szczodrzynski.edziennik.data.db.entity.Noteable
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.databinding.CardHomeNotesBinding
+import pl.szczodrzynski.edziennik.ext.applyExpressiveShapeMorphToButtons
 import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ext.onClick
+import pl.szczodrzynski.edziennik.ext.toDrawable
 import pl.szczodrzynski.edziennik.data.enums.NavTarget
 import pl.szczodrzynski.edziennik.ui.home.HomeCard
 import pl.szczodrzynski.edziennik.ui.home.HomeCardAdapter
@@ -76,14 +79,16 @@ class HomeNotesCard(
         holder.root.removeAllViews()
         val b = CardHomeNotesBinding.inflate(LayoutInflater.from(holder.root.context))
         b.root.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-            setMargins(8.dp)
+            setMargins(4.dp)
         }
         holder.root += b.root
+        b.root.applyExpressiveShapeMorphToButtons()
 
         adapter = NoteListAdapter(
             activity = activity,
             onNoteClick = this@HomeNotesCard::onNoteClick,
             onNoteEditClick = null,
+            embedded = true,
         )
 
         app.db.noteDao().getAllNoOwner(profileId = profile.id).observe(activity) { notes ->
@@ -96,7 +101,8 @@ class HomeNotesCard(
             }
 
             // apply the new note list
-            adapter.setAllItems(notes.take(4))
+            val limit = app.profile.config.ui.homeNotesLimit.coerceAtLeast(1)
+            adapter.setAllItems(notes.take(limit))
 
             // configure the adapter & recycler view
             if (b.list.adapter == null) {
@@ -112,7 +118,15 @@ class HomeNotesCard(
             }
         }
 
+        val cornerButton = app.profile.config.ui.homeNotesCornerButton
+        b.addNoteCorner.isVisible = cornerButton
+        b.addNote.isVisible = !cornerButton
+
+        val addIcon = CommunityMaterial.Icon3.cmd_text_box_plus_outline.toDrawable(activity)
+        b.addNote.icon = addIcon
         b.addNote.onClick(this@HomeNotesCard::onNoteAddClick)
+        b.addNoteCorner.icon = addIcon
+        b.addNoteCorner.onClick(this@HomeNotesCard::onNoteAddClick)
 
         holder.root.onClick {
             activity.navigate(navTarget = NavTarget.NOTES)

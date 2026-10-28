@@ -4,18 +4,25 @@
 
 package pl.szczodrzynski.edziennik.ui.agenda
 
+import android.os.Build
 import android.util.SparseIntArray
+import android.view.View
+import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.AbsListView.OnScrollListener
+import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.core.util.forEach
 import androidx.core.util.set
 import androidx.core.view.isVisible
 import com.github.tibolte.agendacalendarview.CalendarManager
 import com.github.tibolte.agendacalendarview.CalendarPickerController
+import com.github.tibolte.agendacalendarview.R
 import com.github.tibolte.agendacalendarview.agenda.AgendaAdapter
 import com.github.tibolte.agendacalendarview.models.BaseCalendarEvent
 import com.github.tibolte.agendacalendarview.models.CalendarEvent
 import com.github.tibolte.agendacalendarview.models.IDayItem
+import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,6 +30,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pl.szczodrzynski.edziennik.App
+import pl.szczodrzynski.edziennik.ext.dp
+import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.data.db.full.EventFull
 import pl.szczodrzynski.edziennik.databinding.FragmentAgendaDefaultBinding
@@ -54,6 +63,15 @@ class AgendaFragmentDefault(
     private val unreadDates = mutableSetOf<Int>()
     private val events = mutableListOf<CalendarEvent>()
     private var isInitialized = false
+    private val cardMargin = 8.dp
+    private val cardRadius = 24.dp
+    private val collapsedCalendarHeight
+        get() = (
+            activity.resources.getDimension(R.dimen.calendar_header_height) +
+            2 * activity.resources.getDimension(R.dimen.day_cell_height)
+        ).toInt()
+    private var listTopInset = 0
+    private var scrollTargetDay: Calendar? = null
 
     private val listView
         get() = b.agendaDefaultView.agendaView.agendaListView
@@ -68,6 +86,10 @@ class AgendaFragmentDefault(
     override fun onScrollStateChanged(view: AbsListView?, newScrollState: Int) {
         b.agendaDefaultView.agendaScrollListener.onScrollStateChanged(view, scrollState)
         scrollState = newScrollState
+        if (newScrollState != OnScrollListener.SCROLL_STATE_IDLE) {
+            // the user is scrolling the list, so stop keeping a day at the top
+            scrollTargetDay = null
+        }
         if (updatePending) updateData()
         if (notifyPending) notifyDataSetChanged()
     }
@@ -144,6 +166,8 @@ class AgendaFragmentDefault(
                     c.time = dayItem.date
                     if (c.timeInMillis == selectedDate.inMillis) {
                         DayDialog(activity, app.profileId, selectedDate).show()
+                    } else {
+                        scrollToSelectedDate(c)
                     }
                 }
 
@@ -204,10 +228,170 @@ class AgendaFragmentDefault(
             TeacherAbsenceEventRenderer()
         )
 
+        val calendarView = b.agendaDefaultView.findViewById<View>(
+            R.id.calendar_view
+        ) ?: b.agendaDefaultView.getChildAt(0)
+
+        val dayNamesHeader = (calendarView as? ViewGroup)?.getChildAt(0) as? ViewGroup
+        if (dayNamesHeader != null) {
+            val abbreviations = activity.resources.getStringArray(
+                com.applandeo.materialcalendarview.R.array.material_calendar_day_abbreviations_array
+            )
+            for (i in 0 until dayNamesHeader.childCount) {
+                val textView = dayNamesHeader.getChildAt(i) as? TextView
+                if (textView != null && abbreviations.isNotEmpty()) {
+                    textView.text = abbreviations[(i + 1) % abbreviations.size]
+                }
+            }
+        }
+
+        if (calendarView != null && calendarView.parent is ViewGroup && calendarView.parent !is MaterialCardView) {
+            val parent = calendarView.parent as ViewGroup
+            val params = calendarView.layoutParams
+
+            parent.removeView(calendarView)
+
+            val cardView = MaterialCardView(activity).apply {
+                layoutParams = params
+                radius = cardRadius.toFloat()
+                cardElevation = 4.dp.toFloat()
+                setCardBackgroundColor(pl.szczodrzynski.edziennik.R.attr.colorCard.resolveAttr(activity))
+                strokeColor = com.google.android.material.R.attr.colorOutlineVariant.resolveAttr(activity)
+                strokeWidth = 1.dp
+
+                if (this.layoutParams is ViewGroup.MarginLayoutParams) {
+                    (this.layoutParams as ViewGroup.MarginLayoutParams).setMargins(8.dp, cardMargin, 8.dp, cardMargin)
+                }
+
+                // the height the library collapses the calendar to, set before
+                // the first layout - otherwise the weeks list measures itself
+                // to the whole page and flashes expanded while loading
+                addView(calendarView, ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    collapsedCalendarHeight
+                ))
+            }
+
+            parent.addView(cardView)
+            cardView.bringToFront()
+
+            val agendaView = b.agendaDefaultView.agendaView
+            val agendaParams = agendaView.layoutParams as? FrameLayout.LayoutParams
+                ?: FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+            agendaParams.width = FrameLayout.LayoutParams.MATCH_PARENT
+            agendaParams.height = FrameLayout.LayoutParams.MATCH_PARENT
+            agendaParams.setMargins(0, 0, 0, 0)
+            agendaView.layoutParams = agendaParams
+            agendaView.enablePlaceholderForCalendar(false)
+
+            agendaView.viewTreeObserver.addOnPreDrawListener {
+                if (agendaView.translationY != 0f) {
+                    agendaView.translationY = 0f
+                }
+                true
+            }
+
+            calendarView.viewTreeObserver.addOnPreDrawListener {
+                if (calendarView.translationY != 0f) {
+                    calendarView.translationY = 0f
+                }
+                true
+            }
+
+            cardView.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, _ ->
+                setListTopInset(bottom)
+            }
+
+            agendaView.findViewById<View>(
+                R.id.view_shadow
+            )?.visibility = View.GONE
+
+            for (i in 0 until b.agendaDefaultView.childCount) {
+                val child = b.agendaDefaultView.getChildAt(i)
+                if (child != cardView && child != calendarView && child != agendaView) {
+                    if (child.javaClass.simpleName != "FloatingActionButton") {
+                        child.visibility = View.GONE
+                    }
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                calendarView.elevation = 0f
+                calendarView.translationZ = 0f
+                agendaView.elevation = 0f
+                agendaView.translationZ = 0f
+            }
+        }
+
         listView.setOnScrollListener(this)
 
         isInitialized = true
         b.progressBar.isVisible = false
+
+        scrollToSelectedDate(selectedDate.asCalendar)
+    }
+
+    /**
+     * Make the list start right below the calendar card, which floats above it.
+     *
+     * The items are laid out (and clipped) a corner radius above the bottom
+     * edge of the card, so that they show in its rounded corners. They must
+     * not be laid out any higher than that: the sticky header is picked
+     * assuming that at most one item reaches above it, so a list laid out
+     * behind the whole calendar makes both the pinned day header and the day
+     * circled on the calendar lag one day behind the list.
+     *
+     * The wrapper's negative padding is added back to every scroll position
+     * requested from it, which puts the day scrolled to - also by the library
+     * itself, on day clicks and on the initial scroll to today - just above the
+     * sticky header line. Its own day header is then hidden and the library
+     * pins a copy of it right below the calendar.
+     */
+    private fun setListTopInset(inset: Int) {
+        if (inset <= 0 || inset == listTopInset)
+            return
+        listTopInset = inset
+
+        listView.clipToPadding = false
+        listView.setPadding(
+            listView.paddingLeft,
+            1.dp - cardRadius,
+            listView.paddingRight,
+            listView.paddingBottom
+        )
+        listView.setStickyHeaderTopOffset(inset)
+
+        // both calls above are forwarded to the wrapped list, so its own
+        // values have to be set afterwards
+        with(listView.wrappedList) {
+            clipToPadding = true
+            setPadding(paddingLeft, inset - cardRadius, paddingRight, paddingBottom)
+        }
+
+        // changing the padding doesn't move the items, so scroll them again
+        scrollTargetDay?.let { day ->
+            listView.post { scrollToDay(day) }
+        }
+    }
+
+    private fun scrollToSelectedDate(calendar: Calendar) {
+        scrollTargetDay = calendar
+        listView.post {
+            // the library also scrolls to today after laying out the list
+            listView.post {
+                scrollToDay(calendar)
+            }
+        }
+    }
+
+    private fun scrollToDay(calendar: Calendar) {
+        val index = manager.events.indexOfFirst {
+            it.instanceDay.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR) &&
+            it.instanceDay.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
+        }
+        if (index >= 0) {
+            listView.setSelection(index)
+        }
     }
 
     private fun updateView() {
@@ -215,7 +399,7 @@ class AgendaFragmentDefault(
         manager.loadEvents(events, BaseCalendarEvent())
 
         adapter?.updateEvents(manager.events)
-        //listView.scrollToCurrentDate(selectedDate.asCalendar)
+        scrollToSelectedDate(selectedDate.asCalendar)
     }
 
     private fun setAsRead(date: Calendar) {
@@ -255,7 +439,7 @@ class AgendaFragmentDefault(
             events += eventList.map {
                 if (!it.seen)
                     unreadDates.add(it.date.value)
-                AgendaEvent(it)
+                AgendaEvent(it, color = app.eventManager.getEventColor(it))
             }
             return
         }
@@ -267,14 +451,14 @@ class AgendaFragmentDefault(
             if (list.size == 1) {
                 if (!event.seen)
                     unreadDates.add(event.date.value)
-                events += AgendaEvent(event)
+                events += AgendaEvent(event, color = app.eventManager.getEventColor(event))
             } else {
                 events.add(0, AgendaEventGroup(
                     profileId = event.profileId,
                     date = event.date,
                     typeId = event.type,
                     typeName = event.typeName ?: "-",
-                    typeColor = event.typeColor ?: event.eventColor,
+                    typeColor = app.eventManager.getEventColor(event),
                     count = list.size,
                     showBadge = list.any { !it.seen }
                 ))

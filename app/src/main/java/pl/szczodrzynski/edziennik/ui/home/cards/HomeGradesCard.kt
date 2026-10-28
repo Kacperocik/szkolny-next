@@ -64,6 +64,7 @@ class HomeGradesCard(
 
     private val grades = mutableListOf<GradeFull>()
     private val subjects = mutableListOf<ItemGradesSubjectModel>()
+    private var lastGradeListWidth = 0
 
     override fun bind(position: Int, holder: HomeCardAdapter.ViewHolder) {
         holder.root.removeAllViews()
@@ -71,18 +72,16 @@ class HomeGradesCard(
         b.root.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
             WRAP_CONTENT
         ).apply {
-            setMargins(8.dp)
+            setMargins(4.dp)
         }
         holder.root += b.root
 
-        b.settings.setImageDrawable(
-            IconicsDrawable(activity, CommunityMaterial.Icon.cmd_cog_outline).apply {
-                colorAttr(activity, R.attr.colorIcon)
-                sizeDp = 24
-            }
-        )
-        b.settings.onClick {
-            HomeConfigDialog(activity, reloadOnDismiss = true).show()
+        b.settings.visibility = GONE
+
+        // the card width changes with the number of home columns
+        b.gradeList.addOnLayoutChangeListener { v, left, _, right, _, _, _, _, _ ->
+            if (subjects.isNotEmpty() && right - left > 0 && right - left != lastGradeListWidth)
+                v.post { update() }
         }
 
         val days = app.profile.config.ui.homeGradesWeeks * 7
@@ -96,7 +95,7 @@ class HomeGradesCard(
             update()
         })
 
-        b.root.setOnClickListener {
+        holder.root.onClick {
             activity.navigate(navTarget = NavTarget.GRADES)
         }
     }
@@ -122,6 +121,7 @@ class HomeGradesCard(
             model?.grades1?.add(grade)
         }
 
+        lastGradeListWidth = b.gradeList.width
         b.gradeList.removeAllViews()
 
         val textLayoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
@@ -137,7 +137,10 @@ class HomeGradesCard(
             gradeItem.orientation = HORIZONTAL
 
             var totalWidth = 0
-            val maxWidth = (app.resources.displayMetrics.widthPixels -
+            val maxWidth = if (b.gradeList.width > 0)
+                (b.gradeList.width - Utils.dpToPx(16 /*ellipsize width*/)) / 1.5f
+            else
+                (app.resources.displayMetrics.widthPixels -
                     Utils.dpToPx((if (app.config.ui.miniMenuVisible) 72 else 0) /*miniDrawer size*/ +
                             24 + 24 /*left and right offsets*/ +
                             16 /*ellipsize width*/)) / 1.5f
@@ -165,7 +168,7 @@ class HomeGradesCard(
                     gradeItem.addView(ellipsisText, textLayoutParams)
                     return@forEach
                 } else {
-                    gradeItem.addView(gradeName, textLayoutParams)
+                    gradeItem.addView(gradeName)
                 }
             }
 

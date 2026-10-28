@@ -102,7 +102,7 @@ class LoginChooserFragment : Fragment(), CoroutineScope {
                 element = LoginInfo.Register(
                     loginType = LoginType.TEMPLATE,
                     registerName = R.string.menu_lab,
-                    registerLogo = R.drawable.face_2,
+                    registerLogo = R.drawable.login_logo_laboratory,
                     loginModes = listOf(
                         LoginInfo.Mode(
                             loginMode = LoginMode.PODLASIE_API,
@@ -146,7 +146,6 @@ class LoginChooserFragment : Fragment(), CoroutineScope {
         b.list.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
-            addItemDecoration(SimpleDividerItemDecoration(context))
         }
 
         b.helpButton.onClick {

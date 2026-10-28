@@ -7,15 +7,21 @@ package pl.szczodrzynski.edziennik
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.provider.OpenableColumns
 import com.canhub.cropper.CropImage
+import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
+import pl.szczodrzynski.edziennik.ui.crop.AppCropImageActivity
 import pl.szczodrzynski.edziennik.ui.login.LoginActivity
+import pl.szczodrzynski.edziennik.utils.Utils
 import java.io.File
 import java.io.FileOutputStream
 
-class MainActivityRequestHandler(val activity: MainActivity) {
+class MainActivityRequestHandler(val hostActivity: MainActivity) {
+    val activity get() = hostActivity
+
     companion object {
         private const val REQUEST_LOGIN_ACTIVITY = 2000
         private const val REQUEST_FILE_HEADER_BACKGROUND = 3000
@@ -26,72 +32,56 @@ class MainActivityRequestHandler(val activity: MainActivity) {
         private const val REQUEST_CROP_PROFILE_IMAGE = 5100
     }
 
-    private val app = activity.app
+    private val app = hostActivity.app
     private val requestData = mutableMapOf<Int, Any?>()
     private val listeners = mutableMapOf<Int, (data: Any?) -> Unit>()
 
     private val manager
         get() = app.permissionManager
 
-    fun requestLogin() = activity.startActivityForResult(
-        Intent(activity, LoginActivity::class.java),
+    fun requestLogin() = hostActivity.startActivityForResult(
+        Intent(hostActivity, LoginActivity::class.java),
         REQUEST_LOGIN_ACTIVITY
     )
 
+    private fun startImagePicker(requestCode: Int) {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "image/*"
+        }
+        val chooser = Intent.createChooser(intent, hostActivity.getString(R.string.choose_file))
+        hostActivity.startActivityForResult(chooser, requestCode)
+    }
+
     fun requestHeaderBackground(listener: (Any?) -> Unit) =
         manager.requestCameraPermission(
-            activity, 0, isRequired = false
+            hostActivity, 0, isRequired = false
         ) {
             listeners[REQUEST_FILE_HEADER_BACKGROUND] = listener
-            activity.startActivityForResult(
-                CropImage.getPickImageChooserIntent(
-                    activity,
-                    activity.getString(R.string.pick_image_intent_chooser_title),
-                    true,
-                    true
-                ),
-                REQUEST_FILE_HEADER_BACKGROUND
-            )
+            startImagePicker(REQUEST_FILE_HEADER_BACKGROUND)
         }
 
     fun requestAppBackground(listener: (Any?) -> Unit) =
         manager.requestCameraPermission(
-            activity, 0, isRequired = false
+            hostActivity, 0, isRequired = false
         ) {
             listeners[REQUEST_FILE_APP_BACKGROUND] = listener
-            activity.startActivityForResult(
-                CropImage.getPickImageChooserIntent(
-                    activity,
-                    activity.getString(R.string.pick_image_intent_chooser_title),
-                    true,
-                    true
-                ),
-                REQUEST_FILE_APP_BACKGROUND
-            )
+            startImagePicker(REQUEST_FILE_APP_BACKGROUND)
         }
 
     fun requestProfileImage(profile: Profile, listener: (Any?) -> Unit) =
         manager.requestCameraPermission(
-            activity, 0, isRequired = false
+            hostActivity, 0, isRequired = false
         ) {
             listeners[REQUEST_FILE_PROFILE_IMAGE] = listener
             requestData[REQUEST_FILE_PROFILE_IMAGE] = profile
-            activity.startActivityForResult(
-                CropImage.getPickImageChooserIntent(
-                    activity,
-                    activity.getString(R.string.pick_image_intent_chooser_title),
-                    true,
-                    true
-                ),
-                REQUEST_FILE_PROFILE_IMAGE
-            )
+            startImagePicker(REQUEST_FILE_PROFILE_IMAGE)
         }
 
     private fun getFileInfo(uri: Uri): Pair<String, String?> {
         if (uri.scheme == "file") {
             return (uri.lastPathSegment ?: "unknown") to null
         }
-        val cursor = activity.contentResolver.query(
+        val cursor = hostActivity.contentResolver.query(
             uri,
             null,
             null,
@@ -120,7 +110,7 @@ class MainActivityRequestHandler(val activity: MainActivity) {
     private fun saveFile(uri: Uri, name: String): String {
         val (filename, _) = getFileInfo(uri)
         val extension = filename.substringAfterLast('.')
-        val file = File(activity.filesDir, "$name.$extension")
+        val file = File(hostActivity.filesDir, "$name.$extension")
         activity.contentResolver.openInputStream(uri)?.use { input ->
             FileOutputStream(file).use { output ->
                 input.copyTo(output)
@@ -129,30 +119,48 @@ class MainActivityRequestHandler(val activity: MainActivity) {
         return file.absolutePath
     }
 
+    private fun createCropIntent(uri: Uri, options: CropImageOptions): Intent {
+        return Intent(hostActivity, AppCropImageActivity::class.java).apply {
+            putExtra(CropImage.CROP_IMAGE_EXTRA_BUNDLE, Bundle().apply {
+                putParcelable(CropImage.CROP_IMAGE_EXTRA_SOURCE, uri)
+                putParcelable(CropImage.CROP_IMAGE_EXTRA_OPTIONS, options)
+            })
+        }
+    }
+
+    @Suppress("DEPRECATION")
     fun handleResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK)
             return
-        var uri = CropImage.getPickImageResultUri(activity, data)
+        var uri = data?.data
         when (requestCode) {
             REQUEST_LOGIN_ACTIVITY -> {
                 if (!app.config.loginFinished)
-                    activity.finish()
+                    hostActivity.finish()
                 else {
-                    activity.handleIntent(data?.extras)
+                    hostActivity.handleIntent(data?.extras)
                 }
             }
             REQUEST_FILE_HEADER_BACKGROUND -> {
                 if (uri == null)
-                    return // TODO: 2021-03-24 if the app returns no data 
+                    return
                 if (shouldCrop(uri)) {
-                    val intent = CropImage.activity(uri)
-                        .setAspectRatio(512, 288)
-                        .setGuidelines(CropImageView.Guidelines.ON_TOUCH)
-                        .setAllowFlipping(true)
-                        .setAllowRotation(true)
-                        .setRequestedSize(512, 288)
-                        .getIntent(activity)
-                    activity.startActivityForResult(intent, REQUEST_CROP_HEADER_BACKGROUND)
+                    val options = CropImageOptions().apply {
+                        aspectRatioX = 512
+                        aspectRatioY = 288
+                        fixAspectRatio = true
+                        guidelines = CropImageView.Guidelines.ON_TOUCH
+                        allowFlipping = true
+                        allowRotation = true
+                        allowCounterRotation = true
+                        activityBackgroundColor = Utils.getAttr(hostActivity, android.R.attr.colorBackground)
+                        activityMenuIconColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                        toolbarColor = Utils.getAttr(hostActivity, R.attr.colorSurface)
+                        toolbarTitleColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                        toolbarBackButtonColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                    }
+                    val intent = createCropIntent(uri, options)
+                    hostActivity.startActivityForResult(intent, REQUEST_CROP_HEADER_BACKGROUND)
                 } else {
                     val path = saveFile(uri, "header")
                     app.config.ui.headerBackground = path
@@ -163,12 +171,19 @@ class MainActivityRequestHandler(val activity: MainActivity) {
                 if (uri == null)
                     return
                 if (shouldCrop(uri)) {
-                    val intent = CropImage.activity(uri)
-                        .setGuidelines(CropImageView.Guidelines.ON_TOUCH)
-                        .setAllowFlipping(true)
-                        .setAllowRotation(true)
-                        .getIntent(activity)
-                    activity.startActivityForResult(intent, REQUEST_CROP_APP_BACKGROUND)
+                    val options = CropImageOptions().apply {
+                        guidelines = CropImageView.Guidelines.ON_TOUCH
+                        allowFlipping = true
+                        allowRotation = true
+                        allowCounterRotation = true
+                        activityBackgroundColor = Utils.getAttr(hostActivity, android.R.attr.colorBackground)
+                        activityMenuIconColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                        toolbarColor = Utils.getAttr(hostActivity, R.attr.colorSurface)
+                        toolbarTitleColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                        toolbarBackButtonColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                    }
+                    val intent = createCropIntent(uri, options)
+                    hostActivity.startActivityForResult(intent, REQUEST_CROP_APP_BACKGROUND)
                 } else {
                     val path = saveFile(uri, "background")
                     app.config.ui.appBackground = path
@@ -179,15 +194,23 @@ class MainActivityRequestHandler(val activity: MainActivity) {
                 if (uri == null)
                     return
                 if (shouldCrop(uri)) {
-                    val intent = CropImage.activity(uri)
-                        .setAspectRatio(1, 1)
-                        .setCropShape(CropImageView.CropShape.OVAL)
-                        .setGuidelines(CropImageView.Guidelines.ON_TOUCH)
-                        .setAllowFlipping(true)
-                        .setAllowRotation(true)
-                        .setRequestedSize(512, 512)
-                        .getIntent(activity)
-                    activity.startActivityForResult(intent, REQUEST_CROP_PROFILE_IMAGE)
+                    val options = CropImageOptions().apply {
+                        aspectRatioX = 1
+                        aspectRatioY = 1
+                        fixAspectRatio = true
+                        cropShape = CropImageView.CropShape.OVAL
+                        guidelines = CropImageView.Guidelines.ON_TOUCH
+                        allowFlipping = true
+                        allowRotation = true
+                        allowCounterRotation = true
+                        activityBackgroundColor = Utils.getAttr(hostActivity, android.R.attr.colorBackground)
+                        activityMenuIconColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                        toolbarColor = Utils.getAttr(hostActivity, R.attr.colorSurface)
+                        toolbarTitleColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                        toolbarBackButtonColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                    }
+                    val intent = createCropIntent(uri, options)
+                    hostActivity.startActivityForResult(intent, REQUEST_CROP_PROFILE_IMAGE)
                 } else {
                     val profile =
                         requestData.remove(REQUEST_FILE_PROFILE_IMAGE) as? Profile ?: return
@@ -197,19 +220,22 @@ class MainActivityRequestHandler(val activity: MainActivity) {
                 }
             }
             REQUEST_CROP_HEADER_BACKGROUND -> {
-                uri = CropImage.getActivityResult(data)?.uri ?: return
+                val cropResult = data?.getParcelableExtra<CropImage.ActivityResult>(CropImage.CROP_IMAGE_EXTRA_RESULT)
+                uri = cropResult?.uriContent ?: return
                 val path = saveFile(uri, "header")
                 app.config.ui.headerBackground = path
                 listeners.remove(REQUEST_FILE_HEADER_BACKGROUND)?.invoke(path)
             }
             REQUEST_CROP_APP_BACKGROUND -> {
-                uri = CropImage.getActivityResult(data)?.uri ?: return
+                val cropResult = data?.getParcelableExtra<CropImage.ActivityResult>(CropImage.CROP_IMAGE_EXTRA_RESULT)
+                uri = cropResult?.uriContent ?: return
                 val path = saveFile(uri, "background")
                 app.config.ui.appBackground = path
                 listeners.remove(REQUEST_FILE_APP_BACKGROUND)?.invoke(path)
             }
             REQUEST_CROP_PROFILE_IMAGE -> {
-                uri = CropImage.getActivityResult(data)?.uri ?: return
+                val cropResult = data?.getParcelableExtra<CropImage.ActivityResult>(CropImage.CROP_IMAGE_EXTRA_RESULT)
+                uri = cropResult?.uriContent ?: return
                 val profile = requestData.remove(REQUEST_FILE_PROFILE_IMAGE) as? Profile ?: return
                 val path = saveFile(uri, "profile${profile.id}")
                 profile.image = path

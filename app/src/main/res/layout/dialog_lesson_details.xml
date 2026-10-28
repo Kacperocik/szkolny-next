@@ -56,21 +56,24 @@
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:overScrollMode="never">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="24dp">
+            android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/subjectContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="8dp"
                 android:baselineAligned="false"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="24dp"
+                android:paddingBottom="16dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -80,6 +83,7 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/oldSubjectNameView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:isVisible="@{oldSubjectName != null}"
@@ -91,6 +95,7 @@
                         tools:text="pracownia urządzeń techniki komputerowej" />
 
                     <TextView
+                        android:id="@+id/subjectNameView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:isVisible="@{subjectName != null}"
@@ -121,12 +126,14 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/lessonTimeContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="right"
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/lessonNumberText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:isVisible="@{lesson.displayLessonNumber != null}"
@@ -135,12 +142,20 @@
                         tools:text="4" />
 
                     <TextView
+                        android:id="@+id/lessonTimeView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@{lesson.displayStartTime.stringHM + ` - ` + lesson.displayEndTime.stringHM}"
                         tools:text="14:55 - 15:40" />
                 </LinearLayout>
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/contentContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp">
 
             <LinearLayout
                 android:id="@+id/shiftedLayout"
@@ -199,7 +214,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/dialog_lesson_details_teacher"
-                        android:textAppearance="?textAppearanceLabelMedium" />
+                        android:textAppearance="?textAppearanceLabelMedium"
+                        android:textColor="?attr/colorSecondary" />
 
                     <TextView
                         android:id="@+id/oldTeacherNameView"
@@ -234,7 +250,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/dialog_lesson_details_team"
-                        android:textAppearance="?textAppearanceLabelMedium" />
+                        android:textAppearance="?textAppearanceLabelMedium"
+                        android:textColor="?attr/colorSecondary" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -275,7 +292,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="@string/dialog_lesson_details_classroom"
-                        android:textAppearance="?textAppearanceLabelMedium" />
+                        android:textAppearance="?textAppearanceLabelMedium"
+                        android:textColor="?attr/colorSecondary" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -310,7 +328,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="@string/dialog_lesson_details_id"
-                        android:textAppearance="?textAppearanceLabelMedium" />
+                        android:textAppearance="?textAppearanceLabelMedium"
+                        android:textColor="?attr/colorSecondary" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -395,20 +414,26 @@
 
                 <ImageView
                     android:id="@+id/image"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginBottom="8dp"
-                    app:srcCompat="@drawable/ic_timetable" />
+                    android:layout_width="@dimen/illustration_dialog_size"
+                    android:layout_height="@dimen/illustration_dialog_size"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="16dp"
+                    android:contentDescription="@null"
+                    app:srcCompat="@drawable/illustration_event_checked_compact" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center"
                     android:text="@string/dialog_lesson_no_events"
                     android:textAppearance="?textAppearanceHeadlineSmall" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center"
                     android:text="@string/dialog_no_events_hint" />
             </LinearLayout>
 
@@ -417,6 +442,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
+                android:theme="@style/ThemeOverlay.App.NestedCard"
                 tools:listitem="@layout/event_list_item"
                 tools:visibility="visible" />
 
@@ -447,6 +473,7 @@
                     android:layout_margin="8dp"
                     android:text="@string/notes_button"
                     android:visibility="gone" />
+            </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -30,6 +30,11 @@ public class ItemWidgetTimetableModel {
     public List<Integer> eventColors = new ArrayList<>();
     public boolean bigStyle = false;
     public boolean darkTheme = false;
+    public boolean colorSubjectBackground = false;
+    public boolean appBackground = false;
+    public int themeColorSecondary = 0;
+    public int themeColorOnSurfaceVariant = 0;
+    public int themeColorTextPrimary = 0;
 
     public boolean isNoTimetableItem = false;
     public boolean isNoLessonsItem = false;

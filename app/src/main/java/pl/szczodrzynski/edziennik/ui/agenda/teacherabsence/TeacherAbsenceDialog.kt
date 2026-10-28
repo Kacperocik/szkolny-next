@@ -21,6 +21,7 @@ class TeacherAbsenceDialog(
         DialogTeacherAbsenceListBinding.inflate(layoutInflater)
 
     override fun getPositiveButtonText() = R.string.close
+    override fun hasCloseIconWhenSpaceLimited() = true
 
     override suspend fun onShow() {
         b.teacherAbsenceView.setHasFixedSize(true)
@@ -29,7 +30,9 @@ class TeacherAbsenceDialog(
         app.db.teacherAbsenceDao().getAllByDate(profileId, date).observe(
             activity as LifecycleOwner
         ) { absenceList ->
-            val adapter = TeacherAbsenceAdapter(activity, date, absenceList)
+            val adapter = TeacherAbsenceAdapter(activity, date, absenceList) {
+                dismiss()
+            }
             b.teacherAbsenceView.adapter = adapter
             b.teacherAbsenceView.visibility = View.VISIBLE
         }

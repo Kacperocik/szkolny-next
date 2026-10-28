@@ -2,15 +2,25 @@
   ~ Copyright (c) Kuba Szczodrzyński 2020-2-29.
   -->
 
-<LinearLayout
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?selectableItemBackground"
-    android:gravity="center_vertical"
-    android:orientation="horizontal">
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="?attr/colorCard"
+    app:cardElevation="0dp"
+    app:cardPreventCornerOverlap="false"
+    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupSingle"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
     <com.mikepenz.iconics.view.IconicsImageView
         android:id="@+id/dropdownIcon"
@@ -74,14 +84,38 @@
         tools:visibility="visible" />
 
     <com.mikepenz.iconics.view.IconicsImageView
-        android:id="@+id/editButton"
+        android:id="@+id/simFinalButton"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_gravity="center_vertical"
+        android:layout_marginStart="3dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@string/grades_simulator_set_semester_final"
+        android:scaleType="centerInside"
+        android:visibility="gone"
+        app:iiv_color="?android:textColorSecondary"
+        app:iiv_icon="cmd-flag-checkered"
+        app:iiv_size="20dp"
+        tools:src="@android:drawable/ic_menu_edit"
+        tools:visibility="visible" />
+
+    <com.mikepenz.iconics.view.IconicsImageView
+        android:id="@+id/simAddButton"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="12dp"
+        android:layout_marginRight="12dp"
         android:background="?selectableItemBackgroundBorderless"
         android:scaleType="centerInside"
+        android:visibility="gone"
         app:iiv_color="?android:textColorSecondary"
-        app:iiv_icon="cmd-playlist-edit"
+        app:iiv_icon="cmd-plus"
         app:iiv_size="24dp"
-        tools:src="@android:drawable/ic_menu_edit" />
-</LinearLayout>
+        tools:src="@android:drawable/ic_menu_edit"
+        tools:visibility="visible" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

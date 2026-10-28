@@ -2,20 +2,24 @@ package pl.szczodrzynski.navlib.bottomsheet.items
 
 import android.graphics.drawable.Drawable
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.sizeDp
 import pl.szczodrzynski.navlib.ImageHolder
 import pl.szczodrzynski.navlib.R
+import pl.szczodrzynski.navlib.cancelExpressiveCardShapeMorph
 import pl.szczodrzynski.navlib.colorAttr
+import pl.szczodrzynski.navlib.enableExpressiveCardShapeMorph
 import pl.szczodrzynski.navlib.getColorFromAttr
 
-data class BottomSheetPrimaryItem(override val isContextual: Boolean = true) : IBottomSheetItem<BottomSheetPrimaryItem.ViewHolder> {
+class BottomSheetPrimaryItem(override val isContextual: Boolean = true) : IBottomSheetItem<BottomSheetPrimaryItem.ViewHolder> {
 
     /*_                             _
      | |                           | |
@@ -36,10 +40,64 @@ data class BottomSheetPrimaryItem(override val isContextual: Boolean = true) : I
         val image = itemView.findViewById<ImageView>(R.id.item_icon)
         val text = itemView.findViewById<TextView>(R.id.item_text)
         val description = itemView.findViewById<TextView>(R.id.item_description)
+        val switch = itemView.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.item_switch)
     }
 
+    var cornerPosition: CornerPosition = CornerPosition.SINGLE
+    var group: BottomSheetGroup = BottomSheetGroup.CONTEXTUAL
+    var isFirstInAdapter: Boolean = false
+    var isSwitch: Boolean = false
+    var isChecked: Boolean = false
+    var onCheckedChangeListener: ((isChecked: Boolean) -> Unit)? = null
+
     override fun bindViewHolder(viewHolder: ViewHolder) {
-        viewHolder.root.setOnClickListener(onClickListener)
+        val card = viewHolder.root as? MaterialCardView
+        if (card != null) {
+            // Drop any press morph left over from the previous item on this recycled view.
+            card.cancelExpressiveCardShapeMorph()
+            val density = card.resources.displayMetrics.density
+            val cornerLarge = 24f * density
+            val cornerSmall = 4f * density
+
+            val isFirst = cornerPosition == CornerPosition.FIRST || cornerPosition == CornerPosition.SINGLE
+            val isLast = cornerPosition == CornerPosition.LAST || cornerPosition == CornerPosition.SINGLE
+
+            card.shapeAppearanceModel = card.shapeAppearanceModel.toBuilder()
+                .setTopLeftCornerSize(if (isFirst) cornerLarge else cornerSmall)
+                .setTopRightCornerSize(if (isFirst) cornerLarge else cornerSmall)
+                .setBottomLeftCornerSize(if (isLast) cornerLarge else cornerSmall)
+                .setBottomRightCornerSize(if (isLast) cornerLarge else cornerSmall)
+                .build()
+
+            val lp = card.layoutParams as? ViewGroup.MarginLayoutParams
+            if (lp != null) {
+                val baseMargin = (1f * density).toInt()
+                val extraTop = if (isFirst && !isFirstInAdapter)
+                    (12f * density).toInt()
+                else
+                    0
+                lp.topMargin = baseMargin + extraTop
+                lp.bottomMargin = baseMargin
+                card.layoutParams = lp
+            }
+            card.enableExpressiveCardShapeMorph()
+        }
+
+        if (isSwitch) {
+            viewHolder.switch.visibility = View.VISIBLE
+            viewHolder.switch.isClickable = false
+            viewHolder.switch.isFocusable = false
+            viewHolder.switch.isChecked = isChecked
+            viewHolder.root.setOnClickListener {
+                isChecked = !isChecked
+                viewHolder.switch.isChecked = isChecked
+                onCheckedChangeListener?.invoke(isChecked)
+                onClickListener?.onClick(it)
+            }
+        } else {
+            viewHolder.switch.visibility = View.GONE
+            viewHolder.root.setOnClickListener(onClickListener)
+        }
 
         viewHolder.image.setImageDrawable(IconicsDrawable(viewHolder.text.context).apply {
             icon = iconicsIcon
@@ -119,6 +177,21 @@ data class BottomSheetPrimaryItem(override val isContextual: Boolean = true) : I
 
     fun withOnClickListener(onClickListener: View.OnClickListener): BottomSheetPrimaryItem {
         this.onClickListener = onClickListener
+        return this
+    }
+
+    fun withGroup(group: BottomSheetGroup): BottomSheetPrimaryItem {
+        this.group = group
+        return this
+    }
+
+    fun withSwitch(
+        checked: Boolean,
+        onCheckedChangeListener: ((isChecked: Boolean) -> Unit)? = null,
+    ): BottomSheetPrimaryItem {
+        this.isSwitch = true
+        this.isChecked = checked
+        this.onCheckedChangeListener = onCheckedChangeListener
         return this
     }
 }

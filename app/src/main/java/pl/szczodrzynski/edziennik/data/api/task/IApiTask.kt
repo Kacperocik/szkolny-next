@@ -12,6 +12,7 @@ import org.greenrobot.eventbus.EventBus
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.data.api.ApiService
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
+import timber.log.Timber
 
 abstract class IApiTask(open val profileId: Int) {
     var taskId: Int = 0
@@ -27,11 +28,15 @@ abstract class IApiTask(open val profileId: Int) {
     abstract fun cancel()
 
     fun enqueue(context: Context) {
-        Intent(context, ApiService::class.java).let {
-            if (SDK_INT >= O)
-                context.startForegroundService(it)
-            else
-                context.startService(it)
+        try {
+            Intent(context, ApiService::class.java).let {
+                if (SDK_INT >= O)
+                    context.startForegroundService(it)
+                else
+                    context.startService(it)
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to start ApiService foreground service")
         }
         EventBus.getDefault().postSticky(this)
     }
@@ -44,11 +49,15 @@ abstract class IApiTask(open val profileId: Int) {
         fun enqueueAll(context: Context, tasks: List<IApiTask>) {
             if (tasks.isEmpty())
                 return
-            Intent(context, ApiService::class.java).let {
-                if (SDK_INT >= O)
-                    context.startForegroundService(it)
-                else
-                    context.startService(it)
+            try {
+                Intent(context, ApiService::class.java).let {
+                    if (SDK_INT >= O)
+                        context.startForegroundService(it)
+                    else
+                        context.startService(it)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to start ApiService foreground service")
             }
             tasks.forEach {
                 EventBus.getDefault().postSticky(it)

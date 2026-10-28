@@ -53,6 +53,7 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
         private const val TAG = "MessagesComposeFragment"
     }
 
+    override fun getScrollingView() = b.root
     override fun getFab() = R.string.messages_compose_send to CommunityMaterial.Icon3.cmd_send_outline
     override fun getBottomSheetItems() = listOf(
         BottomSheetPrimaryItem(true)
@@ -237,14 +238,19 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
         sendMessage()
     }
 
-    private fun onBeforeNavigate(): Boolean {
+    fun hasUnsavedChanges(): Boolean {
+        if (!isAdded || view == null)
+            return false
         val messageText = b.text.text?.toString()?.trim() ?: ""
         val greetingText = this.greetingText.trim()
-        // navigateUp if nothing changed
-        if ((!changedRecipients || b.recipients.allChips.isEmpty())
+        return !((!changedRecipients || b.recipients.allChips.isEmpty())
             && (!changedSubject || b.subject.text.isNullOrBlank())
-            && (!changedBody || messageText.isEmpty() || messageText == greetingText)
-        )
+            && (!changedBody || messageText.isEmpty() || messageText == greetingText))
+    }
+
+    private fun onBeforeNavigate(): Boolean {
+        // navigateUp if nothing changed
+        if (!hasUnsavedChanges())
             return true
         saveDraftDialog()
         return false
@@ -394,7 +400,7 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
         SimpleDialog<Unit>(activity) {
             title(R.string.messages_compose_confirm_title)
             message(R.string.messages_compose_confirm_text)
-            positive(R.string.send) {
+            positive(R.string.messages_compose_send) {
                 EdziennikTask.messageSend(App.profileId, recipients, subject.trim(), body)
                     .enqueue(activity)
             }
@@ -412,6 +418,15 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
     override fun onPause() {
         super.onPause()
         activity.onBeforeNavigate = null
+    }
+
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (hidden) {
+            activity.onBeforeNavigate = null
+        } else if (isAdded) {
+            activity.onBeforeNavigate = this::onBeforeNavigate
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)

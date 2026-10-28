@@ -37,6 +37,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:clipToPadding="false"
+                    android:theme="@style/ThemeOverlay.App.NestedCard"
                     tools:itemCount="3"
                     tools:listitem="@layout/note_list_item" />
             </LinearLayout>
@@ -61,7 +62,7 @@
                     android:padding="16dp"
                     android:text="@string/notes_no_data"
                     android:textAppearance="?textAppearanceHeadlineSmall"
-                    app:drawableTopCompat="@drawable/ic_note" />
+                    app:drawableTopCompat="@drawable/illustration_notes_compact" />
 
                 <TextView
                     android:layout_width="wrap_content"

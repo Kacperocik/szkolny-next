@@ -9,12 +9,15 @@ import android.view.LayoutInflater
 import androidx.core.widget.addTextChangedListener
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.shape.MaterialShapeDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import pl.szczodrzynski.edziennik.*
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.databinding.DialogProfileConfigBinding
 import pl.szczodrzynski.edziennik.ext.dp
+import pl.szczodrzynski.edziennik.ext.enableExpressiveShapeMorph
 import pl.szczodrzynski.edziennik.ext.onChange
 import pl.szczodrzynski.edziennik.ext.onClick
+import pl.szczodrzynski.edziennik.ext.toDrawable
 import pl.szczodrzynski.edziennik.ui.dialogs.ProfileRemoveDialog
 import pl.szczodrzynski.edziennik.ui.base.dialog.BindingDialog
 
@@ -29,6 +32,7 @@ class ProfileConfigDialog(
         DialogProfileConfigBinding.inflate(layoutInflater)
 
     override fun getPositiveButtonText() = R.string.close
+    override fun hasCloseIconWhenSpaceLimited() = true
 
     private var profileChanged = false
     private var profileRemoved = false
@@ -72,6 +76,11 @@ class ProfileConfigDialog(
             }
         }
 
+        b.logoutButton.icon = CommunityMaterial.Icon.cmd_account_arrow_left_outline.toDrawable(
+            activity,
+            colorRes = R.color.md_red_500,
+        )
+        b.logoutButton.enableExpressiveShapeMorph()
         b.logoutButton.onClick {
             ProfileRemoveDialog(activity, profile.id, profile.name) {
                 profileRemoved = true

@@ -5,14 +5,16 @@
     android:id="@+id/widgetNotificationsRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingLeft="12dp"
+    android:paddingTop="8dp"
+    android:paddingRight="12dp"
+    android:paddingBottom="8dp">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="2dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -20,8 +22,9 @@
             android:id="@+id/widgetNotificationsTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/secondaryTextLight"
-            android:textSize="11sp"
+            android:textColor="#1976D2"
+            android:textSize="12sp"
+            android:textStyle="bold"
             tools:text="Władca Androida - Nowa ocena" />
 
         <TextView
@@ -31,8 +34,9 @@
             android:layout_gravity="center_vertical"
             android:ellipsize="end"
             android:maxLines="3"
-            android:textColor="@color/primaryTextLight"
-            android:textSize="13sp"
+            android:textColor="#1C1B1F"
+            android:textSize="14sp"
+            android:textStyle="bold"
             tools:text="Nowa ocena (5) z przedmiotu język polski" />
     </LinearLayout>
 
@@ -41,8 +45,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_margin="8dp"
-        android:textColor="@color/primaryTextLight"
+        android:layout_marginStart="8dp"
+        android:textColor="#49454F"
         android:textSize="11sp"
-        tools:text="10:00 - 10:45" />
+        tools:text="10:00" />
 </LinearLayout>

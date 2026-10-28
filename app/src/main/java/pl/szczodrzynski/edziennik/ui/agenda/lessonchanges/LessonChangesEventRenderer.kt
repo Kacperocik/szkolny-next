@@ -4,10 +4,15 @@
 
 package pl.szczodrzynski.edziennik.ui.agenda.lessonchanges
 
+import android.os.Build
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.github.tibolte.agendacalendarview.render.EventRenderer
 import com.google.android.material.color.MaterialColors
+import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.databinding.AgendaCounterItemBinding
 import pl.szczodrzynski.edziennik.databinding.AgendaWrappedCounterBinding
@@ -19,38 +24,61 @@ class LessonChangesEventRenderer : EventRenderer<LessonChangesEvent>() {
 
     override fun render(view: View, event: LessonChangesEvent) {
         val b = AgendaWrappedCounterBinding.bind(view).item
-        val harmonizedColor = MaterialColors.harmonizeWithPrimary(view.context, event.color)
-        val textColor = Colors.legibleTextColor(harmonizedColor)
-
-        b.card.foreground.setTintColor(harmonizedColor)
-        b.card.background.setTintColor(harmonizedColor)
-        b.name.setText(R.string.agenda_lesson_changes)
-        b.name.setTextColor(textColor)
-        b.count.text = event.count.toString()
-        b.count.setTextColor(textColor)
-
-        b.badgeBackground.isVisible = event.showItemBadge
-        b.badgeBackground.background.setTintColor(
-            android.R.attr.colorBackground.resolveAttr(view.context)
-        )
-        b.badge.isVisible = event.showItemBadge
+        bindCard(b.card, b.name, b.count, b.badgeBackground, b.badge, event)
     }
 
     fun render(b: AgendaCounterItemBinding, event: LessonChangesEvent) {
-        val harmonizedColor = MaterialColors.harmonizeWithPrimary(b.root.context, event.color)
-        val textColor = Colors.legibleTextColor(harmonizedColor)
-        b.card.foreground.setTintColor(harmonizedColor)
-        b.card.background.setTintColor(harmonizedColor)
-        b.name.setText(R.string.agenda_lesson_changes)
-        b.name.setTextColor(textColor)
-        b.count.text = event.count.toString()
-        b.count.setTextColor(textColor)
+        bindCard(b.card, b.name, b.count, b.badgeBackground, b.badge, event)
+    }
 
-        b.badgeBackground.isVisible = event.showItemBadge
-        b.badgeBackground.background.setTintColor(
-            android.R.attr.colorBackground.resolveAttr(b.root.context)
+    private fun bindCard(
+        card: FrameLayout,
+        name: TextView,
+        count: TextView,
+        badgeBackground: View,
+        badge: View,
+        event: LessonChangesEvent
+    ) {
+        val harmonizedColor = MaterialColors.harmonizeWithPrimary(card.context, event.color)
+        val isClassic = App.profile.config.ui.agendaClassicCards
+
+        if (isClassic) {
+            val textColor = Colors.legibleTextColor(harmonizedColor)
+            val bgColor = android.R.attr.colorBackground.resolveAttr(card.context)
+            card.background = ContextCompat.getDrawable(card.context, R.drawable.bg_rounded_8dp)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                card.foreground = ContextCompat.getDrawable(card.context, R.drawable.bg_rounded_8dp_outline)
+                card.foreground?.setTintColor(harmonizedColor)
+            }
+            card.background?.setTintColor(harmonizedColor)
+            name.setText(R.string.agenda_lesson_changes)
+            name.setTextColor(textColor)
+            count.text = event.count.toString()
+            count.background = ContextCompat.getDrawable(card.context, R.drawable.bg_rounded_8dp)
+            count.background?.setTintColor(bgColor)
+            count.setTextColor(Colors.legibleTextColor(bgColor))
+        } else {
+            val surfaceContainer = MaterialColors.getColor(card, R.attr.colorCard, 0x1a808080)
+            val primaryText = MaterialColors.getColor(card, android.R.attr.textColorPrimary, 0xff000000.toInt())
+
+            card.background = ContextCompat.getDrawable(card.context, R.drawable.bg_rounded_16dp)
+            card.background?.setTintColor(surfaceContainer)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                card.foreground = null
+            }
+            name.setText(R.string.agenda_lesson_changes)
+            name.setTextColor(primaryText)
+            count.text = event.count.toString()
+            count.background = ContextCompat.getDrawable(card.context, R.drawable.bg_rounded_16dp)
+            count.background?.setTintColor(harmonizedColor)
+            count.setTextColor(Colors.legibleTextColor(harmonizedColor))
+        }
+
+        badgeBackground.isVisible = event.showItemBadge && isClassic
+        badgeBackground.background?.setTintColor(
+            android.R.attr.colorBackground.resolveAttr(card.context)
         )
-        b.badge.isVisible = event.showItemBadge
+        badge.isVisible = event.showItemBadge
     }
 
     override fun getEventLayout(): Int = R.layout.agenda_wrapped_counter

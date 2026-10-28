@@ -5,16 +5,18 @@
 package pl.szczodrzynski.edziennik.ui.login
 
 import android.app.Activity
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -40,7 +42,6 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
     lateinit var navOptionsBuilder: NavOptions.Builder
     val nav by lazy { Navigation.findNavController(this, R.id.nav_host_fragment) }
     val errorSnackbar: ErrorSnackbar by lazy { ErrorSnackbar(this) }
-    val swipeRefreshLayout: SwipeRefreshLayout by lazy { b.swipeRefreshLayout }
 
     private val job: Job = Job()
     override val coroutineContext: CoroutineContext
@@ -52,8 +53,7 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
 
     fun getRootView() = b.root
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun handleBackPress() {
         val destination = nav.currentDestination ?: run {
             nav.navigateUp()
             return
@@ -91,9 +91,20 @@ class LoginActivity : AppCompatActivity(), CoroutineScope {
         nav.navigateUp()
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        handleBackPress()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setTheme(R.style.AppTheme_M3)
+        app.uiManager.applyTheme(this)
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleBackPress()
+            }
+        })
 
         navOptionsBuilder = NavOptions.Builder()
                 .setEnterAnim(R.anim.slide_in_right)

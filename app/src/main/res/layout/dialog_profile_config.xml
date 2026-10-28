@@ -89,9 +89,10 @@
                 android:gravity="center_horizontal"
                 android:text="@{profile.subname}"
                 android:textAppearance="?textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
                 tools:text="3b3t - 2020/2021" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
+            <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/syncSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -107,6 +108,9 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/profile_config_logout"
                 android:textColor="@color/md_red_500"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:iconTint="@color/md_red_500"
                 app:rippleColor="@color/md_red_300"
                 app:strokeColor="@color/md_red_500" />
         </LinearLayout>

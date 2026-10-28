@@ -2,6 +2,8 @@
  * Copyright (c) Kacper Ziubryniewicz 2019-12-8
  */
 
+@file:Suppress("DEPRECATION_ERROR")
+
 package pl.szczodrzynski.edziennik.data.api.szkolny.interceptor
 
 import okhttp3.Interceptor

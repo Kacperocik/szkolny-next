@@ -9,11 +9,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ProgressBar
+    <com.google.android.material.loadingindicator.LoadingIndicator
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        app:indicatorColor="?attr/colorPrimary" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/noData"
@@ -26,13 +27,16 @@
         android:text="@string/teachers_no_data"
         android:textAppearance="?textAppearanceHeadlineSmall"
         android:visibility="gone"
-        app:drawableTopCompat="@drawable/ic_no_grades"
+        app:drawableTopCompat="@drawable/illustration_teachers"
         tools:visibility="visible" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
         android:visibility="gone"
         tools:listitem="@layout/teacher_item"
         tools:visibility="visible" />

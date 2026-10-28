@@ -2,115 +2,119 @@
   ~ Copyright (c) Kuba Szczodrzyński 2020-4-4.
   -->
 
-<androidx.constraintlayout.widget.ConstraintLayout
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/messageItemCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="8dp"
-    android:layout_marginBottom="8dp"
-    android:background="?attr/selectableItemBackground">
+    android:layout_marginBottom="1dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="?attr/colorCard"
+    app:cardElevation="0dp"
+    app:cardPreventCornerOverlap="false"
+    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupSingle"
+    app:strokeWidth="0dp">
 
-    <ImageView
-        android:id="@+id/messageProfileBackground"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/bg_circle" />
-
-    <TextView
-        android:id="@+id/messageSender"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:textAppearance="?textAppearanceBodyLarge"
-        app:layout_constraintEnd_toStartOf="@+id/messageAttachmentImage"
-        app:layout_constraintStart_toEndOf="@+id/messageProfileBackground"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Allegro" />
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
 
-    <com.mikepenz.iconics.view.IconicsTextView
-        android:id="@+id/messageSubject"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:singleLine="true"
-        app:layout_constraintEnd_toStartOf="@id/messageStar"
-        app:layout_constraintStart_toEndOf="@+id/messageProfileBackground"
-        app:layout_constraintTop_toBottomOf="@+id/messageSender"
-        tools:text="Nowe oferty w Twoich obserwowanych wyszukiwaniach" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/messageProfileBackground"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/avatars" />
 
-    <TextView
-        android:id="@+id/messageBody"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:autoLink="all"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:textAppearance="?textAppearanceBodySmall"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/messageStar"
-        app:layout_constraintStart_toEndOf="@+id/messageProfileBackground"
-        app:layout_constraintTop_toBottomOf="@+id/messageSubject"
-        tools:text="Znajdź produkty, których szukasz. Witaj Kuba Szczodrzyński (Client" />
+        <TextView
+            android:id="@+id/messageSender"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            app:layout_constraintEnd_toStartOf="@+id/messageAttachmentImage"
+            app:layout_constraintStart_toEndOf="@+id/messageProfileBackground"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Allegro" />
 
-    <com.mikepenz.iconics.view.IconicsImageView
-        android:id="@+id/messageStar"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="?selectableItemBackgroundBorderless"
-        android:padding="4dp"
-        app:iiv_color="?android:textColorSecondary"
-        app:iiv_icon="cmd-star-outline"
-        app:iiv_size="24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/messageDate"
-        tools:background="@android:drawable/star_off" />
+        <com.mikepenz.iconics.view.IconicsTextView
+            android:id="@+id/messageSubject"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="8dp"
+            android:singleLine="true"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            app:layout_constraintEnd_toStartOf="@id/messageStar"
+            app:layout_constraintStart_toEndOf="@+id/messageProfileBackground"
+            app:layout_constraintTop_toBottomOf="@+id/messageSender"
+            tools:text="Nowe oferty w Twoich obserwowanych wyszukiwaniach" />
 
-    <TextView
-        android:id="@+id/messageDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:textAppearance="?textAppearanceLabelMedium"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="09:41" />
+        <TextView
+            android:id="@+id/messageBody"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:autoLink="all"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/messageStar"
+            app:layout_constraintStart_toEndOf="@+id/messageProfileBackground"
+            app:layout_constraintTop_toBottomOf="@+id/messageSubject"
+            tools:text="Znajdź produkty, których szukasz..." />
 
-    <com.mikepenz.iconics.view.IconicsImageView
-        android:id="@+id/messageAttachmentImage"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginRight="4dp"
-        app:iiv_color="?android:textColorSecondary"
-        app:iiv_icon="cmd-attachment"
-        app:layout_constraintBottom_toBottomOf="@+id/messageDate"
-        app:layout_constraintEnd_toStartOf="@+id/messageDate"
-        app:layout_constraintTop_toTopOf="@+id/messageDate"
-        tools:background="@tools:sample/avatars[4]" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.mikepenz.iconics.view.IconicsImageView
+            android:id="@+id/messageStar"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            app:iiv_color="?attr/colorOnSurfaceVariant"
+            app:iiv_icon="cmd-star-outline"
+            app:iiv_size="24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:background="@android:drawable/star_off" />
+
+        <TextView
+            android:id="@+id/messageDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceLabelMedium"
+            android:textColor="?attr/colorSecondary"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="09:41" />
+
+        <com.mikepenz.iconics.view.IconicsImageView
+            android:id="@+id/messageAttachmentImage"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginEnd="4dp"
+            app:iiv_color="?attr/colorOnSurfaceVariant"
+            app:iiv_icon="cmd-attachment"
+            app:layout_constraintBottom_toBottomOf="@+id/messageDate"
+            app:layout_constraintEnd_toStartOf="@+id/messageDate"
+            app:layout_constraintTop_toTopOf="@+id/messageDate"
+            tools:background="@tools:sample/avatars[4]" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

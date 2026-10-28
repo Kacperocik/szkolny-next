@@ -22,6 +22,7 @@ class LessonChangesDialog(
         DialogLessonChangeListBinding.inflate(layoutInflater)
 
     override fun getPositiveButtonText() = R.string.close
+    override fun hasCloseIconWhenSpaceLimited() = true
 
     override suspend fun onShow() {
         val lessonChanges = withContext(Dispatchers.Default) {

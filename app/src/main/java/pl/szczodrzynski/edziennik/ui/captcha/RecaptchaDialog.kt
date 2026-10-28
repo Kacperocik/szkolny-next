@@ -2,6 +2,8 @@
  * Copyright (c) Kuba Szczodrzyński 2020-2-15.
  */
 
+@file:Suppress("DEPRECATION_ERROR")
+
 package pl.szczodrzynski.edziennik.ui.captcha
 
 import android.graphics.Bitmap

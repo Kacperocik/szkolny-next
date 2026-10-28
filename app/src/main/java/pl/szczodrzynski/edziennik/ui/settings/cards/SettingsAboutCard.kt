@@ -23,6 +23,7 @@ import pl.szczodrzynski.edziennik.ext.after
 import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.ui.dialogs.ChangelogDialog
 import pl.szczodrzynski.edziennik.ui.dialogs.DevModeDialog
+import pl.szczodrzynski.edziennik.ui.settings.ItemCornerPositions
 import pl.szczodrzynski.edziennik.ui.settings.SettingsCard
 import pl.szczodrzynski.edziennik.ui.settings.SettingsLicenseActivity
 import pl.szczodrzynski.edziennik.ui.settings.SettingsUtil
@@ -42,10 +43,9 @@ class SettingsAboutCard(util: SettingsUtil) : SettingsCard(util), CoroutineScope
     }
 
     override fun buildCard() = util.createCard(
-        null,
-        items = ::getItems,
-        itemsMore = ::getItemsMore,
-        backgroundColor = R.attr.colorPrimaryContainer.resolveAttr(activity)
+        titleRes = null,
+        items = { getItems(it) + getItemsMore(it) },
+        itemsMore = { emptyList() },
     )
 
     private val versionDetailsItem by lazy {
@@ -59,7 +59,9 @@ class SettingsAboutCard(util: SettingsUtil) : SettingsCard(util), CoroutineScope
         )
     }
 
-    override fun getItems(card: MaterialAboutCard) = listOf(
+    override fun getItems(card: MaterialAboutCard) = ItemCornerPositions.applyGroupPositions(
+        listOfNotNull(
+            util.createSectionItem(R.string.settings_card_about_title),
         util.createTitleItem(),
 
         util.createActionItem(
@@ -97,34 +99,32 @@ class SettingsAboutCard(util: SettingsUtil) : SettingsCard(util), CoroutineScope
             activity.navigate(navTarget = NavTarget.CONTRIBUTORS)
         },
 
-        util.createMoreItem(card, items = listOf(
-            util.createActionItem(
-                text = R.string.settings_about_changelog_text,
-                icon = CommunityMaterial.Icon3.cmd_radar
-            ) {
-                ChangelogDialog(activity).show()
-            },
+        util.createActionItem(
+            text = R.string.settings_about_changelog_text,
+            icon = CommunityMaterial.Icon3.cmd_radar
+        ) {
+            ChangelogDialog(activity).show()
+        },
 
-            util.createActionItem(
-                text = R.string.settings_about_update_text,
-                subText = R.string.settings_about_update_subtext,
-                icon = CommunityMaterial.Icon3.cmd_update
-            ) {
-                launch {
-                    val channel = if (App.devMode)
-                        Update.Type.BETA
-                    else
-                        Update.Type.RC
-                    val result = app.updateManager.checkNow(channel, notify = false)
-                    val update = result.getOrNull()
-                    // the dialog is shown by MainActivity (EventBus)
-                    when {
-                        result.isFailure -> Toast.makeText(app, app.getString(R.string.notification_cant_check_update), Toast.LENGTH_SHORT).show()
-                        update == null -> Toast.makeText(app, app.getString(R.string.notification_no_update), Toast.LENGTH_SHORT).show()
-                    }
+        util.createActionItem(
+            text = R.string.settings_about_update_text,
+            subText = R.string.settings_about_update_subtext,
+            icon = CommunityMaterial.Icon3.cmd_update
+        ) {
+            launch {
+                val channel = if (App.devMode)
+                    Update.Type.BETA
+                else
+                    Update.Type.RC
+                val result = app.updateManager.checkNow(channel, notify = false)
+                val update = result.getOrNull()
+                // the dialog is shown by MainActivity (EventBus)
+                when {
+                    result.isFailure -> Toast.makeText(app, app.getString(R.string.notification_cant_check_update), Toast.LENGTH_SHORT).show()
+                    update == null -> Toast.makeText(app, app.getString(R.string.notification_no_update), Toast.LENGTH_SHORT).show()
                 }
             }
-        )),
+        },
 
         util.createSectionItem(
             text = R.string.see_also
@@ -153,32 +153,30 @@ class SettingsAboutCard(util: SettingsUtil) : SettingsCard(util), CoroutineScope
             Utils.openUrl(activity, "https://szkolny.eu/github/android")
         },
 
-        util.createMoreItem(card, items = listOfNotNull(
-            util.createActionItem(
-                text = R.string.settings_about_homepage_text,
-                subText = R.string.settings_about_homepage_subtext,
-                icon = CommunityMaterial.Icon.cmd_earth
-            ) {
-                Utils.openUrl(activity, "https://szkolny.eu/")
-            },
+        util.createActionItem(
+            text = R.string.settings_about_homepage_text,
+            subText = R.string.settings_about_homepage_subtext,
+            icon = CommunityMaterial.Icon.cmd_earth
+        ) {
+            Utils.openUrl(activity, "https://szkolny.eu/")
+        },
 
-            util.createActionItem(
-                text = R.string.settings_about_licenses_text,
-                icon = CommunityMaterial.Icon.cmd_code_braces
-            ) {
-                activity.startActivity(Intent(activity, SettingsLicenseActivity::class.java))
-            },
+        util.createActionItem(
+            text = R.string.settings_about_licenses_text,
+            icon = CommunityMaterial.Icon.cmd_code_braces
+        ) {
+            activity.startActivity(Intent(activity, SettingsLicenseActivity::class.java))
+        },
 
-            if (App.devMode)
-                util.createActionItem(
-                    text = R.string.settings_about_crash_text,
-                    subText = R.string.settings_about_crash_subtext,
-                    icon = CommunityMaterial.Icon.cmd_bug_outline
-                ) {
-                    throw RuntimeException("MANUAL CRASH")
-                }
-            else
-                null
-        ))
-    )
+        if (App.devMode)
+            util.createActionItem(
+                text = R.string.settings_about_crash_text,
+                subText = R.string.settings_about_crash_subtext,
+                icon = CommunityMaterial.Icon.cmd_bug_outline
+            ) {
+                throw RuntimeException("MANUAL CRASH")
+            }
+        else
+            null
+    ))
 }

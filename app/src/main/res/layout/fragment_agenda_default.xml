@@ -4,27 +4,28 @@
     xmlns:agendaCalendar="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
     android:orientation="vertical">
 
-    <ProgressBar
+    <com.google.android.material.loadingindicator.LoadingIndicator
         android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        agendaCalendar:indicatorColor="?attr/colorPrimary" />
 
     <com.github.tibolte.agendacalendarview.AgendaCalendarView
         android:id="@+id/agenda_default_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        agendaCalendar:agendaCurrentDayTextColor="?colorPrimaryDark"
-        agendaCalendar:calendarColor="?colorSurface"
-        agendaCalendar:calendarCurrentDayTextColor="?colorPrimaryDark"
-        agendaCalendar:calendarDayTextColor="?android:textColorPrimary"
-        agendaCalendar:calendarHeaderColor="?colorSurface"
-        agendaCalendar:calendarHeaderTextColor="?colorOnSurface"
-        agendaCalendar:calendarPastDayTextColor="?android:textColorSecondary"
-        agendaCalendar:fabColor="?colorPrimaryContainer"
+        agendaCalendar:agendaCurrentDayTextColor="?attr/colorPrimary"
+        agendaCalendar:calendarColor="?attr/colorSurfaceContainerHigh"
+        agendaCalendar:calendarCurrentDayTextColor="?attr/colorPrimary"
+        agendaCalendar:calendarDayTextColor="?attr/colorOnSurface"
+        agendaCalendar:calendarHeaderColor="?attr/colorSurfaceContainerHigh"
+        agendaCalendar:calendarHeaderTextColor="?attr/colorOnSurface"
+        agendaCalendar:calendarPastDayTextColor="?attr/colorOutline"
+        agendaCalendar:fabColor="?attr/colorPrimaryContainer"
         agendaCalendar:layout_constraintBottom_toBottomOf="parent"
         agendaCalendar:layout_constraintEnd_toEndOf="parent"
         agendaCalendar:layout_constraintHorizontal_bias="1.0"

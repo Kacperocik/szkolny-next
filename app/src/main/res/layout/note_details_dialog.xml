@@ -32,6 +32,7 @@
                 layout="@layout/note_dialog_header" />
 
             <include
+                android:id="@+id/subtitle"
                 layout="@layout/note_dialog_subtitle"
                 app:text="@{@string/notes_details_dialog_title}" />
 
@@ -46,7 +47,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/dialog_event_details_added_by"
-                    android:textAppearance="?textAppearanceLabelMedium" />
+                    android:textAppearance="?textAppearanceLabelMedium"
+                    android:textColor="?attr/colorSecondary" />
 
                 <com.mikepenz.iconics.view.IconicsTextView
                     android:id="@+id/addedBy"
@@ -74,7 +76,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:text="@string/notes_details_id"
-                            android:textAppearance="?textAppearanceLabelMedium" />
+                            android:textAppearance="?textAppearanceLabelMedium"
+                            android:textColor="?attr/colorSecondary" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -95,7 +98,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:text="@string/notes_details_owner_id"
-                            android:textAppearance="?textAppearanceLabelMedium" />
+                            android:textAppearance="?textAppearanceLabelMedium"
+                            android:textColor="?attr/colorSecondary" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -112,7 +116,8 @@
                     android:layout_marginTop="8dp"
                     android:isVisible="@{note.topic != null}"
                     android:text="@string/dialog_event_details_topic"
-                    android:textAppearance="?textAppearanceLabelMedium" />
+                    android:textAppearance="?textAppearanceLabelMedium"
+                    android:textColor="?attr/colorSecondary" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -128,7 +133,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/dialog_event_details_body"
-                    android:textAppearance="?textAppearanceLabelMedium" />
+                    android:textAppearance="?textAppearanceLabelMedium"
+                    android:textColor="?attr/colorSecondary" />
 
                 <TextView
                     android:layout_width="match_parent"

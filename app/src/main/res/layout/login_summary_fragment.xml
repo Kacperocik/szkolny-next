@@ -56,7 +56,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <androidx.appcompat.widget.SwitchCompat
+    <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/registerMeSwitch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

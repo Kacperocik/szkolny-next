@@ -4,6 +4,7 @@
 
 package pl.szczodrzynski.edziennik.ui.widgets.timetable
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.appwidget.AppWidgetManager
@@ -14,7 +15,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -22,6 +22,7 @@ import android.os.Build
 import android.util.SparseArray
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.withStyledAttributes
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.MainActivity
@@ -32,12 +33,14 @@ import pl.szczodrzynski.edziennik.data.db.entity.Lesson.Companion.TYPE_NO_LESSON
 import pl.szczodrzynski.edziennik.data.enums.NavTarget
 import pl.szczodrzynski.edziennik.ext.filterOutArchived
 import pl.szczodrzynski.edziennik.ext.getJsonObject
+import pl.szczodrzynski.edziennik.ext.getJsonObject
 import pl.szczodrzynski.edziennik.ext.pendingIntentFlag
 import pl.szczodrzynski.edziennik.ext.pendingIntentMutable
 import pl.szczodrzynski.edziennik.ext.putExtras
 import pl.szczodrzynski.edziennik.ext.toDrawable
 import pl.szczodrzynski.edziennik.ui.widgets.LessonDialogActivity
 import pl.szczodrzynski.edziennik.ui.widgets.WidgetConfig
+import pl.szczodrzynski.edziennik.ui.widgets.resolveWidgetTheme
 import pl.szczodrzynski.edziennik.utils.models.Date
 import pl.szczodrzynski.edziennik.utils.models.ItemWidgetTimetableModel
 import pl.szczodrzynski.edziennik.utils.models.Time
@@ -52,6 +55,38 @@ class WidgetTimetableProvider : AppWidgetProvider() {
         private const val TAG = "WidgetTimetable"
 
         var timetables: SparseArray<List<ItemWidgetTimetableModel>>? = null
+
+        @JvmStatic
+        fun loadWidgetData(context: Context, appWidgetId: Int) {
+            try {
+                val app = context.applicationContext as App
+                val appWidgetManager = AppWidgetManager.getInstance(context)
+                val provider = WidgetTimetableProvider()
+                val widgetConfigs = app.config.widgetConfigs
+                val config = widgetConfigs.getJsonObject(appWidgetId.toString())?.let { app.gson.fromJson(it, WidgetConfig::class.java) } ?: WidgetConfig(-1)
+
+                var bellSyncDiffMillis: Long = 0
+                app.config.timetable.bellSyncDiff?.let {
+                    bellSyncDiffMillis = (it.hour * 60 * 60 * 1000 + it.minute * 60 * 1000 + it.second * 1000).toLong()
+                    bellSyncDiffMillis *= app.config.timetable.bellSyncMultiplier.toLong()
+                    bellSyncDiffMillis *= -1
+                }
+
+                val colors = resolveWidgetTheme(context, config)
+                val isDark = colors.isDark
+                val views = if (config.bigStyle) {
+                    RemoteViews(context.packageName, if (isDark) R.layout.widget_timetable_dark_big else R.layout.widget_timetable_big)
+                } else {
+                    RemoteViews(context.packageName, if (isDark) R.layout.widget_timetable_dark else R.layout.widget_timetable)
+                }
+
+                if (timetables == null) timetables = SparseArray()
+                provider.prepareAppWidget(app, context, appWidgetId, views, config, colors, bellSyncDiffMillis, timetables!!)
+                appWidgetManager.updateAppWidget(appWidgetId, views)
+            } catch (e: Exception) {
+                Timber.e(e)
+            }
+        }
 
         fun getPendingSelfIntent(context: Context, action: String): PendingIntent {
             val intent = Intent(context, WidgetTimetableProvider::class.java)
@@ -81,6 +116,13 @@ class WidgetTimetableProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         if (ACTION_SYNC_DATA == intent.action) {
             EdziennikTask.sync().enqueue(context)
+        } else if (Intent.ACTION_CONFIGURATION_CHANGED == intent.action) {
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val thisWidget = ComponentName(context, WidgetTimetableProvider::class.java)
+            val appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
+            if (appWidgetIds != null && appWidgetIds.isNotEmpty()) {
+                onUpdate(context, appWidgetManager, appWidgetIds)
+            }
         }
         super.onReceive(context, intent)
     }
@@ -88,10 +130,20 @@ class WidgetTimetableProvider : AppWidgetProvider() {
     private val ignoreCancelled = false
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        val pendingResult = goAsync()
+        pl.szczodrzynski.edziennik.ui.widgets.WidgetUpdater.executor.execute {
+            try {
+                updateWidgets(context, appWidgetManager)
+            } catch (e: Exception) {
+                Timber.e(e)
+            } finally {
+                pendingResult.finish()
+            }
+        }
+    }
+
+    private fun updateWidgets(context: Context, appWidgetManager: AppWidgetManager) {
         val thisWidget = ComponentName(context, WidgetTimetableProvider::class.java)
-
-        timetables = SparseArray()
-
         val app = context.applicationContext as App
         val widgetConfigs = app.config.widgetConfigs
 
@@ -102,79 +154,108 @@ class WidgetTimetableProvider : AppWidgetProvider() {
             bellSyncDiffMillis *= -1
         }
 
-        val allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
+        val allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget) ?: return
+        val nextTimetables = SparseArray<List<ItemWidgetTimetableModel>>()
+        val nextViews = SparseArray<RemoteViews>()
 
-        allWidgetIds?.forEach { appWidgetId ->
-            val config = widgetConfigs.getJsonObject(appWidgetId.toString())?.let { app.gson.fromJson(it, WidgetConfig::class.java) } ?: return@forEach
+        allWidgetIds.forEach { appWidgetId ->
+            try {
+                val config = widgetConfigs.getJsonObject(appWidgetId.toString())
+                    ?.let { app.gson.fromJson(it, WidgetConfig::class.java) }
+                    ?: return@forEach
 
-            val views = if (config.bigStyle) {
-                RemoteViews(context.packageName, if (config.darkTheme) R.layout.widget_timetable_dark_big else R.layout.widget_timetable_big)
-            } else {
-                RemoteViews(context.packageName, if (config.darkTheme) R.layout.widget_timetable_dark else R.layout.widget_timetable)
+                val colors = resolveWidgetTheme(context, config)
+                val isDark = colors.isDark
+                val views = if (config.bigStyle) {
+                    RemoteViews(context.packageName, if (isDark) R.layout.widget_timetable_dark_big else R.layout.widget_timetable_big)
+                } else {
+                    RemoteViews(context.packageName, if (isDark) R.layout.widget_timetable_dark else R.layout.widget_timetable)
+                }
+
+                val refreshIntent = Intent(app, WidgetTimetableProvider::class.java)
+                refreshIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                refreshIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds)
+                views.setOnClickPendingIntent(
+                    R.id.widgetTimetableRefresh,
+                    PendingIntent.getBroadcast(
+                        context,
+                        appWidgetId,
+                        refreshIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or pendingIntentFlag(),
+                    ),
+                )
+                views.setViewVisibility(R.id.widgetTimetableSync, View.GONE)
+                views.setViewVisibility(R.id.widgetTimetableLoading, View.GONE)
+
+                prepareAppWidget(app, context, appWidgetId, views, config, colors, bellSyncDiffMillis, nextTimetables)
+                nextViews.put(appWidgetId, views)
+            } catch (e: Exception) {
+                Timber.e(e)
             }
+        }
 
-            val refreshIntent = Intent(app, WidgetTimetableProvider::class.java)
-            refreshIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-            refreshIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
-            val refreshPendingIntent = PendingIntent.getBroadcast(context,
-                    0, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT or pendingIntentFlag())
-            views.setOnClickPendingIntent(R.id.widgetTimetableRefresh, refreshPendingIntent)
-
-            views.setViewVisibility(R.id.widgetTimetableSync, View.GONE)
-
-            views.setImageViewBitmap(
-                R.id.widgetTimetableRefresh,
-                CommunityMaterial.Icon3.cmd_refresh
-                    .toDrawable(context, Color.WHITE, sizeDp = if (config.bigStyle) 28 else 20)
-                    .toBitmap()
-            )
-
-            prepareAppWidget(app, appWidgetId, views, config, bellSyncDiffMillis)
-
+        timetables = nextTimetables
+        allWidgetIds.forEach { appWidgetId ->
+            val views = nextViews.get(appWidgetId) ?: return@forEach
             appWidgetManager.updateAppWidget(appWidgetId, views)
             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widgetTimetableListView)
         }
     }
 
+    @SuppressLint("ResourceType")
     private fun prepareAppWidget(
             app: App,
+            context: Context,
             appWidgetId: Int,
             views: RemoteViews,
             widgetConfig: WidgetConfig,
-            bellSyncDiffMillis: Long
+            colors: pl.szczodrzynski.edziennik.ui.widgets.WidgetThemeColors,
+            bellSyncDiffMillis: Long,
+            targetTimetables: SparseArray<List<ItemWidgetTimetableModel>>,
     ) {
         // get the current bell-synced time
         val now = Time.fromMillis(Time.getNow().inMillis + bellSyncDiffMillis)
 
         // set the widget transparency
-        val mode = PorterDuff.Mode.DST_IN
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            // this code seems to crash the launcher on >= P
-            val transparency = widgetConfig.opacity  //0...1
-            val colorFilter = 0x01000000L * (255f * transparency).toLong()
-            try {
-                val declaredMethods = Class.forName("android.widget.RemoteViews").declaredMethods
-                val len = declaredMethods.size
-                if (len > 0) {
-                    for (m in 0 until len) {
-                        val method = declaredMethods[m]
-                        if (method.name == "setDrawableParameters") {
-                            method.isAccessible = true
-                            method.invoke(views, R.id.widgetTimetableBackground, true, -1, colorFilter.toInt(), mode, -1)
-                            method.invoke(views, R.id.widgetTimetableHeader, true, -1, colorFilter.toInt(), mode, -1)
-                            break
-                        }
-                    }
-                }
-            } catch (e: ClassNotFoundException) {
-                Timber.e(e)
-            } catch (e: InvocationTargetException) {
-                Timber.e(e)
-            } catch (e: IllegalAccessException) {
-                Timber.e(e)
-            } catch (e: IllegalArgumentException) {
-                Timber.e(e)
-            }
+        val opacity = widgetConfig.opacity.coerceIn(0f, 1f)
+        val alphaInt = (opacity * 255f).toInt()
+        views.setInt(R.id.widgetTimetableHeaderBg, "setAlpha", alphaInt)
+        views.setInt(R.id.widgetTimetableBackgroundBg, "setAlpha", alphaInt)
+
+        val isDark = colors.isDark
+        val primaryColor = colors.primary
+        val defaultBodyColor = if (isDark) 0xFF1E1F25.toInt() else 0xFFF2F4F7.toInt()
+        val bodyColor = if (widgetConfig.appBackground) colors.background else defaultBodyColor
+        val headerColor = if (widgetConfig.headerSameAsBody) bodyColor else primaryColor
+
+        views.setInt(R.id.widgetTimetableHeaderBg, "setColorFilter", headerColor)
+        views.setInt(R.id.widgetTimetableBackgroundBg, "setColorFilter", bodyColor)
+
+        val rippleRes = if (widgetConfig.headerSameAsBody && !isDark) R.drawable.widget_button_ripple_dark else R.drawable.widget_button_ripple
+        views.setInt(R.id.widgetTimetableRefresh, "setBackgroundResource", rippleRes)
+        views.setInt(R.id.widgetTimetableSync, "setBackgroundResource", rippleRes)
+
+        if (widgetConfig.headerSameAsBody) {
+            val titleColor = if (isDark) 0xFFE6E1E5.toInt() else 0xFF1C1B1F.toInt()
+            val subtitleColor = if (isDark) 0xFFCAC4D0.toInt() else 0xFF49454F.toInt()
+            views.setTextColor(R.id.widgetTimetableTitle, titleColor)
+            views.setTextColor(R.id.widgetTimetableSubtitle, subtitleColor)
+            val iconColor = if (isDark) Color.WHITE else 0xFF1C1B1F.toInt()
+            views.setImageViewBitmap(
+                R.id.widgetTimetableRefresh,
+                CommunityMaterial.Icon3.cmd_refresh
+                    .toDrawable(app, iconColor, sizeDp = if (widgetConfig.bigStyle) 28 else 20)
+                    .toBitmap()
+            )
+        } else {
+            views.setTextColor(R.id.widgetTimetableTitle, Color.WHITE)
+            views.setTextColor(R.id.widgetTimetableSubtitle, 0xFFD0E4FF.toInt())
+            views.setImageViewBitmap(
+                R.id.widgetTimetableRefresh,
+                CommunityMaterial.Icon3.cmd_refresh
+                    .toDrawable(app, Color.WHITE, sizeDp = if (widgetConfig.bigStyle) 28 else 20)
+                    .toBitmap()
+            )
         }
 
         val unified = widgetConfig.profileId == -1
@@ -249,7 +330,7 @@ class WidgetTimetableProvider : AppWidgetProvider() {
                 val separator = ItemWidgetTimetableModel()
                 separator.profileId = profile.id
                 separator.bigStyle = widgetConfig.bigStyle
-                separator.darkTheme = widgetConfig.darkTheme
+                separator.darkTheme = isDark
                 separator.separatorProfileName = profile.name
                 if (lessons.isNotEmpty() && lessons[0].type != TYPE_NO_LESSONS) {
                     separator.lessonDate = timetableDate
@@ -280,7 +361,7 @@ class WidgetTimetableProvider : AppWidgetProvider() {
                     val separator = ItemWidgetTimetableModel()
                     separator.profileId = profile.id
                     separator.bigStyle = widgetConfig.bigStyle
-                    separator.darkTheme = widgetConfig.darkTheme
+                    separator.darkTheme = isDark
                     separator.isNoTimetableItem = true
                     models.add(separator)
                 }
@@ -288,7 +369,7 @@ class WidgetTimetableProvider : AppWidgetProvider() {
                     val separator = ItemWidgetTimetableModel()
                     separator.profileId = profile.id
                     separator.bigStyle = widgetConfig.bigStyle
-                    separator.darkTheme = widgetConfig.darkTheme
+                    separator.darkTheme = isDark
                     separator.isNoLessonsItem = true
                     models.add(separator)
                 }
@@ -303,7 +384,13 @@ class WidgetTimetableProvider : AppWidgetProvider() {
                 val model = ItemWidgetTimetableModel()
 
                 model.bigStyle = widgetConfig.bigStyle
-                model.darkTheme = widgetConfig.darkTheme
+                model.darkTheme = isDark
+                model.colorSubjectBackground = widgetConfig.colorSubjectBackground
+                model.appBackground = widgetConfig.appBackground
+
+                model.themeColorSecondary = colors.secondary
+                model.themeColorOnSurfaceVariant = colors.onSurfaceVariant
+                model.themeColorTextPrimary = colors.onSurface
 
                 model.profileId = profile.id
 
@@ -356,7 +443,8 @@ class WidgetTimetableProvider : AppWidgetProvider() {
                 for (event in events) {
                     if (event.time == null || event.time != lesson.displayStartTime)
                         continue
-                    model.eventColors.add(if (event.isHomework) ItemWidgetTimetableModel.EVENT_COLOR_HOMEWORK else event.eventColor)
+                    val eventColor = if (event.isHomework) ItemWidgetTimetableModel.EVENT_COLOR_HOMEWORK else app.eventManager.getEventColor(event)
+                    model.eventColors.add(eventColor)
                 }
 
                 models += model
@@ -397,7 +485,7 @@ class WidgetTimetableProvider : AppWidgetProvider() {
         val headerPendingIntent = PendingIntent.getActivity(app, appWidgetId, headerIntent, FLAG_UPDATE_CURRENT or pendingIntentMutable())
         views.setOnClickPendingIntent(R.id.widgetTimetableHeader, headerPendingIntent)
 
-        timetables!!.put(appWidgetId, models)
+        targetTimetables.put(appWidgetId, models)
 
         // apply the list service to the list view
         val listIntent = Intent(app, WidgetTimetableService::class.java)

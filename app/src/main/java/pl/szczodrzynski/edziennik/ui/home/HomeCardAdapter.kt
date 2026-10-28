@@ -9,19 +9,36 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.material.card.MaterialCardView
 import pl.szczodrzynski.edziennik.R
+import pl.szczodrzynski.edziennik.ext.applyExpressiveShapeMorphToButtons
+import pl.szczodrzynski.edziennik.ext.dp
+import pl.szczodrzynski.edziennik.ext.enableExpressiveCardShapeMorph
 
-class HomeCardAdapter(var items: MutableList<HomeCard>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class HomeCardAdapter(
+    var items: MutableList<HomeCard>,
+    var isCardsLocked: () -> Boolean = { false },
+    private val onCardSizeChanged: () -> Unit = {},
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
         private const val TAG = "HomeCardAdapter"
     }
 
     var itemTouchHelper: ItemTouchHelper? = null
+    var cardHorizontalMargin = 16.dp
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         (holder as ViewHolder).bind(itemTouchHelper)
+        (holder.root.layoutParams as? StaggeredGridLayoutManager.LayoutParams)?.apply {
+            // debug, archive & availability cards span the whole width
+            isFullSpan = items[position].id >= 100
+            leftMargin = cardHorizontalMargin
+            rightMargin = cardHorizontalMargin
+        }
         items[position].bind(position, holder)
+        holder.root.applyExpressiveShapeMorphToButtons()
+        holder.root.enableExpressiveCardShapeMorph(isLocked = isCardsLocked)
     }
 
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
@@ -31,7 +48,13 @@ class HomeCardAdapter(var items: MutableList<HomeCard>) : RecyclerView.Adapter<R
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return ViewHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.card_home, parent, false) as MaterialCardView
-        )
+        ).also { holder ->
+            holder.root.addOnLayoutChangeListener { _, left, top, right, bottom,
+                                                   oldLeft, oldTop, oldRight, oldBottom ->
+                if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop)
+                    onCardSizeChanged()
+            }
+        }
     }
 
     override fun getItemCount(): Int = items.size

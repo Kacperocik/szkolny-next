@@ -11,6 +11,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat.*
 import androidx.core.app.NotificationManagerCompat.*
 import pl.szczodrzynski.edziennik.R
+import pl.szczodrzynski.edziennik.data.enums.NotificationType
 
 class NotificationManager(val c: Context) {
     data class Channel(
@@ -105,11 +106,45 @@ class NotificationManager(val c: Context) {
             PRIORITY_DEFAULT
     )
 
+    val ongoingLesson = Channel(
+        150,
+        "pl.szczodrzynski.edziennik.ONGOING_LESSON",
+        c.getString(R.string.notification_channel_ongoing_lesson_name),
+        c.getString(R.string.notification_channel_ongoing_lesson_desc),
+        IMPORTANCE_LOW,
+        PRIORITY_LOW,
+        quiet = true
+    )
+
+    private val dataByType by lazy {
+        NotificationType.entries.associateWith { type ->
+            if (type == NotificationType.UPDATE)
+                return@associateWith updates
+            if (type == NotificationType.ERROR)
+                return@associateWith userAttention
+
+            val enabledByDefault = type.enabledByDefault != false
+            Channel(
+                id = 1000 + type.id,
+                key = "pl.szczodrzynski.edziennik.DATA.${type.id}",
+                name = c.getString(type.titleRes),
+                description = c.getString(R.string.notification_channel_notifications_desc),
+                importance = if (enabledByDefault) IMPORTANCE_HIGH else IMPORTANCE_NONE,
+                priority = if (enabledByDefault) PRIORITY_MAX else PRIORITY_MIN,
+                lightColor = 0xff2196f3.toInt()
+            )
+        }
+    }
+
+    fun dataChannel(type: NotificationType): Channel =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            dataByType.getValue(type)
+        else
+            data
+
     val all by lazy { listOf(
             sync,
-            data,
-            dataQuiet,
-            updates,
-            userAttention
-    ) }
+            userAttention,
+            ongoingLesson
+    ) + dataByType.values }
 }

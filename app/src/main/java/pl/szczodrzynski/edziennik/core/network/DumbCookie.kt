@@ -2,6 +2,8 @@
  * Copyright (c) Kuba Szczodrzyński 2020-3-24.
  */
 
+@file:Suppress("DEPRECATION_ERROR")
+
 package pl.szczodrzynski.edziennik.core.network
 
 import okhttp3.Cookie

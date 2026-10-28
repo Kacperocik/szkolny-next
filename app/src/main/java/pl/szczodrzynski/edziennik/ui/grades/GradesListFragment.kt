@@ -18,26 +18,24 @@ import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.core.manager.GradesManager
 import pl.szczodrzynski.edziennik.data.db.entity.Grade
 import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_NO_GRADE
-import pl.szczodrzynski.edziennik.data.db.enums.MetadataType
 import pl.szczodrzynski.edziennik.data.db.full.GradeFull
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
 import pl.szczodrzynski.edziennik.data.enums.MetadataType
-import pl.szczodrzynski.edziennik.data.enums.NavTarget
+import pl.szczodrzynski.edziennik.ext.getStudentData
 import pl.szczodrzynski.edziennik.databinding.GradesListFragmentBinding
-import pl.szczodrzynski.edziennik.ext.Bundle
-import pl.szczodrzynski.edziennik.ext.averageOrNull
 import pl.szczodrzynski.edziennik.ext.isNotNullNorEmpty
 import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
 import pl.szczodrzynski.edziennik.ui.base.fragment.BaseFragment
 import pl.szczodrzynski.edziennik.ui.dialogs.settings.GradesConfigDialog
 import pl.szczodrzynski.edziennik.ui.grades.models.GradesAverages
+import pl.szczodrzynski.edziennik.ui.grades.models.GradesEmpty
 import pl.szczodrzynski.edziennik.ui.grades.models.GradesSemester
+import pl.szczodrzynski.edziennik.ui.grades.models.GradesSimulatorToggle
 import pl.szczodrzynski.edziennik.ui.grades.models.GradesStats
 import pl.szczodrzynski.edziennik.ui.grades.models.GradesSubject
 import pl.szczodrzynski.edziennik.utils.TextInputDropDown
-import pl.szczodrzynski.edziennik.utils.managers.GradesManager
-import pl.szczodrzynski.edziennik.utils.managers.GradesManager.Companion.UNIVERSITY_AVERAGE_MODE_ECTS
-import pl.szczodrzynski.edziennik.utils.managers.GradesManager.Companion.UNIVERSITY_AVERAGE_MODE_SIMPLE
+import pl.szczodrzynski.edziennik.core.manager.GradesManager.Companion.UNIVERSITY_AVERAGE_MODE_ECTS
+import pl.szczodrzynski.edziennik.core.manager.GradesManager.Companion.UNIVERSITY_AVERAGE_MODE_SIMPLE
 import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetPrimaryItem
 import kotlin.math.max
 
@@ -56,6 +54,13 @@ class GradesListFragment : BaseFragment<GradesListFragmentBinding, MainActivity>
                 activity.bottomSheet.close()
                 GradesConfigDialog(activity, true).show()
             },
+        BottomSheetPrimaryItem(true)
+            .withTitle(if (gradesAdapter?.simulatorMode == true) R.string.grades_simulator_exit else R.string.menu_grades_editor)
+            .withIcon(CommunityMaterial.Icon.cmd_calculator)
+            .withOnClickListener {
+                activity.bottomSheet.close()
+                gradesAdapter?.let { setSimulatorMode(it, !it.simulatorMode) }
+            },
     )
 
     private val manager
@@ -65,11 +70,13 @@ class GradesListFragment : BaseFragment<GradesListFragmentBinding, MainActivity>
     private val dontCountGrades
         get() = manager.dontCountGrades
     private var expandSubjectId = 0L
+    private var lastGrades: List<GradeFull> = emptyList()
+    private var gradesAdapter: GradesAdapter? = null
 
     override suspend fun onViewReady(savedInstanceState: Bundle?) {
         expandSubjectId = arguments?.getLong("gradesSubjectId") ?: 0L
 
-        val adapter = GradesAdapter(activity)
+        val adapter = GradesAdapter(activity).also { gradesAdapter = it }
         var firstRun = true
 
         app.db.gradeDao().getAllOrderBy(App.profileId, app.gradesManager.getOrderByString()).observe(viewLifecycleOwner, Observer { grades -> this@GradesListFragment.launch {
@@ -114,6 +121,12 @@ class GradesListFragment : BaseFragment<GradesListFragmentBinding, MainActivity>
             }
 
             // load & configure the adapter
+            lastGrades = items
+            if (adapter.simulatorMode) {
+                // Preserve in-progress simulator edits instead of rebuilding the list.
+                b.progressBar.isVisible = false
+                return@launch
+            }
             adapter.items = withContext(Dispatchers.Default) { processGrades(items) }
             if (items.isNotNullNorEmpty() && b.list.adapter == null) {
                 b.list.adapter = adapter
@@ -144,26 +157,83 @@ class GradesListFragment : BaseFragment<GradesListFragmentBinding, MainActivity>
             GradeDetailsDialog(activity, it).show()
         }
 
-        adapter.onGradesEditorClick = { subject, semester ->
-            val otherSemester = subject.semesters.firstOrNull { it != semester }
-            var gradeSumOtherSemester = otherSemester?.averages?.normalWeightedSum
-            var gradeCountOtherSemester = otherSemester?.averages?.normalWeightedCount
-            if ((gradeSumOtherSemester ?: 0f) == 0f || (gradeCountOtherSemester ?: 0f) == 0f) {
-                gradeSumOtherSemester = otherSemester?.averages?.normalSum
-                gradeCountOtherSemester = otherSemester?.averages?.normalCount?.toFloat()
-            }
-
-            activity.navigate(navTarget = NavTarget.GRADES_EDITOR, args = Bundle(
-                    "subjectId" to subject.subjectId,
-                    "semester" to semester.number,
-                    "averageMode" to manager.yearAverageMode,
-                    "yearAverageBefore" to subject.averages.normalAvg,
-                    "gradeSumOtherSemester" to gradeSumOtherSemester,
-                    "gradeCountOtherSemester" to gradeCountOtherSemester,
-                    "averageOtherSemester" to otherSemester?.averages?.normalAvg,
-                    "finalOtherSemester" to otherSemester?.finalGrade?.value
-            ))
+        adapter.onSimulatorToggle = { enabled ->
+            setSimulatorMode(adapter, enabled)
         }
+    }
+
+    private fun setSimulatorMode(adapter: GradesAdapter, enabled: Boolean) {
+        if (enabled) {
+            val stats = adapter.items.firstOrNull { it is GradesStats } as? GradesStats ?: return
+            adapter.simSnapshot = GradesAdapter.SimulatorSnapshot(
+                sem1 = GradesAdapter.SimulatorStatSnapshot(stats.normalSem1, stats.normalSem1Proposed, stats.normalSem1Final, stats.sem1NotAllFinal),
+                sem2 = GradesAdapter.SimulatorStatSnapshot(stats.normalSem2, stats.normalSem2Proposed, stats.normalSem2Final, stats.sem2NotAllFinal),
+                yearly = GradesAdapter.SimulatorStatSnapshot(stats.normalYearly, stats.normalYearlyProposed, stats.normalYearlyFinal, stats.yearlyNotAllFinal)
+            )
+            adapter.simulatorMode = true
+            adapter.snapshotSimulatorGrades()
+            adapter.snapshotSimulatorAverages()
+            ensureSimulatorSemesters(adapter)
+            b.simulatorBorder.isVisible = true
+            adapter.notifyDataSetChanged()
+        } else {
+            adapter.simulatorMode = false
+            adapter.simSnapshot = null
+            adapter.clearSimulatorSnapshots()
+            b.simulatorBorder.isVisible = false
+            adapter.restoreSimulatorGrades(lastGrades)
+            this@GradesListFragment.launch {
+                adapter.items = withContext(Dispatchers.Default) { processGrades(lastGrades) }
+                adapter.notifyDataSetChanged()
+            }
+        }
+    }
+
+    /** Adds missing semester rows so grades can also be simulated in empty semesters. */
+    private fun ensureSimulatorSemesters(adapter: GradesAdapter) {
+        val subjects = adapter.items.filterIsInstance<GradesSubject>()
+        for (subject in subjects) {
+            if (subject.isUnknown)
+                continue
+            for (number in 1..2) {
+                if (subject.semesters.any { it.number == number })
+                    continue
+                val semester = GradesSemester(subject.subjectId, number)
+                subject.semesters.add(semester)
+                subject.semesters.sortByDescending { it.number }
+                insertSemesterRow(adapter, subject, semester)
+            }
+        }
+    }
+
+    private fun insertSemesterRow(adapter: GradesAdapter, subject: GradesSubject, semester: GradesSemester) {
+        val subjectPos = adapter.items.indexOf(subject)
+        if (subjectPos == -1 || subject.state != GradesAdapter.STATE_OPENED)
+            return
+        // Keep semester blocks in descending order when inserting the new row.
+        var insertPos = subjectPos + 1
+        var currentSem = Int.MAX_VALUE
+        outer@ while (insertPos < adapter.items.size) {
+            val blockSem = when (val item = adapter.items[insertPos]) {
+                is GradesSemester -> {
+                    if (item.subjectId != subject.subjectId)
+                        break@outer
+                    item.number
+                }
+                is GradeFull -> {
+                    if (item.subjectId != subject.subjectId)
+                        break@outer
+                    item.semester
+                }
+                is GradesEmpty -> currentSem
+                else -> break@outer
+            }
+            if (blockSem <= semester.number)
+                break
+            currentSem = blockSem
+            insertPos++
+        }
+        adapter.items.add(insertPos, semester)
     }
 
     private fun expandSubject(adapter: GradesAdapter) {
@@ -332,77 +402,9 @@ class GradesListFragment : BaseFragment<GradesListFragmentBinding, MainActivity>
             return (items + stats).toMutableList()
         }
 
-        val sem1Expected = mutableListOf<Float>()
-        val sem2Expected = mutableListOf<Float>()
-        val yearlyExpected = mutableListOf<Float>()
-        val sem1Proposed = mutableListOf<Float>()
-        val sem2Proposed = mutableListOf<Float>()
-        val yearlyProposed = mutableListOf<Float>()
-        val sem1Final = mutableListOf<Float>()
-        val sem2Final = mutableListOf<Float>()
-        val yearlyFinal = mutableListOf<Float>()
+        manager.computeGradesStats(items, stats)
 
-        val sem1Point = mutableListOf<Float>()
-        val sem2Point = mutableListOf<Float>()
-        val yearlyPoint = mutableListOf<Float>()
-
-        for (item in items) {
-            if (item.isUnknown) {
-                // do not count averages for "unknown" subjects
-                continue
-            }
-            item.semesters.forEach { sem ->
-                manager.calculateAverages(sem.averages)
-                if (sem.number == 1) {
-                    sem.proposedGrade?.value?.let { sem1Proposed += it }
-                    sem.finalGrade?.value?.let {
-                        sem1Final += it
-                        sem1Expected += it
-                    } ?: run {
-                        sem.averages.normalAvg?.let { sem1Expected += manager.getRoundedGrade(it).toFloat() }
-                    }
-                    sem.averages.pointAvgPercent?.let { sem1Point += it }
-                }
-                if (sem.number == 2) {
-                    sem.proposedGrade?.value?.let { sem2Proposed += it }
-                    sem.finalGrade?.value?.let {
-                        sem2Final += it
-                        sem2Expected += it
-                    } ?: run {
-                        sem.averages.normalAvg?.let { sem2Expected += manager.getRoundedGrade(it).toFloat() }
-                    }
-                    sem.averages.pointAvgPercent?.let { sem2Point += it }
-                }
-            }
-            manager.calculateAverages(item.averages, item.semesters)
-            item.proposedGrade?.value?.let { yearlyProposed += it }
-            item.finalGrade?.value?.let {
-                yearlyFinal += it
-                yearlyExpected += it
-            } ?: run {
-                item.averages.normalAvg?.let { yearlyExpected += manager.getRoundedGrade(it).toFloat() }
-            }
-            item.averages.pointAvgPercent?.let { yearlyPoint += it }
-        }
-
-        stats.normalSem1 = sem1Expected.averageOrNull()?.toFloat() ?: 0f
-        stats.normalSem1Proposed = sem1Proposed.averageOrNull()?.toFloat() ?: 0f
-        stats.normalSem1Final = sem1Final.averageOrNull()?.toFloat() ?: 0f
-        stats.sem1NotAllFinal = sem1Final.size < sem1Expected.size
-        stats.normalSem2 = sem2Expected.averageOrNull()?.toFloat() ?: 0f
-        stats.normalSem2Proposed = sem2Proposed.averageOrNull()?.toFloat() ?: 0f
-        stats.normalSem2Final = sem2Final.averageOrNull()?.toFloat() ?: 0f
-        stats.sem2NotAllFinal = sem2Final.size < sem2Expected.size
-        stats.normalYearly = yearlyExpected.averageOrNull()?.toFloat() ?: 0f
-        stats.normalYearlyProposed = yearlyProposed.averageOrNull()?.toFloat() ?: 0f
-        stats.normalYearlyFinal = yearlyFinal.averageOrNull()?.toFloat() ?: 0f
-        stats.yearlyNotAllFinal = yearlyFinal.size < yearlyExpected.size
-
-        stats.pointSem1 = sem1Point.averageOrNull()?.toFloat() ?: 0f
-        stats.pointSem2 = sem2Point.averageOrNull()?.toFloat() ?: 0f
-        stats.pointYearly = yearlyPoint.averageOrNull()?.toFloat() ?: 0f
-
-        return (items + stats).toMutableList()
+        return (items + GradesSimulatorToggle + stats).toMutableList()
     }
 
     private fun countGrade(grade: Grade, averages: GradesAverages) {

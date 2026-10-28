@@ -530,7 +530,7 @@ public class Utils {
         }
         return 0.00f;
     }
-    
+
     public static int getVulcanGradeColor(String name) {
         switch (name) {
             case "1-":
@@ -776,6 +776,7 @@ public class Utils {
     }
 
     public static String getExtensionFromFileName(String fileName) {
+        if (!fileName.contains(".")) return "";
         return fileName.substring(fileName.lastIndexOf(".")+1).toLowerCase();
     }
 

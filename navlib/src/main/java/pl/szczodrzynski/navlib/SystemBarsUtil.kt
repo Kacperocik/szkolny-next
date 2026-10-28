@@ -17,6 +17,9 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.mikepenz.materialize.util.KeyboardUtil
 
 
@@ -146,7 +149,7 @@ class SystemBarsUtil(private val activity: Activity) {
     private var insetsApplied = false
 
     fun commit() {
-        Log.d("NavLib", "SystemBarsUtil applying")
+        Log.d("NavLib", "SystemBarsUtil applying: appFullscreen=$appFullscreen")
         insetsApplied = false
         if (paddingByKeyboard != null) {
             // thanks mikepenz for this life-saving class
@@ -159,200 +162,63 @@ class SystemBarsUtil(private val activity: Activity) {
         if (targetStatusBarColor == COLOR_PRIMARY_DARK)
             targetStatusBarColor = getColorFromAttr(activity, R.attr.colorPrimaryDark)
 
-        var targetStatusBarDarker = statusBarDarker
-
-        // fallback if the SB color is too light for the icons to be visible
-        // applicable on Lollipop 5.0 and TouchWiz 4.1-4.3
-        var targetStatusBarFallbackLight = statusBarFallbackLight
-        if (targetStatusBarFallbackLight == COLOR_PRIMARY_DARK)
-            targetStatusBarFallbackLight = getColorFromAttr(activity, R.attr.colorPrimaryDark)
-
-        // fallback if there is a gradient under the status bar
-        // applicable on AOSP/similar 4.4 and Huawei EMUI Lollipop
-        // TODO check huawei 6.0+ for gradient bars, check huawei 4.4
-        var targetStatusBarFallbackGradient = statusBarFallbackGradient
-        if (targetStatusBarFallbackGradient == COLOR_PRIMARY_DARK)
-            targetStatusBarFallbackGradient = getColorFromAttr(activity, R.attr.colorPrimaryDark)
-
-        // determines the target mode that will be applied
-        var targetStatusBarMode = TARGET_MODE_NORMAL
-
+        val targetStatusBarDarker = statusBarDarker
         val targetStatusBarLight = ColorUtils.calculateLuminance(targetStatusBarColor) > 0.75 && !targetStatusBarDarker
 
-        if (appFullscreen) {
-            window.decorView.systemUiVisibility = 0
-            // API 19+ (KitKat 4.4+) - make the app fullscreen.
-            // On lower APIs this is useless because
-            // #1 the status/nav bar cannot be transparent (except Samsung TouchWiz)
-            // #2 tablets do not report status/nav bar height correctly
-            // #3 SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN makes the activity not resize when keyboard is open
-            // Samsung TouchWiz - app will go fullscreen. There is a problem though, see #3.
-            var targetAppFullscreen = false
-            if (SDK_INT >= VERSION_CODES.KITKAT) {
-                targetAppFullscreen = true
-            }
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
-            if (SDK_INT in VERSION_CODES.KITKAT until VERSION_CODES.LOLLIPOP) {
-                // API 19-20 (KitKat 4.4) - set gradient status bar
-                window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-                // take FallbackGradient color
-                targetStatusBarMode = TARGET_MODE_GRADIENT
-                // disable darker even if [statusBarDarker] == true BUT gradient fallback is not COLOR_HALF_TRANSPARENT
-                //targetStatusBarDarker = targetStatusBarDarker && targetStatusBarFallbackGradient == COLOR_HALF_TRANSPARENT
-            }
-            else if (SDK_INT >= VERSION_CODES.LOLLIPOP) {
-                // API 21+ (Lollipop 5.0+) - set transparent status bar
-                if (statusBarTranslucent) {
-                    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        val targetView = insetsListener ?: marginBySystemBars ?: window.decorView
+
+        ViewCompat.setOnApplyWindowInsetsListener(targetView) { _, windowInsets ->
+            val statusBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val navBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            if (appFullscreen) {
+                // Fullscreen mode: Hide top status bar (clock, battery, wifi, etc.) so nothing overlaps
+                insetsController.hide(WindowInsetsCompat.Type.statusBars())
+                insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+                if (SDK_INT < VERSION_CODES.R) {
+                    @Suppress("DEPRECATION")
+                    window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
                 }
-                else {
+
+                if (SDK_INT >= VERSION_CODES.LOLLIPOP) {
                     window.statusBarColor = Color.TRANSPARENT
                 }
-                if (SDK_INT < VERSION_CODES.M && targetStatusBarLight) {
-                    // take FallbackLight color
-                    targetStatusBarMode = TARGET_MODE_LIGHT
+
+                applyPadding(0, 0, 0, navBarsInsets.bottom)
+                statusBarBgView?.visibility = GONE
+                statusBarDarkView?.visibility = GONE
+            } else {
+                // Normal mode: Show status bar and add top padding equal to statusBarsInsets.top so app toolbar starts below status bar
+                insetsController.show(WindowInsetsCompat.Type.statusBars())
+                insetsController.show(WindowInsetsCompat.Type.navigationBars())
+
+                if (SDK_INT < VERSION_CODES.R) {
+                    @Suppress("DEPRECATION")
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
                 }
-            }
-            if (SDK_INT >= VERSION_CODES.M && targetStatusBarLight) {
-                // API 23+ (Marshmallow 6.0+) - set the status bar icons to dark color if [statusBarLight] is true
-                window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-            }
-            // FOR SAMSUNG/SONY DEVICES (TouchWiz 4.1-4.3)
-            if (SDK_INT < VERSION_CODES.KITKAT) {
-                val libs = activity.packageManager.systemSharedLibraryNames
-                var reflect: String? = null
-                // TODO galaxy s3 - opening keyboard does not resize activity if fullscreen
-                if (libs != null) {
-                    for (lib in libs) {
-                        Log.d("SBU", lib)
-                        if (lib == "touchwiz")
-                            // SYSTEM_UI_FLAG_TRANSPARENT_BACKGROUND = 0x00001000
-                            reflect = "SYSTEM_UI_FLAG_TRANSPARENT_BACKGROUND"
-                        else if (lib.startsWith("com.sonyericsson.navigationbar"))
-                            reflect = "SYSTEM_UI_FLAG_TRANSPARENT"
-                    }
-                    if (reflect != null) {
-                        try {
-                            val field = View::class.java.getField(reflect)
-                            var flag = 0
-                            if (field.type === Integer.TYPE)
-                                flag = field.getInt(null)
-                            if (flag != 0) {
-                                window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or flag
-                                targetStatusBarMode = TARGET_MODE_LIGHT /* or TARGET_MODE_GRADIENT */
-                                targetAppFullscreen = true
-                            }
-                        } catch (e: Exception) {
-                        }
-                    }
+
+                insetsController.isAppearanceLightStatusBars = targetStatusBarLight
+
+                if (SDK_INT >= VERSION_CODES.LOLLIPOP) {
+                    window.statusBarColor = Color.TRANSPARENT
                 }
-            }
-            // TODO huawei detection for 5.0+
 
-            targetStatusBarColor = when (targetStatusBarMode) {
-                TARGET_MODE_LIGHT -> when (targetStatusBarFallbackLight) {
-                    COLOR_DO_NOT_CHANGE -> targetStatusBarColor
-                    COLOR_HALF_TRANSPARENT -> {
-                        targetStatusBarDarker = true
-                        targetStatusBarColor
-                    }
-                    else -> targetStatusBarFallbackLight
-                }
-                TARGET_MODE_GRADIENT -> when (targetStatusBarFallbackGradient) {
-                    COLOR_DO_NOT_CHANGE -> {
-                        targetStatusBarDarker = false
-                        targetStatusBarColor
-                    }
-                    COLOR_HALF_TRANSPARENT -> {
-                        targetStatusBarDarker = true
-                        targetStatusBarColor
-                    }
-                    else -> {
-                        targetStatusBarDarker = false
-                        targetStatusBarFallbackGradient
-                    }
-                }
-                else -> targetStatusBarColor
+                applyPadding(0, statusBarsInsets.top, 0, navBarsInsets.bottom)
+
+                statusBarBgView?.visibility = VISIBLE
+                statusBarBgView?.setBackgroundColor(targetStatusBarColor)
+                statusBarDarkView?.visibility = if (targetStatusBarDarker) VISIBLE else GONE
             }
 
-            statusBarBgView?.setBackgroundColor(targetStatusBarColor)
-            statusBarDarkView?.visibility = if (targetStatusBarDarker) VISIBLE else GONE
-
-            if (targetAppFullscreen) {
-                window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            }
-
-            // TODO navigation bar options like status bar
-            // NAVIGATION BAR
-            if (SDK_INT >= VERSION_CODES.KITKAT && (SDK_INT < VERSION_CODES.LOLLIPOP || !navigationBarTransparent)) {
-                // API 19-20 (KitKat 4.4) - set gradient navigation bar
-                // API 21+ (Lollipop 5.0+) - set half-transparent navigation bar if [navigationBarTransparent] is false
-                window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-            }
-
-            if (SDK_INT >= VERSION_CODES.LOLLIPOP && navigationBarTransparent) {
-                // API 21+ (Lollipop 5.0+) - set fully transparent navigation bar if [navigationBarTransparent] is true
-                window.navigationBarColor = Color.TRANSPARENT
-            }
-
-            // PADDING
-            if (insetsListener != null) {
-                if (SDK_INT >= VERSION_CODES.LOLLIPOP && false) {
-                    ViewCompat.setOnApplyWindowInsetsListener(insetsListener!!) { _, insets ->
-                        Log.d("NavLib", "Got insets left = ${insets.systemWindowInsetLeft}, top = ${insets.systemWindowInsetTop}, right = ${insets.systemWindowInsetRight}, bottom = ${insets.systemWindowInsetBottom}")
-                        if (insetsApplied)
-                            return@setOnApplyWindowInsetsListener insets.consumeSystemWindowInsets()
-                        Log.d("NavLib", "Applied insets left = ${insets.systemWindowInsetLeft}, top = ${insets.systemWindowInsetTop}, right = ${insets.systemWindowInsetRight}, bottom = ${insets.systemWindowInsetBottom}")
-                        insetsApplied = true
-                        applyPadding(
-                            insets.systemWindowInsetLeft,
-                            insets.systemWindowInsetTop,
-                            insets.systemWindowInsetRight,
-                            insets.systemWindowInsetBottom
-                        )
-                        insets.consumeSystemWindowInsets()
-                    }
-                }
-                else {
-                    var statusBarSize = 0
-                    val statusBarRes = resources.getIdentifier("status_bar_height", "dimen", "android")
-                    if (statusBarRes > 0 && targetAppFullscreen) {
-                        statusBarSize = resources.getDimensionPixelSize(statusBarRes)
-                    }
-
-
-                    var navigationBarSize = 0
-                    if (hasNavigationBar(activity) && targetAppFullscreen) {
-                        val orientation = resources.configuration.orientation
-
-                        val navigationBarRes = when {
-                            orientation == ORIENTATION_PORTRAIT ->
-                                resources.getIdentifier("navigation_bar_height", "dimen", "android")
-                            isTablet(activity) ->
-                                resources.getIdentifier("navigation_bar_height_landscape", "dimen", "android")
-                            else ->
-                                resources.getIdentifier("navigation_bar_width", "dimen", "android")
-                        }
-
-                        if (navigationBarRes > 0) {
-                            navigationBarSize = resources.getDimensionPixelSize(navigationBarRes)
-                        }
-                    }
-
-                    applyPadding(
-                        0,
-                        statusBarSize,
-                        0,
-                        navigationBarSize
-                    )
-                }
-            }
+            windowInsets
         }
-        else {
-            // app not fullscreen
-            // TODO statusBarColor & navigationBarColor if not fullscreen (it's possible)
-        }
+
+        ViewCompat.requestApplyInsets(targetView)
     }
 
     private fun isTablet(c: Context): Boolean {

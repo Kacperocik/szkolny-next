@@ -11,31 +11,48 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.shape.ShapeAppearanceModel
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.szkolny.font.SzkolnyFont
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.entity.Notice
 import pl.szczodrzynski.edziennik.data.db.full.NoticeFull
+import pl.szczodrzynski.edziennik.ext.enableExpressiveCardShapeMorph
+import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.ext.resolveColor
 import pl.szczodrzynski.edziennik.ext.toDrawable
 import pl.szczodrzynski.edziennik.utils.BetterLink
 import pl.szczodrzynski.edziennik.utils.Utils.bs
 import pl.szczodrzynski.edziennik.utils.models.Date
+import pl.szczodrzynski.navlib.enableExpressiveImageShapeMorph
 
 class NoticesAdapter//getting the context and product list with constructor
 (private val context: Context, var noticeList: List<NoticeFull>) : RecyclerView.Adapter<NoticesAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         //inflating and returning our view holder
-        val inflater = LayoutInflater.from(context)
+        val inflater = LayoutInflater.from(parent.context)
         val view = inflater.inflate(R.layout.row_notices_item, parent, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = context.applicationContext as App
+
+        val isFirst = position == 0
+        val isLast = position == itemCount - 1
+
+        val shapeOverlay = when {
+            isFirst && isLast -> R.style.ShapeAppearance_Material3_Corner_GroupSingle
+            isFirst -> R.style.ShapeAppearance_Material3_Corner_GroupTop
+            isLast -> R.style.ShapeAppearance_Material3_Corner_GroupBottom
+            else -> R.style.ShapeAppearance_Material3_Corner_GroupMiddle
+        }
+        holder.noticesItemCard.shapeAppearanceModel = ShapeAppearanceModel.builder(context, shapeOverlay, 0).build()
+        holder.noticesItemCard.enableExpressiveCardShapeMorph()
 
         val notice = noticeList[position]
 
@@ -57,7 +74,7 @@ class NoticesAdapter//getting the context and product list with constructor
                             context,
                             R.color.md_green_600.resolveColor(context)
                         ),
-                        sizeDp = 36
+                        sizeDp = 28
                     )
             )
         } else if (notice.type == Notice.TYPE_NEGATIVE) {
@@ -69,7 +86,7 @@ class NoticesAdapter//getting the context and product list with constructor
                             context,
                             R.color.md_red_600.resolveColor(context)
                         ),
-                        sizeDp = 36,
+                        sizeDp = 28,
                     )
             )
         } else {
@@ -81,7 +98,7 @@ class NoticesAdapter//getting the context and product list with constructor
                             context,
                             R.color.md_blue_500.resolveColor(context)
                         ),
-                        sizeDp = 36,
+                        sizeDp = 28,
                     )
             )
         }
@@ -113,7 +130,7 @@ class NoticesAdapter//getting the context and product list with constructor
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var noticesItemCard: CardView = itemView.findViewById(R.id.noticesItemCard)
+        var noticesItemCard: MaterialCardView = itemView.findViewById(R.id.noticesItemCard)
         var noticesItemType: ImageView = itemView.findViewById(R.id.noticesItemType)
         var noticesItemReason: TextView = itemView.findViewById(R.id.noticesItemReason)
         var noticesItemTeacherName: TextView = itemView.findViewById(R.id.noticesItemTeacherName)

@@ -7,11 +7,10 @@ package pl.szczodrzynski.edziennik.ui.search
 import android.text.Editable
 import android.text.TextWatcher
 import pl.szczodrzynski.edziennik.R
-import pl.szczodrzynski.edziennik.databinding.SearchItemBinding
 
 class SearchTextWatcher(
-    private val b: SearchItemBinding,
-    private val filter: SearchFilter<*>,
+    private val holder: SearchViewHolder,
+    private val adapter: SearchableAdapter<*>,
     private val item: SearchField,
 ) : TextWatcher {
 
@@ -19,13 +18,16 @@ class SearchTextWatcher(
     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
     override fun afterTextChanged(s: Editable?) {
-        item.searchText = s ?: ""
-        filter.filter(s) { count ->
-            if (s.isNullOrBlank())
-                b.searchLayout.helperText = " "
-            else
-                b.searchLayout.helperText =
-                    b.root.context.getString(R.string.messages_search_results, count - 1)
+        holder.onTextChanged(s)
+        item.searchText = s?.toString() ?: ""
+        adapter.filter.filter(s) { _ ->
+            val count = adapter.getMatchingContentCount()
+            if (s.isNullOrBlank() || count == 0) {
+                holder.b.searchLayout.helperText = " "
+            } else {
+                val resId = adapter.searchResultsPluralRes
+                holder.b.searchLayout.helperText = holder.b.root.context.resources.getQuantityString(resId, count, count)
+            }
         }
     }
 
@@ -34,8 +36,8 @@ class SearchTextWatcher(
     }
 
     override fun hashCode(): Int {
-        var result = b.hashCode()
-        result = 31 * result + filter.hashCode()
+        var result = holder.hashCode()
+        result = 31 * result + adapter.hashCode()
         result = 31 * result + item.hashCode()
         return result
     }

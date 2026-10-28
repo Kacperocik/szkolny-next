@@ -27,14 +27,15 @@
         android:text="@string/login_sync_title"
         android:textAppearance="?textAppearanceHeadlineSmall" />
 
-    <ProgressBar
+    <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/loginSyncProgressBar"
-        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="8dp"
         android:indeterminate="true"
-        android:max="100" />
+        app:indicatorColor="?attr/colorPrimary"
+        app:trackCornerRadius="8dp"
+        app:trackThickness="4dp" />
 
     <TextView
         android:id="@+id/loginSyncSubtitle1"
@@ -48,5 +49,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        tools:text="@string/login_sync_subtitle_2_format" />
+        tools:text="Synchronizacja końcowa" />
 </LinearLayout>

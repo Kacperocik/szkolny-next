@@ -15,6 +15,7 @@ import pl.szczodrzynski.edziennik.data.db.entity.Lesson
 import pl.szczodrzynski.edziennik.data.db.full.LessonFull
 import pl.szczodrzynski.edziennik.ext.setText
 import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
+import pl.szczodrzynski.edziennik.utils.Colors
 import kotlin.coroutines.CoroutineContext
 
 class TimetableManager(val app: App) : CoroutineScope {
@@ -84,5 +85,15 @@ class TimetableManager(val app: App) : CoroutineScope {
             }
         }
         return annotationVisible
+    }
+
+    fun getSubjectColor(subjectId: Long?, name: String?): Int {
+        subjectId?.let { id ->
+            app.profile.config.ui.timetableSubjectColors
+                .get(id.toString())
+                ?.takeIf { it.isJsonPrimitive }
+                ?.asInt
+        }?.let { return it }
+        return Colors.stringToMaterialColorCRC(name ?: "")
     }
 }

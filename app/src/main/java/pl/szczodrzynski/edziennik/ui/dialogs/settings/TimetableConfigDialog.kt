@@ -9,7 +9,9 @@ import androidx.appcompat.app.AppCompatActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.databinding.TimetableConfigDialogBinding
 import pl.szczodrzynski.edziennik.ext.Intent
+import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ui.base.dialog.ConfigDialog
+import pl.szczodrzynski.edziennik.ui.timetable.SubjectColorsDialog
 import pl.szczodrzynski.edziennik.ui.timetable.TimetableFragment
 
 class TimetableConfigDialog(
@@ -23,6 +25,9 @@ class TimetableConfigDialog(
 
     override fun initView() {
         b.features = app.profile.loginStoreType.features
+        b.changeSubjectColors.onClick {
+            SubjectColorsDialog(activity).show()
+        }
     }
 
     override suspend fun loadConfig() {
@@ -30,6 +35,8 @@ class TimetableConfigDialog(
     }
 
     override suspend fun saveConfig() {
-        activity.sendBroadcast(Intent(TimetableFragment.ACTION_RELOAD_PAGES))
+        activity.sendBroadcast(
+            Intent(TimetableFragment.ACTION_RELOAD_PAGES).setPackage(activity.packageName)
+        )
     }
 }

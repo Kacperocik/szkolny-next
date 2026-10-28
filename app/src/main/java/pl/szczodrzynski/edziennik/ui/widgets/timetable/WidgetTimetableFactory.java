@@ -13,10 +13,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
@@ -24,7 +26,10 @@ import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 import androidx.annotation.DrawableRes;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 
+import com.google.gson.JsonObject;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial;
 import com.mikepenz.iconics.utils.IconicsConvertersKt;
@@ -33,8 +38,13 @@ import com.mikepenz.iconics.utils.IconicsDrawableExtensionsKt;
 import java.util.List;
 
 import kotlin.Unit;
+import pl.szczodrzynski.edziennik.App;
 import pl.szczodrzynski.edziennik.R;
 import pl.szczodrzynski.edziennik.ext.TextExtensionsKt;
+import pl.szczodrzynski.edziennik.ui.widgets.WidgetConfig;
+import pl.szczodrzynski.edziennik.ui.widgets.WidgetThemeColors;
+import pl.szczodrzynski.edziennik.ui.widgets.WidgetThemeKt;
+import pl.szczodrzynski.edziennik.utils.Colors;
 import pl.szczodrzynski.edziennik.utils.models.Date;
 import pl.szczodrzynski.edziennik.utils.models.ItemWidgetTimetableModel;
 import pl.szczodrzynski.edziennik.utils.models.Time;
@@ -71,6 +81,9 @@ public class WidgetTimetableFactory implements RemoteViewsService.RemoteViewsFac
     public void onDataSetChanged() {
         // executed EVERY TIME
         Timber.d("onDataSetChanged for appWidgetId: %s", appWidgetId);
+        if (WidgetTimetableProvider.Companion.getTimetables() == null || WidgetTimetableProvider.Companion.getTimetables().get(appWidgetId) == null) {
+            WidgetTimetableProvider.loadWidgetData(context, appWidgetId);
+        }
         lessons = WidgetTimetableProvider.Companion.getTimetables() == null ? null : WidgetTimetableProvider.Companion.getTimetables().get(appWidgetId);
     }
 
@@ -96,7 +109,8 @@ public class WidgetTimetableFactory implements RemoteViewsService.RemoteViewsFac
     public static Bitmap getColoredBitmap (Context context, @DrawableRes int resId, int color, int width, int height) {
         Bitmap bitmap;
 
-        Drawable drawable = context.getResources().getDrawable(resId);
+        Drawable drawable = ContextCompat.getDrawable(context, resId);
+        if (drawable == null) return null;
 
         if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
             bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
@@ -137,8 +151,23 @@ public class WidgetTimetableFactory implements RemoteViewsService.RemoteViewsFac
         }).toBitmap();
     }
 
+    private WidgetThemeColors resolveRowTheme() {
+        App app = (App) context.getApplicationContext();
+        WidgetConfig config = new WidgetConfig(-1);
+        try {
+            JsonObject configs = app.getConfig().getWidgetConfigs();
+            if (configs != null && configs.has(String.valueOf(appWidgetId))) {
+                config = app.getGson().fromJson(configs.get(String.valueOf(appWidgetId)), WidgetConfig.class);
+            }
+        } catch (Exception ignored) {
+        }
+        return WidgetThemeKt.resolveWidgetTheme(app, config);
+    }
+
     @Override
     public RemoteViews getViewAt(int i) {
+        WidgetThemeColors colors = resolveRowTheme();
+        boolean isDark = colors.isDark();
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.row_widget_timetable_item);
 
         if (lessons != null) {
@@ -147,9 +176,9 @@ public class WidgetTimetableFactory implements RemoteViewsService.RemoteViewsFac
             ItemWidgetTimetableModel lesson = lessons.get(i);
 
             if (lesson.bigStyle) {
-                views = new RemoteViews(context.getPackageName(), lesson.darkTheme ? R.layout.row_widget_timetable_dark_big_item : R.layout.row_widget_timetable_big_item);
+                views = new RemoteViews(context.getPackageName(), isDark ? R.layout.row_widget_timetable_dark_big_item : R.layout.row_widget_timetable_big_item);
             }
-            else if (lesson.darkTheme) {
+            else if (isDark) {
                 views = new RemoteViews(context.getPackageName(), R.layout.row_widget_timetable_dark_item);
             }
 
@@ -170,7 +199,7 @@ public class WidgetTimetableFactory implements RemoteViewsService.RemoteViewsFac
                 else
                     views.setTextViewText(R.id.widgetTimetableProfileName, lesson.separatorProfileName+"\n"+Week.getFullDayName(lesson.lessonDate.getWeekDay()));
                 views.setTextViewTextSize(R.id.widgetTimetableProfileName, COMPLEX_UNIT_SP, lesson.bigStyle ? 30 : 20);
-                views.setTextColor(R.id.widgetTimetableProfileName, lesson.darkTheme ? 0xffffffff : 0xff000000);
+                views.setTextColor(R.id.widgetTimetableProfileName, isDark ? 0xFFE6E1E5 : 0xFF1C1B1F);
 
                 Intent intent = new Intent();
                 intent.putExtra("profileId", lesson.profileId);
@@ -188,7 +217,7 @@ public class WidgetTimetableFactory implements RemoteViewsService.RemoteViewsFac
                 views.setViewVisibility(R.id.widgetTimetableContent, View.GONE);
                 views.setTextViewText(R.id.widgetTimetableProfileName, context.getString(R.string.widget_timetable_short_no_timetable));
                 views.setTextViewTextSize(R.id.widgetTimetableProfileName, COMPLEX_UNIT_SP, lesson.bigStyle ? 26 : 18);
-                views.setTextColor(R.id.widgetTimetableProfileName, lesson.darkTheme ? 0xffffffff : 0xff000000);
+                views.setTextColor(R.id.widgetTimetableProfileName, isDark ? 0xFFE6E1E5 : 0xFF1C1B1F);
 
                 Intent intent = new Intent();
                 intent.putExtra("profileId", lesson.profileId);
@@ -203,7 +232,7 @@ public class WidgetTimetableFactory implements RemoteViewsService.RemoteViewsFac
                 views.setViewVisibility(R.id.widgetTimetableContent, View.GONE);
                 views.setTextViewText(R.id.widgetTimetableProfileName, context.getString(R.string.widget_timetable_short_no_lessons));
                 views.setTextViewTextSize(R.id.widgetTimetableProfileName, COMPLEX_UNIT_SP, lesson.bigStyle ? 26 : 18);
-                views.setTextColor(R.id.widgetTimetableProfileName, lesson.darkTheme ? 0xffffffff : 0xff000000);
+                views.setTextColor(R.id.widgetTimetableProfileName, isDark ? 0xFFE6E1E5 : 0xFF1C1B1F);
 
                 Intent intent = new Intent();
                 intent.putExtra("profileId", lesson.profileId);
@@ -244,7 +273,7 @@ public class WidgetTimetableFactory implements RemoteViewsService.RemoteViewsFac
             p.setAntiAlias(true);
             p.setFilterBitmap(true);
             p.setDither(true);
-            p.setColor(lesson.darkTheme ? 0x30FFFFFF : 0x30000000);
+            p.setColor(isDark ? 0x30FFFFFF : 0x30000000);
 
             if (lesson.lessonDate.getValue() == Date.getToday().getValue()) {
                 long startTime = lesson.startTime.getInMillis();
@@ -273,7 +302,43 @@ public class WidgetTimetableFactory implements RemoteViewsService.RemoteViewsFac
             else {
                 canvas.drawRect(0, 0, 0, 5, p);
             }
+            if (lesson.colorSubjectBackground && !lesson.appBackground && lesson.subjectName != null) {
+                int subjectColor = 0;
+                try {
+                    String subjectStr = lesson.subjectName.toString();
+                    App app = (App) context.getApplicationContext();
+                    JsonObject subjectColors = app.getProfile().getConfig().getUi().getTimetableSubjectColors();
+                    if (subjectColors != null && subjectColors.has(subjectStr)) {
+                        subjectColor = Color.parseColor(subjectColors.get(subjectStr).getAsString());
+                    } else {
+                        subjectColor = Colors.stringToMaterialColorCRC(subjectStr);
+                    }
+                } catch (Exception ignored) {
+                }
+                if (subjectColor != 0) {
+                    Paint bgPaint = new Paint();
+                    bgPaint.setStyle(Paint.Style.FILL);
+                    bgPaint.setColor(ColorUtils.setAlphaComponent(subjectColor, 0x40));
+                    // DST_OVER places the subject background behind the already drawn progress bar.
+                    bgPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OVER));
+                    canvas.drawRect(0, 0, 100, 5, bgPaint);
+                }
+            }
             views.setImageViewBitmap(R.id.widgetTimetableBackground, bmp);
+
+            int primaryText = colors.getOnSurface() != 0
+                    ? colors.getOnSurface()
+                    : (isDark ? 0xFFE6E1E5 : 0xFF1C1B1F);
+            int secondaryText = colors.getSecondary() != 0
+                    ? colors.getSecondary()
+                    : (isDark ? 0xFFCAC4D0 : 0xFF625B71);
+            int variantText = colors.getOnSurfaceVariant() != 0
+                    ? colors.getOnSurfaceVariant()
+                    : (isDark ? 0xFFCAC4D0 : 0xFF49454F);
+            views.setTextColor(R.id.widgetTimetableTime, secondaryText);
+            views.setTextColor(R.id.widgetTimetableSubjectName, primaryText);
+            views.setTextColor(R.id.widgetTimetableOldSubjectName, variantText);
+            views.setTextColor(R.id.widgetTimetableClassroomName, variantText);
 
             int eventIndicatorSize = dpToPx(10);
 

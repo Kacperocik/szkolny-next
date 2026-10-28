@@ -10,12 +10,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.shape.ShapeAppearanceModel
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.full.EventFull
 import pl.szczodrzynski.edziennik.databinding.EventListItemBinding
 import pl.szczodrzynski.edziennik.ext.*
 import pl.szczodrzynski.edziennik.ui.grades.viewholder.BindableViewHolder
+import pl.szczodrzynski.edziennik.ui.search.SearchableAdapter
 import pl.szczodrzynski.edziennik.utils.models.Date
 import pl.szczodrzynski.edziennik.utils.models.Week
 
@@ -37,8 +39,30 @@ class EventViewHolder(
     ) {
         val manager = app.eventManager
 
+        val firstContentIndex = if (adapter.items.isNotEmpty() && adapter.getItemViewType(0) == SearchableAdapter.ITEM_TYPE_SEARCH) 1 else 0
+        val lastContentIndex = adapter.items.size - 1
+
+        val isFirst = position == firstContentIndex
+        val isLast = position == lastContentIndex
+
+        val shapeOverlay = when {
+            isFirst && isLast -> R.style.ShapeAppearance_Material3_Corner_GroupSingle
+            isFirst -> R.style.ShapeAppearance_Material3_Corner_GroupTop
+            isLast -> R.style.ShapeAppearance_Material3_Corner_GroupBottom
+            else -> R.style.ShapeAppearance_Material3_Corner_GroupMiddle
+        }
+        b.eventItemCard.shapeAppearanceModel = ShapeAppearanceModel.builder(b.root.context, shapeOverlay, 0).build()
+        b.eventItemCard.enableExpressiveCardShapeMorph()
+
+        if (adapter.activeEventId != null && item.id == adapter.activeEventId) {
+            b.eventItemCard.setCardBackgroundColor(R.attr.colorSecondaryContainer.resolveAttr(activity))
+        } else {
+            val cardAttr = if (adapter.embedded) R.attr.colorCardNested else R.attr.colorCard
+            b.eventItemCard.setCardBackgroundColor(cardAttr.resolveAttr(b.root.context))
+        }
+
         if (adapter.onEventClick != null) {
-            b.root.onClick {
+            b.eventItemCard.onClick {
                 adapter.onEventClick.invoke(item)
                 if (!item.seen) {
                     manager.markAsSeen(item)
@@ -84,6 +108,7 @@ class EventViewHolder(
                 )
             else null,
         ).concat(bullet)
+        b.details.setTextColor(R.attr.colorSecondary.resolveAttr(b.root.context))
 
         val addedBy = item.sharedByName ?: item.teacherName ?: ""
         b.addedBy.setText(
@@ -113,20 +138,8 @@ class EventViewHolder(
 
         b.attachmentIcon.isVisible = item.hasAttachments
 
-        b.typeColor.background?.setTintColor(MaterialColors.harmonizeWithPrimary(b.root.context, item.eventColor))
+        b.typeColor.background?.setTintColor(MaterialColors.harmonizeWithPrimary(b.root.context, manager.getEventColor(item)))
         b.typeColor.isVisible = adapter.showTypeColor
-
-        b.editButton.isVisible = !adapter.simpleMode
-                && item.addedManually
-                && !item.isDone
-                && adapter.onEventEditClick != null
-
-        if (adapter.onEventEditClick != null) {
-            b.editButton.onClick {
-                adapter.onEventEditClick.invoke(item)
-            }
-            b.editButton.attachToastHint(R.string.hint_edit_event)
-        }
 
         if (item.showAsUnseen == null)
             item.showAsUnseen = !item.seen

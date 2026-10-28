@@ -51,7 +51,8 @@ class Config(app: App) : BaseConfig<Config>(app, profileId = null) {
 
     var devMode by config<Boolean?>("debugMode", null)
     var devModePassword by config<String?>(null)
-    var enableChucker by config<Boolean?>(null)
+    var enableChucker by config<Boolean>(false)
+    var labOldAgenda by config<Boolean>(false)
 
     var apiAvailabilityCheck by config<Boolean>(true)
     var apiInvalidCert by config<String?>(null)
@@ -73,15 +74,21 @@ class Config(app: App) : BaseConfig<Config>(app, profileId = null) {
         var themeMode by config<Theme.Mode>(Theme.Mode.DAYNIGHT)
         var themeNightMode by config<Boolean?>(null)
         var themeBlackMode by config<Boolean>(false)
+        var themeIntensity by config<Int>(1)
 
         var language by config<String?>(null)
 
         var appBackground by config<String?>("appBg", null)
         var headerBackground by config<String?>("headerBg", null)
+        var drawerHeaderVisible by config<Boolean>(true)
 
         var miniMenuVisible by config<Boolean>(false)
+        var fixedDrawerCollapsed by config<Boolean>(false)
         var miniMenuButtons by config(NavTarget.Companion::getDefaultConfig)
+        var drawerMoreButtons by config<Set<NavTarget>> { setOf(NavTarget.NOTES) }
         var openDrawerOnBackPressed by config<Boolean>(false)
+        var appFullscreen by config<Boolean>(false)
+        var toolbarAtBottom by config<Boolean>(false)
 
         var bottomSheetOpened by config<Boolean>(false)
         var snowfall by config<Boolean>(false)
@@ -92,6 +99,7 @@ class Config(app: App) : BaseConfig<Config>(app, profileId = null) {
         var enabled by config<Boolean>("syncEnabled", true)
         var interval by config<Int>("syncInterval", 1 * HOUR.toInt())
         var onlyWifi by config<Boolean>("syncOnlyWifi", false)
+        var pullToRefresh by config<Boolean>(true)
 
         var dontShowAppManagerDialog by config<Boolean>(false)
         var lastAppSync by config<Long>(0L)

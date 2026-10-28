@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) Kuba Szczodrzyński 2021-10-24. 
+  ~ Copyright (c) Kuba Szczodrzyński 2021-10-24.
   -->
 
 <layout
@@ -21,6 +21,7 @@
         tools:parentTag="LinearLayout">
 
         <TextView
+            android:id="@+id/subtitleText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
@@ -29,14 +30,10 @@
             android:drawablePadding="8dp"
             android:text="@{text}"
             android:textAppearance="?textAppearanceTitleLarge"
-            app:drawableStartCompat="@drawable/ic_note"
+            android:textColor="?attr/colorSecondary"
+            android:textStyle="bold"
+            app:drawableStartCompat="@drawable/illustration_notes"
             tools:layout_height="28sp"
             tools:text="@string/notes_list_dialog_title" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="4dp"
-            android:background="@drawable/divider" />
     </merge>
 </layout>

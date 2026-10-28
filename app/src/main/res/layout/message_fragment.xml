@@ -14,8 +14,12 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorSurface_6dp"
-        android:orientation="horizontal">
+        android:background="@android:color/transparent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:paddingEnd="12dp">
 
         <TextView
             android:id="@+id/subject"
@@ -26,34 +30,31 @@
             android:background="?selectableItemBackground"
             android:ellipsize="end"
             android:maxLines="2"
-            android:padding="16dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
             android:textAppearance="?textAppearanceTitleLarge"
             tools:text="mobiDziennik - raport dzienny." />
 
-        <com.mikepenz.iconics.view.IconicsImageButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/closeButton"
+            style="?materialIconButtonSecondaryStyle"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center_vertical"
-            android:layout_margin="4dp"
-            android:background="?android:attr/actionBarItemBackground"
-            app:iiv_color="?android:textColorSecondary"
-            app:iiv_icon="cmd-window-close"
-            app:iiv_size="24dp"
-            tools:background="@android:drawable/ic_delete" />
+            android:contentDescription="@string/close"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="?colorOnSecondaryContainer" />
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@drawable/shadow_top" />
-
-    <ProgressBar
+    <com.google.android.material.loadingindicator.LoadingIndicator
         android:id="@+id/progress"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:visibility="visible"
+        app:indicatorColor="?attr/colorPrimary"
         tools:visibility="gone" />
 
     <androidx.core.widget.NestedScrollView
@@ -73,79 +74,91 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <ImageView
-                        android:id="@+id/profileBackground"
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:padding="12dp"
-                        app:srcCompat="@drawable/bg_circle" />
-
-                    <TextView
-                        android:id="@+id/profileName"
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:fontFamily="sans-serif"
-                        android:gravity="center"
-                        android:padding="12dp"
-                        android:textColor="#ffffff"
-                        android:textSize="20sp"
-                        tools:text="JP"
-                        tools:visibility="visible" />
-
-                    <ImageView
-                        android:id="@+id/profileImage"
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:padding="12dp"
-                        android:visibility="gone"
-                        tools:srcCompat="@tools:sample/avatars[0]" />
-                </FrameLayout>
-
-                <LinearLayout
-                    android:id="@+id/senderContainer"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/senderCard"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="?selectableItemBackground"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorSurfaceContainerHighest"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp">
 
-                    <TextView
-                        android:id="@+id/sender"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/senderContainer"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="2"
-                        android:paddingHorizontal="8dp"
-                        android:textStyle="bold"
-                        tools:text="Allegro - wysyłamy duużo wiadomości!!! Masz nowe oferty! Możesz kupić nowego laptopa! Ale super! Ehh, to jest nadawca a nie temat więc nwm czemu to tutaj wpisałem" />
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/date"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:paddingHorizontal="8dp"
-                        android:textAppearance="?textAppearanceBodySmall"
-                        tools:text="20 lis 2021 • 14:26" />
-                </LinearLayout>
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/profileBackground"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:clickable="false"
+                            android:focusable="false"
+                            android:contentDescription="@null"
+                            android:scaleType="centerCrop"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+                            tools:src="@tools:sample/avatars" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:clickable="false"
+                            android:focusable="false"
+                            android:gravity="center_vertical"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/sender"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:clickable="false"
+                                android:focusable="false"
+                                android:ellipsize="end"
+                                android:maxLines="2"
+                                android:textAppearance="?attr/textAppearanceBodyLarge"
+                                android:textColor="?android:attr/textColorPrimary"
+                                android:textStyle="bold"
+                                tools:text="Jan Kowalski" />
+
+                            <TextView
+                                android:id="@+id/date"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:clickable="false"
+                                android:focusable="false"
+                                android:layout_marginTop="2dp"
+                                android:textAppearance="?textAppearanceBodySmall"
+                                android:textColor="?colorSecondary"
+                                tools:text="20 lis 2021 • 14:26" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
                 <com.mikepenz.iconics.view.IconicsImageView
                     android:id="@+id/messageStar"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_margin="4dp"
+                    android:layout_marginStart="8dp"
                     android:background="?selectableItemBackgroundBorderless"
+                    android:padding="12dp"
                     app:iiv_color="?android:textColorSecondary"
                     app:iiv_icon="cmd-star-outline"
                     app:iiv_size="24dp"
@@ -196,7 +209,10 @@
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="4dp"
                     android:layout_weight="1"
-                    android:padding="16dp"
+                    android:paddingVertical="12dp"
+                    android:paddingHorizontal="4dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:text="@string/message_reply"
                     android:textAllCaps="false"
                     app:iiv_top_color="?android:textColorPrimary"
@@ -211,7 +227,10 @@
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="4dp"
                     android:layout_weight="1"
-                    android:padding="16dp"
+                    android:paddingVertical="12dp"
+                    android:paddingHorizontal="4dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:text="@string/message_forward"
                     android:textAllCaps="false"
                     app:iiv_top_color="?android:textColorPrimary"
@@ -226,7 +245,10 @@
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="4dp"
                     android:layout_weight="1"
-                    android:padding="16dp"
+                    android:paddingVertical="12dp"
+                    android:paddingHorizontal="4dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:text="@string/message_delete"
                     android:textAllCaps="false"
                     app:iiv_top_color="?android:textColorPrimary"
@@ -237,9 +259,10 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginHorizontal="8dp"
-                android:gravity="center_horizontal"
+                android:baselineAligned="false"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:visibility="visible">
 
@@ -248,39 +271,61 @@
                     style="?materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/notes_button" />
+                    android:layout_marginHorizontal="4dp"
+                    android:text="@string/notes_button"
+                    android:textAllCaps="false" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/downloadButton"
                     style="?materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="4dp"
+                    android:paddingStart="12dp"
                     android:text="@string/message_download"
                     android:textAllCaps="false"
                     android:visibility="gone"
+                    app:iconPadding="8dp"
+                    app:iconSize="24dp"
                     tools:visibility="visible" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?colorOutlineVariant" />
-
-            <TextView
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/recipientsCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="16dp"
-                android:text="Odbiorcy wiadomości:"
-                android:textAppearance="?textAppearanceTitleMedium" />
+                android:layout_marginBottom="8dp"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorOutlineVariant">
 
-            <TextView
-                android:id="@+id/recipients"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="8dp"
-                tools:text=" - Jan Kowalski, przeczytano: nie\n - Adam Dodatkowy, przeczytano: 20 marca, 17:35" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/recipientsTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Odbiorcy wiadomości:"
+                        android:textAppearance="?textAppearanceTitleMedium" />
+
+                    <TextView
+                        android:id="@+id/recipients"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="?textAppearanceBodyMedium"
+                        android:textIsSelectable="true"
+                        tools:text=" - Jan Kowalski, przeczytano: nie\n - Adam Dodatkowy, przeczytano: 20 marca, 17:35" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

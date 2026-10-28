@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.debug.DebugFragment">    <!-- TODO: Update blank fragment layout -->
+    tools:context=".ui.debug.DebugFragment">
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/runLayout"
         style="?textInputOutlinedStyle"
@@ -80,17 +81,23 @@
         app:layout_constraintStart_toStartOf="@+id/guideline3"
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
-    <HorizontalScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        android:orientation="vertical"
+        android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/debugRegister">
 
-        <com.yuyh.jsonviewer.library.JsonRecyclerView
-            android:id="@+id/rv_json"
+        <TextView
+            android:id="@+id/tv_json"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </HorizontalScrollView>
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:padding="12dp"
+            android:textColor="?colorOnSurface"
+            android:textIsSelectable="true"
+            android:textSize="13sp"
+            tools:text="{ &quot;sample&quot;: &quot;data&quot; }" />
+    </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,7 +7,7 @@
     android:minHeight="180dp"
     android:minResizeWidth="110dp"
     android:minResizeHeight="110dp"
-    android:previewImage="@drawable/widget_timetable_preview"
+    android:previewImage="@drawable/widget_timetable_launcher_preview"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen"

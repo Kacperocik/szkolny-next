@@ -28,7 +28,9 @@
                 android:layout_height="wrap_content"
                 android:isVisible="@{profileName != null}"
                 android:text="@string/dialog_widget_config_profile"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -44,7 +46,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/dialog_widget_timetable_config_theme"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
 
             <RadioGroup
                 android:id="@+id/theme"
@@ -53,11 +57,18 @@
                 android:orientation="horizontal">
 
                 <RadioButton
-                    android:id="@+id/themeLight"
+                    android:id="@+id/themeSystem"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:checked="true"
+                    android:text="@string/settings_theme_mode_system" />
+
+                <RadioButton
+                    android:id="@+id/themeLight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="@string/theme_light" />
 
                 <RadioButton
@@ -68,11 +79,72 @@
                     android:text="@string/theme_dark" />
             </RadioGroup>
 
+            <TextView
+                android:id="@+id/themeColorHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/dialog_widget_config_theme_color"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/themeColorInput"
+                style="?textInputOutlinedDenseStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp">
+
+                <pl.szczodrzynski.edziennik.utils.TextInputDropDown
+                    android:id="@+id/themeColor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="Taki sam jak w aplikacji" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <CheckBox
+                android:id="@+id/colorSubjectBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/dialog_widget_config_color_subject_bg" />
+
+            <CheckBox
+                android:id="@+id/appBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/dialog_widget_config_app_background" />
+
+            <CheckBox
+                android:id="@+id/headerSameAsBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/dialog_widget_config_header_same_as_body" />
+
+            <CheckBox
+                android:id="@+id/useEmoji"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/widget_lucky_number_use_emoji"
+                android:visibility="gone" />
+
+            <CheckBox
+                android:id="@+id/useThemeIconColor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/widget_lucky_number_use_theme_icon_color"
+                android:visibility="gone" />
+
             <CheckBox
                 android:id="@+id/bigStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:text="@string/dialog_widget_timetable_config_big_style" />
 
             <TextView
@@ -80,7 +152,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/dialog_widget_timetable_config_opacity"
-                android:textAppearance="?textAppearanceLabelMedium" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold" />
 
             <SeekBar
                 android:id="@+id/opacity"
@@ -103,28 +177,37 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp">
 
+                <View
+                    android:id="@+id/previewTransparencyGrid"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/widgetPreviewContainer"
+                    app:layout_constraintEnd_toEndOf="@+id/widgetPreviewContainer"
+                    app:layout_constraintStart_toStartOf="@+id/widgetPreviewContainer"
+                    app:layout_constraintTop_toTopOf="@+id/widgetPreviewContainer" />
+
                 <ImageView
                     android:id="@+id/wallpaper"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:scaleType="center"
-                    app:layout_constraintBottom_toBottomOf="@+id/widgetPreview"
-                    app:layout_constraintEnd_toEndOf="@+id/widgetPreview"
-                    app:layout_constraintStart_toStartOf="@+id/widgetPreview"
-                    app:layout_constraintTop_toTopOf="@+id/widgetPreview"
+                    app:layout_constraintBottom_toBottomOf="@+id/widgetPreviewContainer"
+                    app:layout_constraintEnd_toEndOf="@+id/widgetPreviewContainer"
+                    app:layout_constraintStart_toStartOf="@+id/widgetPreviewContainer"
+                    app:layout_constraintTop_toTopOf="@+id/widgetPreviewContainer"
                     tools:srcCompat="@tools:sample/backgrounds/scenic[4]"
                     tools:visibility="visible" />
 
-                <ImageView
-                    android:id="@+id/widgetPreview"
+                <FrameLayout
+                    android:id="@+id/widgetPreviewContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:padding="32dp"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/widget_timetable_preview" />
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </ScrollView>

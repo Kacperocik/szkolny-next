@@ -9,6 +9,7 @@ import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.ui.base.dialog.BaseDialog
+import pl.szczodrzynski.edziennik.ui.home.HomeCard.Companion.CARD_ANNOUNCEMENTS
 import pl.szczodrzynski.edziennik.ui.home.HomeCard.Companion.CARD_EVENTS
 import pl.szczodrzynski.edziennik.ui.home.HomeCard.Companion.CARD_GRADES
 import pl.szczodrzynski.edziennik.ui.home.HomeCard.Companion.CARD_LUCKY_NUMBER
@@ -29,6 +30,7 @@ class HomeCardsDialog(
         R.string.card_type_timetable to CARD_TIMETABLE,
         R.string.card_type_grades to CARD_GRADES,
         R.string.card_type_events to CARD_EVENTS,
+        R.string.card_type_announcements to CARD_ANNOUNCEMENTS,
         R.string.card_type_notes to CARD_NOTES,
     ).mapKeys { (resId, _) -> activity.getString(resId) }
 

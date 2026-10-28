@@ -9,7 +9,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -54,6 +54,7 @@
             android:layout_height="48dp"
             android:background="?selectableItemBackgroundBorderless"
             android:padding="12dp"
+            android:visibility="gone"
             tools:src="@sample/settings" />
     </LinearLayout>
 
@@ -61,6 +62,7 @@
         android:id="@+id/gradeList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
+        android:paddingHorizontal="10dp"
         android:orientation="vertical" />
 </LinearLayout>

@@ -11,8 +11,10 @@ import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.entity.Notification
 import pl.szczodrzynski.edziennik.databinding.NotificationsListItemBinding
+import com.google.android.material.shape.ShapeAppearanceModel
 import pl.szczodrzynski.edziennik.ext.asColoredSpannable
 import pl.szczodrzynski.edziennik.ext.concat
+import pl.szczodrzynski.edziennik.ext.enableExpressiveCardShapeMorph
 import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.ext.resolveString
@@ -47,8 +49,20 @@ class NotificationsAdapter(
         val item = items[position]
         val b = holder.b
 
+        val isFirst = position == 0
+        val isLast = position == itemCount - 1
+
+        val shapeOverlay = when {
+            isFirst && isLast -> R.style.ShapeAppearance_Material3_Corner_GroupSingle
+            isFirst -> R.style.ShapeAppearance_Material3_Corner_GroupTop
+            isLast -> R.style.ShapeAppearance_Material3_Corner_GroupBottom
+            else -> R.style.ShapeAppearance_Material3_Corner_GroupMiddle
+        }
+        b.notificationItemCard.shapeAppearanceModel = ShapeAppearanceModel.builder(activity, shapeOverlay, 0).build()
+        b.notificationItemCard.enableExpressiveCardShapeMorph()
+
         val date = Date.fromMillis(item.addedDate).formattedString
-        val colorSecondary = android.R.attr.textColorSecondary.resolveAttr(activity)
+        val colorSecondary = R.attr.colorSecondary.resolveAttr(activity)
 
         b.notificationIcon.background =
             item.type.icon.toDrawable(app, colorAttr = R.attr.colorPrimary)
@@ -59,10 +73,11 @@ class NotificationsAdapter(
                 " • ",
                 date
         ).concat().asColoredSpannable(colorSecondary)
+        b.profileDate.setTextColor(colorSecondary)
         b.type.text = item.type.titleRes.resolveString(activity)
 
         onItemClick?.let { listener ->
-            b.root.onClick { listener(item) }
+            b.notificationItemCard.onClick { listener(item) }
         }
     }
 

@@ -63,7 +63,7 @@ class ConfigMigration14 : BaseMigration<Config>() {
 
         get("miniMenuButtons")?.toJsonArray()?.let {
             try {
-                ui.miniMenuButtons = it.map { id -> NavTarget.getById(id.asInt) }.toSet()
+                ui.miniMenuButtons = it.mapNotNull { id -> NavTarget.getById(id.asInt) }.toSet()
             } catch (e: Exception) {
                 ui.miniMenuButtons = ui.miniMenuButtons
             }

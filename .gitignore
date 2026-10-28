@@ -266,3 +266,31 @@ fabric.properties
 
 signatures/
 .idea/*.xml
+/.idea/inspectionProfiles/Project_Default.xml
+
+# Temporary copies and extracted dependencies
+/.tmp-cmi/
+/material-aar/
+/com/
+/res/
+/group.txt
+
+# Local Graphify cache, backups and runtime state
+/graphify-out/cache/
+/graphify-out/????-??-??/
+/graphify-out/.cloud-cta-shown
+/graphify-out/.graphify_python
+/graphify-out/.graphify_root
+/graphify-out/.graphify_labels.pending.json
+/graphify-out/.graphify_analysis.json
+/graphify-out/manifest.json
+
+# Local assistant configuration
+/.agents/
+/.cursor/
+/.codex/
+/.opencode/
+
+# Generated Python files
+__pycache__/
+*.py[cod]

@@ -5,16 +5,20 @@
 <resources>
 
     <style name="AppTheme.M2" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="tabStyle">@style/Widget.App.TabLayout</item>
         <item name="android:textColorSecondary">@color/secondaryText</item>
         <item name="android:textViewStyle">@style/AppStyle.TextView</item>
 
-        <item name="nvStatusBarBackground">#ff00ff</item>
+        <item name="nvStatusBarBackground">?colorSurface</item>
         <item name="nvActionBarBackground">?colorSurface</item>
-        <item name="nvBottomBarBackground">#ff00ff</item>
-        <item name="nvNavigationBarBackground">#ff00ff</item>
+        <item name="nvBottomBarBackground">?colorSurface</item>
+        <item name="nvNavigationBarBackground">?colorSurface</item>
 
         <item name="materialButtonSecondaryStyle">
             @style/Widget.MaterialComponents.Button.OutlinedButton
+        </item>
+        <item name="materialButtonConnectedStyle">
+            @style/Widget.App.Button.Connected
         </item>
         <item name="materialIconButtonSecondaryStyle">
             @style/AppStyle.M2.Button.IconButton.Secondary
@@ -38,6 +42,8 @@
         <item name="textAppearanceLabelLarge">@style/AppStyle.M2.Subtitle</item>
         <item name="textAppearanceLabelMedium">@style/AppStyle.M2.Helper</item>
         <item name="textAppearanceLabelSmall">?textAppearanceCaption</item>
+
+        <item name="materialDrawerHeaderStyle">@style/Widget.App.MaterialDrawerHeaderStyle</item>
 
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
@@ -69,6 +75,11 @@
         <item name="colorOnBackground">@color/primaryText</item>
         <item name="colorSurface">@color/colorSurfaceDefault</item>
         <item name="colorOnSurface">@color/primaryText</item>
+        <item name="colorCard">?attr/colorSurface</item>
+        <item name="colorCardUnread">?attr/colorSurface</item>
+        <item name="colorCardNested">?attr/colorSurface</item>
+        <item name="colorTabIndicator">?attr/colorPrimary</item>
+        <item name="colorOnTabIndicator">?attr/colorOnPrimary</item>
     </style>
 
     <style name="AppTheme.M2.Red">
@@ -96,6 +107,21 @@
         <item name="colorSurface">@color/colorSurfaceTeal</item>
     </style>
 
+    <style name="AppTheme.M2.Yellow">
+        <item name="android:colorBackground">@color/windowBackgroundYellow</item>
+        <item name="colorSurface">@color/colorSurfaceYellow</item>
+    </style>
+
+    <style name="AppTheme.M2.Orange">
+        <item name="android:colorBackground">@color/windowBackgroundOrange</item>
+        <item name="colorSurface">@color/colorSurfaceOrange</item>
+    </style>
+
+    <style name="AppTheme.M2.Brown">
+        <item name="android:colorBackground">@color/windowBackgroundBrown</item>
+        <item name="colorSurface">@color/colorSurfaceBrown</item>
+    </style>
+
     <style name="AppTheme.M2.Red.Full">
         <item name="android:colorBackground">@color/windowBackgroundRedFull</item>
         <item name="colorSurface">@color/colorSurfaceRedFull</item>
@@ -119,6 +145,31 @@
     <style name="AppTheme.M2.Teal.Full">
         <item name="android:colorBackground">@color/windowBackgroundTealFull</item>
         <item name="colorSurface">@color/colorSurfaceTealFull</item>
+    </style>
+
+    <style name="AppTheme.M2.Yellow.Full">
+        <item name="android:colorBackground">@color/windowBackgroundYellowFull</item>
+        <item name="colorSurface">@color/colorSurfaceYellowFull</item>
+    </style>
+
+    <style name="AppTheme.M2.Orange.Full">
+        <item name="android:colorBackground">@color/windowBackgroundOrangeFull</item>
+        <item name="colorSurface">@color/colorSurfaceOrangeFull</item>
+    </style>
+
+    <style name="AppTheme.M2.Brown.Full">
+        <item name="android:colorBackground">@color/windowBackgroundBrownFull</item>
+        <item name="colorSurface">@color/colorSurfaceBrownFull</item>
+    </style>
+
+    <style name="AppTheme.M2.Gray">
+        <item name="android:colorBackground">@color/windowBackgroundGray</item>
+        <item name="colorSurface">@color/colorSurfaceGray</item>
+    </style>
+
+    <style name="AppTheme.M2.Gray.Full">
+        <item name="android:colorBackground">@color/windowBackgroundGrayFull</item>
+        <item name="colorSurface">@color/colorSurfaceGrayFull</item>
     </style>
 
 </resources>

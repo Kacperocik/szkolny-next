@@ -50,48 +50,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <pl.szczodrzynski.navlib.NavToolbar
-                        android:id="@+id/nv_toolbar"
-                        style="?toolbarStyle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipToPadding="false">
-
-                        <TextView
-                            android:id="@+id/nv_nightlyText"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical|end"
-                            android:layout_margin="8dp"
-                            android:background="@drawable/nightly_text_rounded"
-                            android:fontFamily="sans-serif-light"
-                            android:padding="4dp"
-                            android:textAllCaps="true"
-                            android:textSize="12sp"
-                            android:textStyle="bold"
-                            tools:backgroundTint="#a0ff0000"
-                            tools:text="Nightly\n20200503" />
-
-                        <com.mikepenz.materialdrawer.view.BezelImageView
-                            android:id="@+id/nv_toolbar_image"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center_vertical|end"
-                            android:layout_marginEnd="13dp"
-                            android:layout_marginRight="13dp"
-                            android:scaleType="centerCrop"
-                            app:materialDrawerSelectorOnPress="#80ffffff"
-                            tools:src="@tools:sample/backgrounds/scenic" />
-                    </pl.szczodrzynski.navlib.NavToolbar>
-
-                    <View
-                        android:id="@+id/nv_toolbarElevation"
-                        android:layout_width="match_parent"
-                        android:layout_height="4dp"
-                        android:layout_marginTop="?actionBarSize"
-                        android:layout_weight="1"
-                        android:background="@drawable/shadow_bottom" />
-
                     <LinearLayout
                         android:id="@+id/nv_content"
                         android:layout_width="match_parent"
@@ -114,6 +72,73 @@
                             android:background="@drawable/shadow_right" />
                     </LinearLayout>
 
+                    <FrameLayout
+                        android:id="@+id/nv_toolbarContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:translationZ="8dp">
+
+                        <pl.szczodrzynski.navlib.NavToolbar
+                            android:id="@+id/nv_toolbar"
+                            style="?toolbarStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clipToPadding="false">
+
+                            <TextView
+                                android:id="@+id/nv_nightlyText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical|end"
+                                android:layout_margin="8dp"
+                                android:background="@drawable/nightly_text_rounded"
+                                android:fontFamily="sans-serif-light"
+                                android:padding="4dp"
+                                android:textAllCaps="true"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                tools:backgroundTint="#a0ff0000"
+                                tools:text="Nightly\n20200503" />
+
+                            <com.mikepenz.materialdrawer.view.BezelImageView
+                                android:id="@+id/nv_toolbar_image"
+                                style="@style/BezelImageView"
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_gravity="center_vertical|end"
+                                android:layout_marginEnd="13dp"
+                                android:layout_marginRight="13dp"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:scaleType="centerCrop"
+                                app:materialDrawerDrawCircularShadow="false"
+                                app:materialDrawerSelectorOnPress="#80ffffff"
+                                tools:src="@tools:sample/backgrounds/scenic" />
+                        </pl.szczodrzynski.navlib.NavToolbar>
+
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/nv_toolbarProgress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:clickable="false"
+                            android:focusable="false"
+                            android:indeterminate="true"
+                            android:padding="0dp"
+                            android:visibility="gone"
+                            app:trackCornerRadius="10dp"
+                            tools:visibility="visible" />
+                    </FrameLayout>
+
+                    <View
+                        android:id="@+id/nv_toolbarElevation"
+                        android:layout_width="match_parent"
+                        android:layout_height="4dp"
+                        android:layout_marginTop="?actionBarSize"
+                        android:layout_weight="1"
+                        android:translationZ="8dp"
+                        android:background="@drawable/shadow_bottom" />
+
                     <pl.szczodrzynski.navlib.NavBottomBar
                         android:id="@+id/nv_bottomBar"
                         style="?bottomAppBarStyle"
@@ -127,6 +152,7 @@
                         android:id="@+id/nv_extendedFloatingActionButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_margin="16dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:text=""

@@ -8,9 +8,13 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import cat.ereza.customactivityoncrash.CustomActivityOnCrash
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.*
 import pl.szczodrzynski.edziennik.App
@@ -20,10 +24,12 @@ import pl.szczodrzynski.edziennik.data.api.ERROR_APP_CRASH
 import pl.szczodrzynski.edziennik.data.api.szkolny.SzkolnyApi
 import pl.szczodrzynski.edziennik.data.api.szkolny.request.ErrorReportRequest
 import pl.szczodrzynski.edziennik.ext.resolveAttr
+import pl.szczodrzynski.edziennik.ext.allowTallerHeight
 import pl.szczodrzynski.edziennik.ext.resolveColor
 import pl.szczodrzynski.edziennik.ext.resolveStyleAttr
 import pl.szczodrzynski.edziennik.utils.html.BetterHtml
 import kotlin.coroutines.CoroutineContext
+import kotlin.random.Random
 
 /*
  * Copyright 2014-2017 Eduard Ereza Martínez
@@ -44,7 +50,15 @@ import kotlin.coroutines.CoroutineContext
 class CrashActivity : AppCompatActivity(), CoroutineScope {
     companion object {
         const val TAG = "CrashActivity"
+        private const val STATE_ILLUSTRATION = "crashIllustration"
+
+        fun randomErrorIllustration() = if (Random.nextBoolean())
+            R.drawable.illustration_error_gravestone
+        else
+            R.drawable.illustration_error_gear
     }
+
+    private var crashIllustration = 0
 
     private val app by lazy { application as App }
     private val api by lazy { SzkolnyApi(app) }
@@ -62,6 +76,10 @@ class CrashActivity : AppCompatActivity(), CoroutineScope {
             finish()
             return
         }
+
+        crashIllustration = savedInstanceState?.getInt(STATE_ILLUSTRATION)
+            ?.takeIf { it != 0 } ?: randomErrorIllustration()
+        findViewById<ImageView>(R.id.crash_illustration).setImageResource(crashIllustration)
 
         //Close/restart button logic:
         //If a class if set, use restart.
@@ -94,7 +112,7 @@ class CrashActivity : AppCompatActivity(), CoroutineScope {
                 .setMessage(BetterHtml.fromHtml(context = null, getErrorString(intent, false)))
                 .setPositiveButton(R.string.close, null)
                 .setNeutralButton(R.string.copy_to_clipboard) { _, _ -> copyErrorToClipboard() }
-                .show()
+                .show().allowTallerHeight()
         }
 
         val errorInformation = CustomActivityOnCrash.getAllErrorDetailsFromIntent(this@CrashActivity, intent)
@@ -108,6 +126,11 @@ class CrashActivity : AppCompatActivity(), CoroutineScope {
             findViewById<View>(R.id.crash_report_btn).visibility = View.VISIBLE
             findViewById<View>(R.id.crash_feature).visibility = View.GONE
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt(STATE_ILLUSTRATION, crashIllustration)
+        super.onSaveInstanceState(outState)
     }
 
     private fun getErrorString(intent: Intent, plain: Boolean): String {
@@ -148,8 +171,19 @@ class CrashActivity : AppCompatActivity(), CoroutineScope {
         )
     }
 
+    private fun getCrashLog(): String {
+        val details = CustomActivityOnCrash.getAllErrorDetailsFromIntent(this, intent)
+        val buildDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+            .format(Date(app.buildManager.buildTimestamp))
+        val line = "Build date: $buildDate "
+        return if (details.contains("Build date:"))
+            details.replace(Regex("Build date:[^\\n]*"), line)
+        else
+            details.replaceFirst(Regex("Build version:[^\\n]*\\n"), "$0$line\n")
+    }
+
     private fun copyErrorToClipboard() {
-        val errorInformation = CustomActivityOnCrash.getAllErrorDetailsFromIntent(this@CrashActivity, intent)
+        val errorInformation = getCrashLog()
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
         clipboard?.apply {
             val clip = ClipData.newPlainText(getString(R.string.customactivityoncrash_error_activity_error_details_clipboard_label), errorInformation)

@@ -4,15 +4,19 @@
 
 package pl.szczodrzynski.edziennik.ui.agenda
 
+import android.content.res.Configuration
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import kotlinx.coroutines.*
 import pl.szczodrzynski.edziennik.*
-import pl.szczodrzynski.edziennik.data.db.entity.Lesson
 import pl.szczodrzynski.edziennik.databinding.DialogDayBinding
+import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ext.ifNotEmpty
 import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ext.setText
@@ -47,6 +51,17 @@ class DayDialog(
 
     override fun getPositiveButtonText() = R.string.close
     override fun getNeutralButtonText() = R.string.add
+    override fun hasCloseIconWhenSpaceLimited() = true
+    override fun shouldShowCloseIcon() =
+        activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    override fun getNeutralButtonIcon() = CommunityMaterial.Icon3.cmd_plus
+    override fun useInlineHeaderIcons() = true
+
+    override fun onCloseIconVisibilityChanged(isVisible: Boolean) {
+        b.dayDate.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            marginEnd = if (isVisible) 88.dp else 8.dp
+        }
+    }
 
     private lateinit var adapter: EventListAdapter
 
@@ -66,27 +81,21 @@ class DayDialog(
             date.formattedString
         )
 
-        val lessons = withContext(Dispatchers.Default) {
-            app.db.timetableDao().getAllForDateNow(profileId, date)
-        }.filter { it.type != Lesson.TYPE_NO_LESSONS }
+        val lessonSummary = withContext(Dispatchers.Default) {
+            summarizeDayLessons(app.db.timetableDao().getAllForDateNow(profileId, date))
+        }
 
-        if (lessons.isNotEmpty()) {
-            run {
-                val startTime = lessons.first().startTime ?: return@run
-                val endTime = lessons.last().endTime ?: return@run
-                val diff = Time.diff(startTime, endTime)
-
-                b.lessonsInfo.setText(
-                    R.string.dialog_day_lessons_info,
-                    startTime.stringHM,
-                    endTime.stringHM,
-                    lessons.size.toString(),
-                    diff.hour.toString(),
-                    diff.minute.toString()
-                )
-
-                b.lessonsInfo.visibility = View.VISIBLE
-            }
+        b.lessonsInfo.isVisible = lessonSummary != null
+        if (lessonSummary != null) {
+            val diff = Time.diff(lessonSummary.startTime, lessonSummary.endTime)
+            b.lessonsInfo.setText(
+                R.string.dialog_day_lessons_info,
+                lessonSummary.startTime.stringHM,
+                lessonSummary.endTime.stringHM,
+                lessonSummary.lessonCount.toString(),
+                diff.hour.toString(),
+                diff.minute.toString()
+            )
         }
 
         val lessonChanges = withContext(Dispatchers.Default) {
@@ -138,6 +147,7 @@ class DayDialog(
 
         adapter = EventListAdapter(
             activity = activity,
+            embedded = true,
             showWeekDay = false,
             showDate = false,
             showType = true,

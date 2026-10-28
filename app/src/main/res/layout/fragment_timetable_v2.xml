@@ -20,19 +20,67 @@
             <pl.szczodrzynski.edziennik.ui.base.views.RecyclerTabLayout
                 android:id="@+id/tabLayout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:tabMode="auto"
-                app:tabPaddingBottom="16dp"
-                app:tabPaddingEnd="16dp"
-                app:tabPaddingStart="16dp"
-                app:tabPaddingTop="16dp" />
+                android:layout_height="@dimen/timetable_day_header_height"
+                app:tabMode="auto" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
+        <pl.szczodrzynski.edziennik.ui.timetable.TimetablePagerLayout
+            android:id="@+id/pagerContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            android:orientation="horizontal"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <!-- hour labels shared by the days shown side by side -->
+            <LinearLayout
+                android:id="@+id/hourLabelsColumn"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/timetable_multi_day_header_height" />
+
+                <ScrollView
+                    android:id="@+id/hourLabelsScroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:scrollbars="none">
+
+                    <FrameLayout
+                        android:id="@+id/hourLabelsFrame"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </ScrollView>
+            </LinearLayout>
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+        </pl.szczodrzynski.edziennik.ui.timetable.TimetablePagerLayout>
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/todayButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="16dp"
+            android:text="@string/timetable_today"
+            android:contentDescription="@string/timetable_today" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fullscreenButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/settings_theme_fullscreen_text" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <LinearLayout
@@ -45,9 +93,10 @@
         tools:visibility="visible">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_no_timetable" />
+            android:layout_width="@dimen/illustration_size"
+            android:layout_height="@dimen/illustration_size"
+            android:contentDescription="@null"
+            app:srcCompat="@drawable/illustration_timetable_unpublished" />
 
         <TextView
             android:layout_width="wrap_content"

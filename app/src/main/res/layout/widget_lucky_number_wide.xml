@@ -1,0 +1,78 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widgetLuckyNumberRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_transparent">
+
+    <ImageView
+        android:id="@+id/widgetLuckyNumberBodyBg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_background_round_white" />
+
+    <LinearLayout
+        android:id="@+id/widgetLuckyNumberContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="10dp">
+
+        <ImageView
+            android:id="@+id/widgetLuckyNumberIcon"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@null"
+            tools:src="@drawable/emoji_smiling" />
+
+        <LinearLayout
+            android:id="@+id/widgetLuckyNumberTexts"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="start|center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/widgetLuckyNumberNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="start"
+                android:textColor="#1C1B1F"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                tools:text="24" />
+
+            <TextView
+                android:id="@+id/widgetLuckyNumberCaption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="3"
+                android:scrollHorizontally="false"
+                android:textColor="#1C1B1F"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="Dzisiaj to Ty masz szczęśliwy numerek!" />
+
+            <TextView
+                android:id="@+id/widgetLuckyNumberProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="1"
+                android:textSize="12sp"
+                tools:text="Władca Androida" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

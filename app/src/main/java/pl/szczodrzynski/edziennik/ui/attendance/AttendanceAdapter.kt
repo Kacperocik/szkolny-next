@@ -12,12 +12,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.shape.ShapeAppearanceModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.full.AttendanceFull
+import pl.szczodrzynski.edziennik.ext.dp
+import pl.szczodrzynski.edziennik.ext.enableExpressiveCardShapeMorph
 import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
 import pl.szczodrzynski.edziennik.ui.attendance.models.*
 import pl.szczodrzynski.edziennik.ui.attendance.viewholder.*
@@ -122,7 +126,10 @@ class AttendanceAdapter(
 
             model.state = STATE_OPENED
             items.addAll(position + 1, subItems.filterNotNull())
-            if (notifyAdapter) notifyItemRangeInserted(position + 1, subItems.size)
+            if (notifyAdapter) {
+                notifyItemChanged(position)
+                notifyItemRangeInserted(position + 1, subItems.size)
+            }
         }
         else {
             val start = position + 1
@@ -146,6 +153,7 @@ class AttendanceAdapter(
             }
 
             model.state = STATE_CLOSED
+            if (notifyAdapter) notifyItemChanged(position)
         }
     }
 
@@ -166,6 +174,8 @@ class AttendanceAdapter(
         holder.itemView.setTag(R.string.tag_key_view_type, viewType)
         holder.itemView.setTag(R.string.tag_key_position, position)
         holder.itemView.setTag(R.string.tag_key_model, item)
+
+        bindGroupShape(holder.itemView, item, position)
 
         when {
             holder is AttendanceViewHolder && item is AttendanceFull -> holder.onBind(activity, app, item, position, this)
@@ -188,6 +198,52 @@ class AttendanceAdapter(
             if (index != -1)
                 notifyItemChanged(index)
         }
+    }
+
+    private fun bindGroupShape(view: View, item: Any, position: Int) {
+        val card = view as? MaterialCardView ?: return
+        val parent = findOpenParent(position)
+        val isFirst = item is ExpandableItemModel<*> || parent == null && position == 0
+        val isLast = when {
+            item is ExpandableItemModel<*> -> item.state == STATE_CLOSED || !hasVisibleChild(position, item)
+            parent != null -> !hasVisibleChildAfter(position, parent)
+            else -> position == items.lastIndex
+        }
+
+        val shapeOverlay = when {
+            isFirst && isLast -> R.style.ShapeAppearance_Material3_Corner_GroupSingle
+            isFirst -> R.style.ShapeAppearance_Material3_Corner_GroupTop
+            isLast -> R.style.ShapeAppearance_Material3_Corner_GroupBottom
+            else -> R.style.ShapeAppearance_Material3_Corner_GroupMiddle
+        }
+        card.shapeAppearanceModel = ShapeAppearanceModel.builder(activity, shapeOverlay, 0).build()
+        card.enableExpressiveCardShapeMorph()
+
+        (card.layoutParams as? ViewGroup.MarginLayoutParams)?.let { params ->
+            params.bottomMargin = (if (isLast) 8 else 3).dp
+            card.layoutParams = params
+        }
+    }
+
+    private fun findOpenParent(position: Int): ExpandableItemModel<*>? {
+        val itemLevel = (items[position] as? ExpandableItemModel<*>)?.level ?: 3
+        for (index in position - 1 downTo 0) {
+            val candidate = items[index] as? ExpandableItemModel<*> ?: continue
+            if (candidate.level < itemLevel) {
+                return candidate.takeIf { it.state == STATE_OPENED }
+            }
+        }
+        return null
+    }
+
+    private fun hasVisibleChild(position: Int, parent: ExpandableItemModel<*>): Boolean {
+        val next = items.getOrNull(position + 1) ?: return false
+        return (next as? ExpandableItemModel<*>)?.level?.let { it > parent.level } ?: true
+    }
+
+    private fun hasVisibleChildAfter(position: Int, parent: ExpandableItemModel<*>): Boolean {
+        val next = items.getOrNull(position + 1) ?: return false
+        return (next as? ExpandableItemModel<*>)?.level?.let { it > parent.level } ?: true
     }
 
     override fun getItemCount() = items.size

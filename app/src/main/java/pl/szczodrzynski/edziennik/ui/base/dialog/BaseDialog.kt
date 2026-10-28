@@ -4,18 +4,27 @@
 
 package pl.szczodrzynski.edziennik.ui.base.dialog
 
+import android.os.Build
 import android.text.Editable
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
+import android.window.BackEvent
+import android.window.OnBackAnimationCallback
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
+import androidx.appcompat.R
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE
 import androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL
 import androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.TextViewCompat
 import androidx.core.widget.addTextChangedListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.mikepenz.iconics.typeface.IIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,10 +33,18 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.greenrobot.eventbus.EventBus
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.databinding.DialogEditTextBinding
+import pl.szczodrzynski.edziennik.ext.allowTallerHeight
+import pl.szczodrzynski.edziennik.ext.applyExpressiveShapeMorphToButtons
+import pl.szczodrzynski.edziennik.ext.dismissWithAnimation
+import pl.szczodrzynski.edziennik.ext.isDialogSpaceLimited
 import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ext.registerSafe
 import pl.szczodrzynski.edziennik.ext.resolveString
+import pl.szczodrzynski.edziennik.ext.restoreTitleSizeOnConfigurationChanges
 import pl.szczodrzynski.edziennik.ext.unregisterSafe
+import pl.szczodrzynski.edziennik.ext.moveButtonsToTitleWhenSpaceLimited
+import pl.szczodrzynski.edziennik.ext.setupPredictiveBackAnimation
+import pl.szczodrzynski.edziennik.ext.useCloseIconWhenSpaceLimited
 import pl.szczodrzynski.edziennik.utils.BetterLinkMovementMethod
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
@@ -61,10 +78,45 @@ abstract class BaseDialog<I : Any>(
     protected open fun getMessageRes(): Int? = null
     protected open fun getMessageFormat(): Pair<Int, List<CharSequence>>? = null
     protected open fun getView(): View? = null
+    /** Extra height requested by custom content that can shrink during measurement. */
+    protected open fun getContentOverflow() = 0
     protected open fun isCancelable() = true
     protected open fun getPositiveButtonText(): Int? = null
     protected open fun getNeutralButtonText(): Int? = null
     protected open fun getNegativeButtonText(): Int? = null
+
+    /**
+     * Whether to replace the close button with a close (X) icon in the title, when the
+     * screen space is very limited. Only for dialogs, whose positive button closes them.
+     */
+    protected open fun hasCloseIconWhenSpaceLimited() = false
+
+    /** Whether the opted-in close icon should be visible in the current configuration. */
+    protected open fun shouldShowCloseIcon() = activity.isDialogSpaceLimited()
+
+    /**
+     * Called when the close (X) icon is shown or hidden (see [hasCloseIconWhenSpaceLimited]),
+     * e.g. to keep the content from being covered by it.
+     */
+    protected open fun onCloseIconVisibilityChanged(isVisible: Boolean) = Unit
+
+    /**
+     * If not null, the neutral button is shown as this icon next to the close (X)
+     * icon (see [hasCloseIconWhenSpaceLimited]), instead of at the bottom.
+     */
+    protected open fun getNeutralButtonIcon(): IIcon? = null
+
+    /** Place custom-header icons side by side instead of stacking them. */
+    protected open fun useInlineHeaderIcons() = false
+
+    /**
+     * Dialogs with only "OK" (and "Cancel") have these buttons moved to the title,
+     * when the screen space is very limited.
+     */
+    private fun hasOnlyOkCancelButtons() =
+        getPositiveButtonText() == pl.szczodrzynski.edziennik.R.string.ok &&
+            getNeutralButtonText() == null &&
+            getNegativeButtonText().let { it == null || it == pl.szczodrzynski.edziennik.R.string.cancel }
 
     protected open fun getItems(): Map<CharSequence, I>? = null
     protected open fun getSingleChoiceItems(): Map<CharSequence, I>? = null
@@ -116,11 +168,39 @@ abstract class BaseDialog<I : Any>(
             if (activity.isFinishing)
                 return@launch
             dialog.show()
+            dialog.allowTallerHeight(::getContentOverflow)
             setButtons()
+            dialog.findViewById<TextView>(R.id.alertTitle)?.let { titleView ->
+                TextViewCompat.setTextAppearance(titleView, com.google.android.material.R.style.MaterialAlertDialog_Material3_Title_Text)
+                titleView.paint.isFakeBoldText = true
+                titleView.isSingleLine = false
+                titleView.maxLines = 2
+                titleView.ellipsize = TextUtils.TruncateAt.END
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    titleView.setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_NONE)
+                }
+            }
+            dialog.restoreTitleSizeOnConfigurationChanges()
+            if (hasCloseIconWhenSpaceLimited())
+                dialog.useCloseIconWhenSpaceLimited(
+                    ::onCloseIconVisibilityChanged,
+                    getNeutralButtonIcon(),
+                    ::shouldShowCloseIcon,
+                    inlineIcons = useInlineHeaderIcons(),
+                )
+            else if (hasOnlyOkCancelButtons())
+                dialog.moveButtonsToTitleWhenSpaceLimited()
+            dialog.window?.decorView?.applyExpressiveShapeMorphToButtons()
+            setupPredictiveBackAnimation()
             dispatchOnShow()
         }
         return this
     }
+
+    private fun setupPredictiveBackAnimation() {
+        dialog.setupPredictiveBackAnimation { dismiss() }
+    }
+
 
     suspend fun showModal() = suspendCancellableCoroutine {
         it.invokeOnCancellation {
@@ -273,6 +353,7 @@ abstract class BaseDialog<I : Any>(
     }
 
     fun getButton() = button
+    fun getDialogButton(whichButton: Int) = dialog.getButton(whichButton)
     fun getItem() = itemSelected
     fun getSingleSelection() = itemSelected
     fun getMultiSelection(): Set<I> {
@@ -287,6 +368,8 @@ abstract class BaseDialog<I : Any>(
     fun getInput(): TextInputEditText? = input
 
     fun dismiss() {
-        dialog.dismiss()
+        if (!dialog.isShowing)
+            return
+        dialog.dismissWithAnimation()
     }
 }

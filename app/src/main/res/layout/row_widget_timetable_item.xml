@@ -11,51 +11,59 @@
         android:id="@+id/widgetTimetableBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:contentDescription="@null"
         android:scaleType="fitXY"
-        tools:srcCompat="@drawable/ic_rip" />
+        tools:srcCompat="@drawable/illustration_error_gear" />
 
     <TextView
         android:id="@+id/widgetTimetableProfileName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_margin="8dp"
         android:gravity="center"
-        android:textColor="@color/primaryTextDark"
-        android:textSize="20sp"
+        android:paddingLeft="16dp"
+        android:paddingTop="8dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="8dp"
+        android:textColor="#1976D2"
+        android:textSize="15sp"
+        android:textStyle="bold"
         android:visibility="gone"
-        tools:text="Władca Androida" />
+        tools:text="Jan Kowalski" />
 
     <LinearLayout
         android:id="@+id/widgetTimetableContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="12dp"
+        android:paddingTop="8dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="8dp">
 
         <TextView
             android:id="@+id/widgetTimetableTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_margin="8dp"
-            android:textColor="@color/primaryTextLight"
-            android:textSize="11sp"
+            android:layout_marginEnd="12dp"
+            android:textColor="#1976D2"
+            android:textSize="12sp"
+            android:textStyle="bold"
             tools:text="10:00 - 10:45" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="2dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/widgetTimetableOldSubjectName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="@color/primaryTextLight"
+                android:textColor="#79747E"
                 android:textSize="11sp"
                 tools:text="informatyka" />
 
@@ -64,15 +72,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:textColor="@color/primaryTextLight"
-                android:textSize="13sp"
+                android:textColor="#1C1B1F"
+                android:textSize="14sp"
+                android:textStyle="bold"
                 tools:text="matematyka" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -81,8 +88,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:textColor="@color/primaryTextLight"
-                    android:textSize="11sp"
+                    android:textColor="#49454F"
+                    android:textSize="12sp"
                     tools:text="029 informatyczna" />
 
                 <LinearLayout
@@ -97,7 +104,7 @@
                         android:layout_height="10dp"
                         android:layout_gravity="center|end"
                         android:layout_marginStart="3dp"
-                        android:layout_marginLeft="3dp" />
+                        android:contentDescription="@null" />
 
                     <ImageView
                         android:id="@+id/widgetTimetableEvent2"
@@ -105,7 +112,7 @@
                         android:layout_height="10dp"
                         android:layout_gravity="center|end"
                         android:layout_marginStart="3dp"
-                        android:layout_marginLeft="3dp" />
+                        android:contentDescription="@null" />
 
                     <ImageView
                         android:id="@+id/widgetTimetableEvent1"
@@ -113,7 +120,7 @@
                         android:layout_height="10dp"
                         android:layout_gravity="center|end"
                         android:layout_marginStart="3dp"
-                        android:layout_marginLeft="3dp" />
+                        android:contentDescription="@null" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

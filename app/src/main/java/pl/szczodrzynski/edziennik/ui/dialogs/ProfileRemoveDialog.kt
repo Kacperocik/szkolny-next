@@ -5,11 +5,13 @@
 package pl.szczodrzynski.edziennik.ui.dialogs
 
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
+import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.ui.base.dialog.BaseDialog
 
 class ProfileRemoveDialog(
@@ -30,6 +32,10 @@ class ProfileRemoveDialog(
     override fun isCancelable() = false
     override fun getPositiveButtonText() = R.string.remove
     override fun getNeutralButtonText() = R.string.cancel
+
+    override suspend fun onShow() {
+        getDialogButton(BUTTON_POSITIVE)?.setTextColor(R.attr.colorError.resolveAttr(activity))
+    }
 
     override suspend fun onPositiveClick(): Boolean {
         withContext(Dispatchers.Default) {

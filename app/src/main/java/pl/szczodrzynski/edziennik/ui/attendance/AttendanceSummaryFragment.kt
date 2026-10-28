@@ -4,6 +4,7 @@
 
 package pl.szczodrzynski.edziennik.ui.attendance
 
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -16,6 +17,7 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.appbar.AppBarLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,7 +29,6 @@ import pl.szczodrzynski.edziennik.data.db.full.AttendanceFull
 import pl.szczodrzynski.edziennik.databinding.AttendanceSummaryFragmentBinding
 import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ext.isNotNullNorEmpty
-import pl.szczodrzynski.edziennik.ext.setText
 import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
 import pl.szczodrzynski.edziennik.ui.attendance.AttendanceFragment.Companion.VIEW_SUMMARY
 import pl.szczodrzynski.edziennik.ui.attendance.models.AttendanceSubject
@@ -45,18 +46,27 @@ class AttendanceSummaryFragment : BaseFragment<AttendanceSummaryFragmentBinding,
 
     override fun getScrollingView() = b.scrollView
 
+    override fun onResume() {
+        super.onResume()
+        appBars += b.appBarLayout
+    }
+
     private val manager
         get() = app.attendanceManager
     private var expandSubjectId = 0L
     private var attendance = listOf<AttendanceFull>()
 
     override suspend fun onViewReady(savedInstanceState: Bundle?) {
+        updateRangeFilterScrollBehavior()
+        b.appBarLayout.addOnOffsetChangedListener { _, verticalOffset ->
+            isScrolled = verticalOffset != 0 || b.scrollView.canScrollVertically(-1)
+        }
         expandSubjectId = arguments?.getLong("gradesSubjectId") ?: 0L
 
         val adapter = AttendanceAdapter(activity, VIEW_SUMMARY)
         var firstRun = true
 
-        app.db.attendanceDao().getAll(App.profileId).observe(this@AttendanceSummaryFragment, Observer { items -> this@AttendanceSummaryFragment.launch {
+        app.db.attendanceDao().getAll(App.profileId).observe(viewLifecycleOwner, Observer { items -> this@AttendanceSummaryFragment.launch {
             if (!isAdded) return@launch
 
             items.forEach {
@@ -125,6 +135,30 @@ class AttendanceSummaryFragment : BaseFragment<AttendanceSummaryFragmentBinding,
                     b.noData.isVisible = false
                 }
                 adapter.notifyDataSetChanged()
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        updateRangeFilterScrollBehavior()
+    }
+
+    private fun updateRangeFilterScrollBehavior() {
+        val isSpaceLimited = resources.configuration.screenHeightDp < 520
+        val params = b.toggleGroup.layoutParams as? AppBarLayout.LayoutParams ?: return
+        val flags = if (isSpaceLimited) {
+            AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL or
+                    AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or
+                    AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
+        } else {
+            0
+        }
+        if (params.scrollFlags != flags) {
+            params.scrollFlags = flags
+            b.toggleGroup.layoutParams = params
+            if (!isSpaceLimited) {
+                b.appBarLayout.setExpanded(true, false)
             }
         }
     }
@@ -253,37 +287,33 @@ class AttendanceSummaryFragment : BaseFragment<AttendanceSummaryFragmentBinding,
             if (percentage == 0f) {
                 b.percentage.isInvisible = true
                 b.percentageCircle.isInvisible = true
+                b.percentageText.isInvisible = true
             }
             else {
                 b.percentage.isVisible = true
                 b.percentageCircle.isVisible = true
-                b.percentage.setText(R.string.attendance_period_summary_format, percentage)
+                b.percentageText.isVisible = true
 
                 val df = DecimalFormat("0.##")
-                b.percentageCircle.setProgressTextAdapter { value ->
-                    df.format(value) + "%"
-                }
-                b.percentageCircle.maxProgress = 100.0
-                animatePercentageIndicator(percentage.toDouble())
+                b.percentageText.text = "${df.format(percentage)}%"
+                b.percentageCircle.max = 100
+                animatePercentageIndicator(percentage.toInt())
             }
         }
 
         return items.toMutableList()
     }
 
-    private fun animatePercentageIndicator(targetProgress: Double) {
+    private fun animatePercentageIndicator(targetProgress: Int) {
         val startingProgress = b.percentageCircle.progress
         val progressChange = targetProgress - startingProgress
 
         val a: Animation = object : Animation() {
             override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
-                val progress = startingProgress + (progressChange * interpolatedTime)
-                //if (interpolatedTime == 1f)
-                //    progress = startingProgress + progressChange
-
+                val progress = (startingProgress + (progressChange * interpolatedTime)).toInt()
                 val color = ColorUtils.blendARGB(Color.RED, Color.GREEN, progress.toFloat() / 100.0f)
-                b.percentageCircle.progressColor = color
-                b.percentageCircle.setProgress(progress, 100.0)
+                b.percentageCircle.setIndicatorColor(color)
+                b.percentageCircle.progress = progress
             }
 
             override fun willChangeBounds(): Boolean {

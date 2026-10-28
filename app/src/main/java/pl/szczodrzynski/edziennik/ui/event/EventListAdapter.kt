@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import pl.szczodrzynski.edziennik.App
+import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.full.EventFull
 import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
 import pl.szczodrzynski.edziennik.ui.search.SearchableAdapter
@@ -29,10 +30,19 @@ class EventListAdapter(
     val showSubject: Boolean = true,
     val markAsSeen: Boolean = true,
     val showNotes: Boolean = true,
+    val embedded: Boolean = false,
     isReversed: Boolean = false,
     val onEventClick: ((event: EventFull) -> Unit)? = null,
     val onEventEditClick: ((event: EventFull) -> Unit)? = null,
 ) : SearchableAdapter<EventFull>(isReversed), CoroutineScope {
+    var activeEventId: Long? = null
+        set(value) {
+            if (field == value) return
+            field = value
+            notifyDataSetChanged()
+        }
+
+    override val searchResultsPluralRes = R.plurals.search_results_events
     companion object {
         private const val TAG = "EventListAdapter"
         private const val ITEM_TYPE_EVENT = 0

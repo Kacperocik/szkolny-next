@@ -88,9 +88,10 @@
             android:layout_gravity="center"
             android:layout_marginTop="8dp"
             android:drawablePadding="16dp"
-            android:text="Brak połączonych przeglądarek"
+            android:gravity="center"
+            android:text="@string/web_push_no_browsers"
             android:textAppearance="?textAppearanceTitleMedium"
-            app:drawableTopCompat="@drawable/ic_web_push_no_browsers" />
+            app:drawableTopCompat="@drawable/illustration_browsers_compact" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/browsersView"

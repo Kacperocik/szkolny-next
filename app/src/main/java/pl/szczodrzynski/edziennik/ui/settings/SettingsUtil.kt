@@ -6,12 +6,15 @@ package pl.szczodrzynski.edziennik.ui.settings
 
 import com.danielstone.materialaboutlibrary.items.*
 import com.danielstone.materialaboutlibrary.model.MaterialAboutCard
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.ext.after
+import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.ext.toDrawable
 import pl.szczodrzynski.edziennik.utils.Colors
 
@@ -38,7 +41,7 @@ class SettingsUtil(
 
         val more = itemsMore(card)
         if (more.isNotEmpty()) {
-            card.items.add(createMoreItem(card, more))
+            card.items.addAll(more)
         }
 
         return card
@@ -70,6 +73,7 @@ class SettingsUtil(
     }
 
     fun createSectionItem(text: Int) = MaterialAboutSectionItem(text)
+    fun createSectionItem(text: String) = MaterialAboutSectionItem(text)
 
     fun createActionItem(
         text: Int,
@@ -79,11 +83,39 @@ class SettingsUtil(
         onClick: (item: MaterialAboutActionItem) -> Unit
     ): MaterialAboutActionItem {
         val iconColor = backgroundColor?.let { Colors.legibleTextColor(it) }
+            ?: R.attr.colorOnSurfaceVariant.resolveAttr(activity)
 
         val item = MaterialAboutActionItem.Builder()
             .text(text)
             .subText(subText ?: 0)
             .icon(icon.toDrawable(activity, iconColor))
+            .build()
+
+        item.setOnClickAction {
+            onClick(item)
+        }
+
+        return item
+    }
+
+    fun createActionItem(
+        text: Int,
+        subText: Int? = null,
+        iconRes: Int,
+        backgroundColor: Int? = null,
+        onClick: (item: MaterialAboutActionItem) -> Unit
+    ): MaterialAboutActionItem {
+        val iconColor = backgroundColor?.let { Colors.legibleTextColor(it) }
+            ?: R.attr.colorOnSurfaceVariant.resolveAttr(activity)
+
+        val drawable = ContextCompat.getDrawable(activity, iconRes)?.mutate()?.also {
+            DrawableCompat.setTint(it, iconColor)
+        }
+
+        val item = MaterialAboutActionItem.Builder()
+            .text(text)
+            .subText(subText ?: 0)
+            .icon(drawable)
             .build()
 
         item.setOnClickAction {
@@ -104,6 +136,7 @@ class SettingsUtil(
         onChange: (item: MaterialAboutSwitchItem, value: Boolean) -> Unit
     ): MaterialAboutSwitchItem {
         val iconColor = backgroundColor?.let { Colors.legibleTextColor(it) }
+            ?: R.attr.colorOnSurfaceVariant.resolveAttr(activity)
 
         val item = MaterialAboutSwitchItem.Builder()
             .text(text)
@@ -134,6 +167,7 @@ class SettingsUtil(
         onClick: (item: MaterialAboutActionSwitchItem) -> Unit
     ): MaterialAboutSwitchItem {
         val iconColor = backgroundColor?.let { Colors.legibleTextColor(it) }
+            ?: R.attr.colorOnSurfaceVariant.resolveAttr(activity)
 
         val item = MaterialAboutActionSwitchItem.Builder()
             .text(text)

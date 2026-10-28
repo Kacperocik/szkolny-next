@@ -13,6 +13,7 @@ import eu.szkolny.font.SzkolnyFont
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.ui.agenda.AgendaFragment
+import pl.szczodrzynski.edziennik.ui.agenda.AgendaNewFragment
 import pl.szczodrzynski.edziennik.ui.announcements.AnnouncementsFragment
 import pl.szczodrzynski.edziennik.ui.attendance.AttendanceFragment
 import pl.szczodrzynski.edziennik.ui.behaviour.BehaviourFragment
@@ -20,7 +21,6 @@ import pl.szczodrzynski.edziennik.ui.debug.DebugFragment
 import pl.szczodrzynski.edziennik.ui.debug.LabFragment
 import pl.szczodrzynski.edziennik.ui.feedback.FeedbackFragment
 import pl.szczodrzynski.edziennik.ui.grades.GradesListFragment
-import pl.szczodrzynski.edziennik.ui.grades.editor.GradesEditorFragment
 import pl.szczodrzynski.edziennik.ui.home.HomeFragment
 import pl.szczodrzynski.edziennik.ui.homework.HomeworkFragment
 import pl.szczodrzynski.edziennik.ui.messages.compose.MessagesComposeFragment
@@ -29,12 +29,16 @@ import pl.szczodrzynski.edziennik.ui.messages.single.MessageFragment
 import pl.szczodrzynski.edziennik.ui.notes.NotesFragment
 import pl.szczodrzynski.edziennik.ui.notifications.NotificationsListFragment
 import pl.szczodrzynski.edziennik.ui.settings.ProfileManagerFragment
+import pl.szczodrzynski.edziennik.ui.settings.SettingsAboutFragment
 import pl.szczodrzynski.edziennik.ui.settings.SettingsFragment
+import pl.szczodrzynski.edziennik.ui.settings.SettingsRegisterFragment
+import pl.szczodrzynski.edziennik.ui.settings.SettingsSyncFragment
+import pl.szczodrzynski.edziennik.ui.settings.SettingsThemeFragment
 import pl.szczodrzynski.edziennik.ui.settings.contributors.ContributorsFragment
 import pl.szczodrzynski.edziennik.ui.teachers.TeachersListFragment
-import pl.szczodrzynski.edziennik.ui.template.TemplateFragment
 import pl.szczodrzynski.edziennik.ui.timetable.TimetableFragment
 import pl.szczodrzynski.edziennik.ui.webpush.WebPushFragment
+import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetGroup
 import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetPrimaryItem
 
 enum class NavTarget(
@@ -74,9 +78,19 @@ enum class NavTarget(
     AGENDA(
         id = 12,
         fragmentClass = AgendaFragment::class.java,
-        location = NavTargetLocation.DRAWER,
+        location = NavTargetLocation.NOWHERE,
         nameRes = R.string.menu_agenda,
         icon = CommunityMaterial.Icon.cmd_calendar_outline,
+        popTo = HOME,
+        badgeType = MetadataType.EVENT,
+        featureType = FeatureType.AGENDA,
+    ),
+    AGENDA_NEW(
+        id = 125,
+        fragmentClass = AgendaNewFragment::class.java,
+        location = NavTargetLocation.DRAWER,
+        nameRes = R.string.menu_agenda,
+        icon = CommunityMaterial.Icon.cmd_calendar_clock,
         popTo = HOME,
         badgeType = MetadataType.EVENT,
         featureType = FeatureType.AGENDA,
@@ -179,15 +193,6 @@ enum class NavTarget(
         popTo = HOME,
         devModeOnly = true,
     ),
-    TEMPLATE(
-        id = 1001,
-        fragmentClass = TemplateFragment::class.java,
-        location = NavTargetLocation.DRAWER_BOTTOM,
-        nameRes = R.string.menu_template,
-        icon = CommunityMaterial.Icon.cmd_code_braces,
-        popTo = HOME,
-        devModeOnly = true,
-    ),
     PROFILE_ADD(
         id = 200,
         fragmentClass = null,
@@ -234,11 +239,6 @@ enum class NavTarget(
         icon = CommunityMaterial.Icon.cmd_android_debug_bridge,
         devModeOnly = true,
     ),
-    GRADES_EDITOR(
-        id = 501,
-        fragmentClass = GradesEditorFragment::class.java,
-        nameRes = R.string.menu_grades_editor,
-    ),
     MESSAGE(
         id = 503,
         fragmentClass = MessageFragment::class.java,
@@ -259,20 +259,62 @@ enum class NavTarget(
         id = 150,
         fragmentClass = ContributorsFragment::class.java,
         nameRes = R.string.contributors,
+    ),
+    SETTINGS_THEME(
+        id = 105,
+        fragmentClass = SettingsThemeFragment::class.java,
+        nameRes = R.string.settings_card_theme_title,
+        titleRes = R.string.menu_settings,
+        popTo = SETTINGS,
+    ),
+    SETTINGS_REGISTER(
+        id = 106,
+        fragmentClass = SettingsRegisterFragment::class.java,
+        nameRes = R.string.settings_card_register_title,
+        titleRes = R.string.menu_settings,
+        popTo = SETTINGS,
+    ),
+    SETTINGS_SYNC(
+        id = 107,
+        fragmentClass = SettingsSyncFragment::class.java,
+        nameRes = R.string.settings_card_sync_title,
+        titleRes = R.string.menu_settings,
+        popTo = SETTINGS,
+    ),
+    SETTINGS_ABOUT(
+        id = 108,
+        fragmentClass = SettingsAboutFragment::class.java,
+        nameRes = R.string.settings_card_about_title,
+        titleRes = R.string.menu_settings,
+        popTo = SETTINGS,
     );
 
     companion object {
+        val drawerMoreConfigurableTargets = listOf(
+            TIMETABLE,
+            AGENDA,
+            AGENDA_NEW,
+            GRADES,
+            MESSAGES,
+            HOMEWORK,
+            BEHAVIOUR,
+            ATTENDANCE,
+            ANNOUNCEMENTS,
+            NOTES,
+        )
+
         fun getDefaultConfig() = setOf(
             HOME,
             TIMETABLE,
             AGENDA,
+            AGENDA_NEW,
             GRADES,
             MESSAGES,
             HOMEWORK,
             SETTINGS
         )
 
-        fun getById(id: Int) = NavTarget.entries.first { it.id == id }
+        fun getById(id: Int): NavTarget? = NavTarget.entries.firstOrNull { it.id == id }
     }
 
     fun toBottomSheetItem(activity: MainActivity) =
@@ -280,6 +322,7 @@ enum class NavTarget(
             it.titleRes = this.nameRes
             if (this.icon != null)
                 it.iconicsIcon = this.icon
+            it.group = BottomSheetGroup.FOOTER
             it.onClickListener = View.OnClickListener {
                 activity.navigate(navTarget = this)
             }

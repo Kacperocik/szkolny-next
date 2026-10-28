@@ -15,7 +15,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.google.android.material.button.MaterialButtonToggleGroup
+        <pl.szczodrzynski.edziennik.ui.base.views.ConnectedButtonToggleGroup
+            style="@style/Widget.App.MaterialButtonToggleGroup.Connected"
+            app:showCheckIcon="false"
             android:id="@+id/styles"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -23,7 +25,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/bold"
-                style="?materialButtonOutlinedStyle"
+                style="@style/Widget.App.Button.Connected"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/community_material_font_v5_8_55"
@@ -34,7 +36,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/italic"
-                style="?materialButtonOutlinedStyle"
+                style="@style/Widget.App.Button.Connected"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/community_material_font_v5_8_55"
@@ -45,7 +47,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/underline"
-                style="?materialButtonOutlinedStyle"
+                style="@style/Widget.App.Button.Connected"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/community_material_font_v5_8_55"
@@ -56,7 +58,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/strike"
-                style="?materialButtonOutlinedStyle"
+                style="@style/Widget.App.Button.Connected"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/community_material_font_v5_8_55"
@@ -67,7 +69,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/subscript"
-                style="?materialButtonOutlinedStyle"
+                style="@style/Widget.App.Button.Connected"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/community_material_font_v5_8_55"
@@ -78,7 +80,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/superscript"
-                style="?materialButtonOutlinedStyle"
+                style="@style/Widget.App.Button.Connected"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/community_material_font_v5_8_55"
@@ -86,7 +88,7 @@
                 android:textSize="20sp"
                 app:iconPadding="0dp"
                 tools:text="\uf6b3" />
-        </com.google.android.material.button.MaterialButtonToggleGroup>
+        </pl.szczodrzynski.edziennik.ui.base.views.ConnectedButtonToggleGroup>
     </HorizontalScrollView>
     <!-- TODO 2021-10-05: stack the group and button on top -->
     <!-- android:layout_marginTop="-13dp" -->

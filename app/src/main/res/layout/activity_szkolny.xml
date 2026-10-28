@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:animateLayoutChanges="true">
 
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        <pl.szczodrzynski.edziennik.ui.base.views.ExpressiveSwipeRefreshLayout
             android:id="@+id/swipeRefreshLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -26,6 +26,6 @@
 
                 <include layout="@layout/fragment_loading" />
             </FrameLayout>
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        </pl.szczodrzynski.edziennik.ui.base.views.ExpressiveSwipeRefreshLayout>
     </pl.szczodrzynski.navlib.NavView>
 </FrameLayout>

@@ -20,6 +20,7 @@ import pl.szczodrzynski.edziennik.data.db.entity.Attendance
 import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ext.setTintColor
 import pl.szczodrzynski.edziennik.core.manager.AttendanceManager
+import pl.szczodrzynski.edziennik.core.manager.AttendanceManager.Companion.SHAPE_MODE_CIRCLE
 
 class AttendanceView : AppCompatTextView {
 
@@ -55,7 +56,11 @@ class AttendanceView : AppCompatTextView {
         else
             0xccffffff.toInt())
 
-        setBackgroundResource(if (bigView) R.drawable.bg_rounded_8dp else R.drawable.bg_rounded_4dp)
+        setBackgroundResource(when {
+            manager.shapeMode == SHAPE_MODE_CIRCLE -> R.drawable.bg_circle
+            bigView -> R.drawable.bg_rounded_8dp
+            else -> R.drawable.bg_rounded_4dp
+        })
         background.setTintColor(attendanceColor)
         gravity = Gravity.CENTER
 
@@ -71,8 +76,10 @@ class AttendanceView : AppCompatTextView {
         }
         else {
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-            setPadding(5.dp, 0, 5.dp, 0)
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+            val isCircle = manager.shapeMode == SHAPE_MODE_CIRCLE
+            setPadding(if (isCircle) 1.dp else 5.dp, 0, if (isCircle) 1.dp else 5.dp, 0)
+            val size = if (isCircle) 20.dp else ViewGroup.LayoutParams.WRAP_CONTENT
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
                 setMargins(0, 0, 5.dp, 0)
             }
             maxLines = 1
@@ -81,4 +88,3 @@ class AttendanceView : AppCompatTextView {
         }
     }
 }
-

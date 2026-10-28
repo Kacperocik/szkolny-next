@@ -6,13 +6,18 @@ package pl.szczodrzynski.edziennik.ui.grades.viewholder
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import com.google.android.flexbox.FlexboxLayout
+import pl.szczodrzynski.edziennik.ext.dp
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.databinding.GradesItemStatsBinding
+import pl.szczodrzynski.edziennik.ext.applyExpressiveShapeMorphToButtons
 import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ui.base.dialog.SimpleDialog
 import pl.szczodrzynski.edziennik.ui.dialogs.settings.GradesConfigDialog
@@ -60,37 +65,85 @@ class StatsViewHolder(
             return
         }
 
+        val sim = if (adapter.simulatorMode) adapter.simSnapshot else null
+        // Keep average cards visible during simulation, including empty semesters.
+        val forceCards = adapter.simulatorMode
+
         getSemesterString(app, item.normalSem1, item.normalSem1Proposed, item.normalSem1Final, item.sem1NotAllFinal).let { (average, notice) ->
-            b.normalSemester1Layout.isVisible = average != null
+            b.normalSemester1Layout.isVisible = average != null || forceCards
             b.normalSemester1Notice.isVisible = notice != null
             b.normalSemester1.text = average
             b.normalSemester1Notice.text = notice
             if (average != null)
                 showAverages += 1
+            bindSimulatorAverage(
+                app = app,
+                averageView = b.normalSemester1,
+                noticeView = b.normalSemester1Notice,
+                beforeRow = b.normalSemester1BeforeRow,
+                beforeValue = b.normalSemester1BeforeValue,
+                simRow = b.normalSemester1SimRow,
+                simValue = b.normalSemester1SimValue,
+                live = Triple(item.normalSem1, item.normalSem1Proposed, item.normalSem1Final) to item.sem1NotAllFinal,
+                snap = sim?.sem1
+            )
         }
         getSemesterString(app, item.normalSem2, item.normalSem2Proposed, item.normalSem2Final, item.sem2NotAllFinal).let { (average, notice) ->
-            b.normalSemester2Layout.isVisible = average != null
+            b.normalSemester2Layout.isVisible = average != null || forceCards
             b.normalSemester2Notice.isVisible = notice != null
             b.normalSemester2.text = average
             b.normalSemester2Notice.text = notice
             if (average != null)
                 showAverages += 2
+            bindSimulatorAverage(
+                app = app,
+                averageView = b.normalSemester2,
+                noticeView = b.normalSemester2Notice,
+                beforeRow = b.normalSemester2BeforeRow,
+                beforeValue = b.normalSemester2BeforeValue,
+                simRow = b.normalSemester2SimRow,
+                simValue = b.normalSemester2SimValue,
+                live = Triple(item.normalSem2, item.normalSem2Proposed, item.normalSem2Final) to item.sem2NotAllFinal,
+                snap = sim?.sem2
+            )
         }
         getSemesterString(app, item.normalYearly, item.normalYearlyProposed, item.normalYearlyFinal, item.yearlyNotAllFinal).let { (average, notice) ->
-            b.normalYearlyLayout.isVisible = average != null
+            b.normalYearlyLayout.isVisible = average != null || forceCards
             b.normalYearlyNotice.isVisible = notice != null
             b.normalYearly.text = average
             b.normalYearlyNotice.text = notice
             if (average != null)
                 showAverages += 3
+            bindSimulatorAverage(
+                app = app,
+                averageView = b.normalYearly,
+                noticeView = b.normalYearlyNotice,
+                beforeRow = b.normalYearlyBeforeRow,
+                beforeValue = b.normalYearlyBeforeValue,
+                simRow = b.normalYearlySimRow,
+                simValue = b.normalYearlySimValue,
+                live = Triple(item.normalYearly, item.normalYearlyProposed, item.normalYearlyFinal) to item.yearlyNotAllFinal,
+                snap = sim?.yearly
+            )
         }
 
-        b.normalTitle.isVisible = showAverages.size > 0
-        b.normalLayout.isVisible = showAverages.size > 0
-        b.normalDivider.isVisible = showAverages.size > 0
-        b.helpButton.isVisible = showAverages.size > 0
-        b.normalDiv1.isVisible = showAverages.contains(1) && showAverages.contains(2) || showAverages.contains(1) && showAverages.contains(3)
-        b.normalDiv2.isVisible = showAverages.contains(2) && showAverages.contains(3)
+        b.normalTitle.isVisible = showAverages.size > 0 || forceCards
+        b.normalLayout.isVisible = showAverages.size > 0 || forceCards
+        b.normalDivider.isVisible = showAverages.size > 0 || forceCards
+        b.helpButton.isVisible = showAverages.size > 0 || forceCards
+
+        val normalVisibleCount = listOf(
+            b.normalSemester1Layout.isVisible,
+            b.normalSemester2Layout.isVisible,
+            b.normalYearlyLayout.isVisible
+        ).count { it }
+        (b.normalYearlyLayout.layoutParams as? FlexboxLayout.LayoutParams)?.let {
+            val wrapped = normalVisibleCount == 3
+            it.flexBasisPercent = if (wrapped) 1f else 0.48f
+            it.topMargin = if (wrapped) 8.dp else 0
+            b.normalYearlyLayout.requestLayout()
+        }
+        updateCardGaps(listOf(b.normalSemester1Layout, b.normalSemester2Layout, b.normalYearlyLayout))
 
         getSemesterString(app, 0f, 0f, item.pointSem1, false).let { (average, _) ->
             b.pointSemester1Layout.isVisible = average != null
@@ -114,8 +167,19 @@ class StatsViewHolder(
         b.pointTitle.isVisible = showPoint.size > 0
         b.pointLayout.isVisible = showPoint.size > 0
         b.pointDivider.isVisible = showPoint.size > 0
-        b.pointDiv1.isVisible = showPoint.contains(1) && showPoint.contains(2)
-        b.pointDiv2.isVisible = showPoint.contains(2) && showPoint.contains(3)
+
+        val pointVisibleCount = listOf(
+            b.pointSemester1Layout.isVisible,
+            b.pointSemester2Layout.isVisible,
+            b.pointYearlyLayout.isVisible
+        ).count { it }
+        (b.pointYearlyLayout.layoutParams as? FlexboxLayout.LayoutParams)?.let {
+            val wrapped = pointVisibleCount == 3
+            it.flexBasisPercent = if (wrapped) 1f else 0.48f
+            it.topMargin = if (wrapped) 8.dp else 0
+            b.pointYearlyLayout.requestLayout()
+        }
+        updateCardGaps(listOf(b.pointSemester1Layout, b.pointSemester2Layout, b.pointYearlyLayout))
 
         b.noData.isVisible = showAverages.isEmpty() && showPoint.isEmpty()
         b.disclaimer.isVisible = !b.noData.isVisible
@@ -133,10 +197,70 @@ class StatsViewHolder(
         b.customValueButton.onClick {
             GradesConfigDialog(activity, reloadOnDismiss = true).show()
         }
+        b.customValueButton.applyExpressiveShapeMorphToButtons()
     }
 
-    private fun getSemesterString(context: Context, expected: Float, proposed: Float, final: Float, notAllFinal: Boolean) : Pair<String?, String?> {
-        val format = DecimalFormat("#.00")
+    private fun bindSimulatorAverage(
+        app: App,
+        averageView: TextView,
+        noticeView: TextView,
+        beforeRow: View,
+        beforeValue: TextView,
+        simRow: View,
+        simValue: TextView,
+        live: Pair<Triple<Float, Float, Float>, Boolean>,
+        snap: GradesAdapter.SimulatorStatSnapshot?
+    ) {
+        if (snap == null) {
+            averageView.isVisible = true
+            beforeRow.isVisible = false
+            simRow.isVisible = false
+            return
+        }
+        val (liveTriple, liveNotAll) = live
+        val (liveAverage, liveNotice) = getSimulatorString(app, liveTriple.first, liveTriple.third, liveNotAll)
+        val (snapAverage, _) = getSimulatorString(app, snap.expected, snap.final, snap.notAllFinal)
+        averageView.isVisible = false
+        beforeRow.isVisible = true
+        beforeValue.text = snapAverage ?: "–"
+        simRow.isVisible = liveAverage != null
+        simValue.text = liveAverage
+        noticeView.isVisible = liveNotice != null
+        noticeView.text = liveNotice
+    }
+
+    /**
+     * Uses final grades where available and rounded averages for remaining subjects.
+     * Averaging final grades alone would reduce the result to a single grade
+     * when only one final grade has been set.
+     */
+    private fun getSimulatorString(context: Context, expected: Float, final: Float, notAllFinal: Boolean): Pair<String?, String?> {
+        if (expected == 0f)
+            return null to null
+        val notice = when {
+            final == 0f -> context.getString(R.string.grades_stats_expected)
+            notAllFinal -> context.getString(R.string.grades_stats_from_final_and_expected)
+            else -> context.getString(R.string.grades_stats_from_final_no_expected)
+        }
+        return DecimalFormat("#.00").format(expected) to notice
+    }
+
+    /**
+     * Adds gaps only between cards in the same row.
+     * With three visible cards, the yearly card occupies a separate row.
+     */
+    private fun updateCardGaps(cards: List<View>) {
+        val visible = cards.filter { it.isVisible }
+        val rowEnds = if (visible.size == 3) setOf(1, 2) else setOf(visible.lastIndex)
+        visible.forEachIndexed { index, card ->
+            (card.layoutParams as? ViewGroup.MarginLayoutParams)?.let {
+                it.rightMargin = if (index in rowEnds) 0 else 8.dp
+                card.layoutParams = it
+            }
+        }
+    }
+
+    private fun getSemesterString(context: Context, expected: Float, proposed: Float, final: Float, notAllFinal: Boolean) : Pair<String?, String?> {        val format = DecimalFormat("#.00")
 
         val average = when {
             final != 0f -> final

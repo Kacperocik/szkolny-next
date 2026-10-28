@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
+import com.google.android.material.appbar.AppBarLayout
 import com.google.gson.JsonObject
 import com.mikepenz.iconics.typeface.IIcon
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +40,7 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
     internal lateinit var b: B
 
     private var isViewReady: Boolean = false
+    private var isActivityReady: Boolean = false
     private var inState: Bundle? = null
     private var appBarAnimator: AppBarColorAnimator? = null
 
@@ -49,8 +51,10 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
     internal var isScrolled = false
         set(value) { // cannot be private - PagerFragment onPageScrollStateChanged
             field = value
-            dispatchCanRefresh()
-            appBarAnimator?.dispatchLiftOnScroll()
+            if (isResumed) {
+                dispatchCanRefresh()
+                appBarAnimator?.dispatchLiftOnScroll()
+            }
         }
 
     /**
@@ -62,7 +66,7 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
     internal var canRefreshDisabled = false
         set(value) {
             field = value
-            dispatchCanRefresh()
+            if (isResumed) dispatchCanRefresh()
         }
 
     /**
@@ -89,22 +93,48 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
         b = this.inflater?.invoke(inflater, container, false)
             ?: inflate(inflater, container, false)
             ?: return null
-        isViewReady = false // reinitialize the view in onResume()
-        inState = savedInstanceState // save the instance state for onResume()
+        isViewReady = false
+        isActivityReady = false
+        inState = savedInstanceState
         appBarAnimator = AppBarColorAnimator(activity, appBars)
         return b.root
+    }
+
+    final override fun onStart() {
+        super.onStart()
+        // ViewPager2 keeps adjacent pages STARTED until a swipe settles.
+        // Load their views now, without taking over the active page's controls.
+        if (parentFragment is PagerFragment<*, *>) initializeView()
     }
 
     override fun onResume() {
         super.onResume()
         EventBus.getDefault().registerSafe(this)
-        if (!isAdded || isViewReady)
-            return
-        isViewReady = true
+        if (!isAdded) return
+        if (!isActivityReady) {
+            isActivityReady = true
+            initializeActivity()
+        }
+        initializeView()
+        dispatchCanRefresh()
+        appBarAnimator?.dispatchLiftOnScroll()
+    }
+
+    private fun initializeActivity() {
         // setup the activity (bottom sheet, FAB, etc.)
         // run before setupScrollListener {} to populate appBars
         (activity as? MainActivity)?.let(::setupMainActivity)
         (activity as? LoginActivity)?.let(::setupLoginActivity)
+        var parent: Fragment? = parentFragment
+        while (parent != null) {
+            if (parent is PagerFragment<*, *>) {
+                val tabLayout = parent.getTabLayout()
+                appBars += tabLayout
+                (tabLayout.parent as? AppBarLayout)?.let { appBars += it }
+                break
+            }
+            parent = parent.parentFragment
+        }
         // listen to scroll state changes
         var first = true
         setupScrollListener {
@@ -112,13 +142,21 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
                 isScrolled = it
             first = false
         }
+    }
+
+    private fun initializeView() {
+        val currentView = view ?: return
+        if (!isAdded || isViewReady) return
+        isViewReady = true
         // let the UI transition for a moment
         startCoroutineTimer(100L) {
-            if (!isAdded)
+            if (!isAdded || view !== currentView)
                 return@startCoroutineTimer
             onViewReady(inState)
-            (activity as? MainActivity)?.gainAttention()
-            (activity as? MainActivity)?.gainAttentionFAB()
+            if (isResumed) {
+                (activity as? MainActivity)?.gainAttention()
+                (activity as? MainActivity)?.gainAttentionFAB()
+            }
         }
     }
 
@@ -127,13 +165,14 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
         EventBus.getDefault().unregisterSafe(this)
     }
 
-    final override fun onDestroyView() {
+    override fun onDestroyView() {
         super.onDestroyView()
         isViewReady = false
+        isActivityReady = false
         job.cancel()
     }
 
-    final override fun onViewCreated(view: View, savedInstanceState: Bundle?) =
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) =
         super.onViewCreated(view, savedInstanceState)
 
     final override fun onViewStateRestored(savedInstanceState: Bundle?) =
@@ -141,7 +180,6 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
 
     final override fun onAttach(context: Context) = super.onAttach(context)
     final override fun onCreate(savedInstanceState: Bundle?) = super.onCreate(savedInstanceState)
-    final override fun onStart() = super.onStart()
     final override fun onStop() = super.onStop()
     final override fun onDestroy() = super.onDestroy()
     final override fun onDetach() = super.onDetach()
@@ -197,7 +235,8 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
     open fun getBottomSheetItems() = listOf<IBottomSheetItem<*>>()
 
     /**
-     * Called after the fragment is initialized (default) or when is becomes visible (pager).
+     * Called once per view, when resumed (default) or started (pager pages).
+     * Adjacent pager pages can load before they become the selected page.
      *
      * Perform view initialization and other tasks, if necessary. Remember to call super
      * if used in a [PagerFragment].
@@ -208,4 +247,7 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
      * Called when the FAB is clicked (if enabled).
      */
     open suspend fun onFabClick() {}
+
+    fun hideFab() = (activity as? MainActivity)?.hideFab()
+    fun showFab() = (activity as? MainActivity)?.showFab()
 }
