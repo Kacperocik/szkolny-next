@@ -100,6 +100,7 @@ class Config(app: App) : BaseConfig<Config>(app, profileId = null) {
         var interval by config<Int>("syncInterval", 1 * HOUR.toInt())
         var onlyWifi by config<Boolean>("syncOnlyWifi", false)
         var pullToRefresh by config<Boolean>(true)
+        var markReadMessagesAndAnnouncements by config<Boolean>(false)
 
         var dontShowAppManagerDialog by config<Boolean>(false)
         var lastAppSync by config<Long>(0L)

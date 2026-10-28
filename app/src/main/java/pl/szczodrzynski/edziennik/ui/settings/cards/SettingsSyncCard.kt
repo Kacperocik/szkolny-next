@@ -20,6 +20,7 @@ import pl.szczodrzynski.edziennik.core.manager.OngoingLessonNotificationManager
 import pl.szczodrzynski.edziennik.core.work.SyncWorker
 import pl.szczodrzynski.edziennik.core.work.UpdateWorker
 import pl.szczodrzynski.edziennik.data.enums.NavTarget
+import pl.szczodrzynski.edziennik.data.enums.LoginType
 import pl.szczodrzynski.edziennik.ui.dialogs.settings.NotificationFilterDialog
 import pl.szczodrzynski.edziennik.ui.dialogs.settings.QuietHoursConfigDialog
 import pl.szczodrzynski.edziennik.ui.dialogs.settings.SyncIntervalDialog
@@ -134,6 +135,15 @@ class SettingsSyncCard(util: SettingsUtil) : SettingsCard(util) {
             if (!it)
                 activity.swipeRefreshLayout.isEnabled = false
         },
+
+        if (app.profile.loginStoreType == LoginType.LIBRUS) util.createPropertyItem(
+            text = R.string.settings_sync_mark_read_messages_text,
+            subText = R.string.settings_sync_mark_read_messages_subtext,
+            icon = CommunityMaterial.Icon.cmd_eye_check_outline,
+            value = configGlobal.sync.markReadMessagesAndAnnouncements
+        ) { _, value ->
+            configGlobal.sync.markReadMessagesAndAnnouncements = value
+        } else null,
 
         if (SDK_INT >= VERSION_CODES.O)
             util.createActionItem(

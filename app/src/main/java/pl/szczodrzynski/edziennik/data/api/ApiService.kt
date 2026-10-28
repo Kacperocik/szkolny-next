@@ -22,6 +22,7 @@ import pl.szczodrzynski.edziennik.data.api.interfaces.EdziennikCallback
 import pl.szczodrzynski.edziennik.data.api.models.ApiError
 import pl.szczodrzynski.edziennik.data.api.task.ErrorReportTask
 import pl.szczodrzynski.edziennik.data.api.task.IApiTask
+import pl.szczodrzynski.edziennik.data.api.task.MarkAllReadTask
 import pl.szczodrzynski.edziennik.data.api.task.SzkolnyTask
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.ext.toApiError
@@ -62,7 +63,16 @@ class ApiService : Service() {
 
         var lastEventTime = System.currentTimeMillis()
         var taskCancelTries = 0
+
+        // Sticky events signal availability; the tasks themselves must not overwrite each other.
+        private val pendingTasks = mutableListOf<IApiTask>()
+
+        fun addPendingTasks(tasks: List<IApiTask>) = synchronized(pendingTasks) {
+            pendingTasks.addAll(tasks)
+        }
     }
+
+    object PendingTasksEvent
 
     private val app by lazy { applicationContext as App }
 
@@ -118,7 +128,7 @@ class ApiService : Service() {
             Timber.d("Task $taskRunningId threw an error - $apiError")
             apiError.profileId = taskProfileId
 
-            EventBus.getDefault().postSticky(ApiTaskErrorEvent(apiError))
+            EventBus.getDefault().postSticky(ApiTaskErrorEvent(apiError, (taskRunning as? EdziennikTask)?.request))
             errorList.add(apiError)
             Timber.e(apiError.throwable)
 
@@ -161,6 +171,7 @@ class ApiService : Service() {
             | |/ _` / __| |/ /  / _ \ \/ / _ \/ __| | | | __| |/ _ \| '_ \
             | | (_| \__ \   <  |  __/>  <  __/ (__| |_| | |_| | (_) | | | |
             |_|\__,_|___/_|\_\  \___/_/\_\___|\___|\__,_|\__|_|\___/|_| |*/
+    @Synchronized
     private fun runTask() {
         checkIfTaskFrozen()
         if (taskIsRunning)
@@ -202,6 +213,7 @@ class ApiService : Service() {
         try {
             when (task) {
                 is EdziennikTask -> task.run(app, taskCallback)
+                is MarkAllReadTask -> task.run(app, taskCallback)
                 is ErrorReportTask -> task.run(app, taskCallback, notification, errorList)
                 is SzkolnyTask -> task.run(taskCallback)
             }
@@ -265,15 +277,26 @@ class ApiService : Service() {
          | |___\ V /  __/ | | | |_| |_) | |_| \__ \
          |______\_/ \___|_| |_|\__|____/ \__,_|__*/
     @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
-    fun onApiTask(task: IApiTask) {
-        EventBus.getDefault().removeStickyEvent(task)
+    @Synchronized
+    fun onPendingTasks(event: PendingTasksEvent) {
+        if (serviceClosed) return
+        EventBus.getDefault().removeStickyEvent(event)
+        val tasks = synchronized(pendingTasks) {
+            pendingTasks.toList().also { pendingTasks.clear() }
+        }
+        tasks.forEach(::addTask)
+        if (tasks.isNotEmpty()) runTask()
+    }
+
+    private fun addTask(task: IApiTask) {
         Timber.d(task.toString())
 
         if (task is EdziennikTask) {
             // fix for duplicated tasks, thank you EventBus
-            if (task.request in allTaskRequestList)
+            val key = task.profileId to task.request
+            if (key in allTaskRequestList)
                 return
-            allTaskRequestList += task.request
+            allTaskRequestList += key
         }
 
         if (task is EdziennikTask) {
@@ -297,7 +320,6 @@ class ApiService : Service() {
         taskQueue.forEach {
             Timber.d("  - $it")
         }
-        runTask()
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
@@ -336,6 +358,8 @@ class ApiService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Timber.d("Foreground service onStartCommand")
         startForeground(app.notificationManager.sync.id, notification.notification)
+        serviceClosed = false
+        onPendingTasks(PendingTasksEvent)
         return START_NOT_STICKY
     }
 

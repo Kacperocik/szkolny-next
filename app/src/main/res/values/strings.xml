@@ -1718,4 +1718,8 @@
     <string name="messages_no_drafts">Brak wersji roboczych wiadomości.</string>
     <string name="homework_no_current">Brak bieżących zadań domowych.</string>
     <string name="homework_no_past">Brak wcześniejszych lub wykonanych zadań domowych.</string>
+    <string name="settings_sync_mark_read_messages_text">Oznaczaj jako przeczytane również wiadomości i ogłoszenia</string>
+    <string name="settings_sync_mark_read_messages_subtext">Akcja «Oznacz wszystko jako przeczytane» obejmie również wiadomości i ogłoszenia w Librusie oraz zmieni ich stan w dzienniku.</string>
+    <string name="main_menu_mark_as_read_partial">Nie udało się oznaczyć wszystkich pozycji jako przeczytane. Spróbuj ponownie.</string>
+    <string name="main_menu_mark_as_read_cancelled">Przerwano oznaczanie jako przeczytane.</string>
 </resources>

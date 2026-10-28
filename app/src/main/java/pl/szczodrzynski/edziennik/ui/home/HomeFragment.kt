@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
@@ -119,20 +118,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, MainActivity>(
             .withGroup(BottomSheetGroup.ACTIONS)
             .withOnClickListener {
                 activity.bottomSheet.close()
-                launch(Dispatchers.IO) {
-                    if (!app.data.uiConfig.enableMarkAsReadAnnouncements) {
-                        app.db.metadataDao()
-                            .setAllSeenExceptMessagesAndAnnouncements(App.profileId, true)
-                    } else {
-                        app.db.metadataDao().setAllSeenExceptMessages(App.profileId, true)
-                    }
-                }
-
-                Toast.makeText(
-                    activity,
-                    R.string.main_menu_mark_as_read_success,
-                    Toast.LENGTH_SHORT
-                ).show()
+                activity.markAllAsRead(App.profileId)
             }
     )
 

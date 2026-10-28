@@ -64,6 +64,7 @@ import pl.szczodrzynski.edziennik.core.work.UpdateStateEvent
 import pl.szczodrzynski.edziennik.core.work.UpdateWorker
 import pl.szczodrzynski.edziennik.data.api.ERROR_VULCAN_API_DEPRECATED
 import pl.szczodrzynski.edziennik.data.api.edziennik.EdziennikTask
+import pl.szczodrzynski.edziennik.data.api.task.MarkAllReadTask
 import pl.szczodrzynski.edziennik.data.api.events.ApiTaskAllFinishedEvent
 import pl.szczodrzynski.edziennik.data.api.events.ApiTaskErrorEvent
 import pl.szczodrzynski.edziennik.data.api.events.ApiTaskFinishedEvent
@@ -365,8 +366,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
         })
 
-        mainSnackbar.setCoordinator(b.navView.coordinator, b.navView.bottomBar)
-        errorSnackbar.setCoordinator(b.navView.coordinator, b.navView.bottomBar)
+        val snackbarAnchor = if (app.config.ui.toolbarAtBottom) b.navView.toolbar.parent as View else null
+        mainSnackbar.setCoordinator(b.navView.coordinator, snackbarAnchor)
+        errorSnackbar.setCoordinator(b.navView.coordinator, snackbarAnchor)
 
         val versionBadge = app.buildManager.versionBadge
         navView.nightlyText.isVisible = versionBadge != null
@@ -673,20 +675,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 EdziennikTask.sync().enqueue(this)
             }
             NavTarget.PROFILE_MARK_AS_READ -> {
-                launch {
-                    withContext(Dispatchers.Default) {
-                        app.db.profileDao().allNow.forEach { profile ->
-                            if (!profile.getAppData().uiConfig.enableMarkAsReadAnnouncements)
-                                app.db.metadataDao()
-                                    .setAllSeenExceptMessagesAndAnnouncements(profile.id, true)
-                            else
-                                app.db.metadataDao().setAllSeenExceptMessages(profile.id, true)
-                        }
-                    }
-                    Toast.makeText(this@MainActivity,
-                        R.string.main_menu_mark_as_read_success,
-                        Toast.LENGTH_SHORT).show()
-                }
+                markAllAsRead()
             }
             else -> {
                 navigate(navTarget = item)
@@ -839,6 +828,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }
             navView.showToolbarProgress(event.progress)
         }
+    }
+
+    fun markAllAsRead(profileId: Int? = null) {
+        MarkAllReadTask(
+            profileId,
+            app.config.sync.markReadMessagesAndAnnouncements,
+        ).enqueue(this)
     }
 
     fun updateLastSyncSubtitle() {

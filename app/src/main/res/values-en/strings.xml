@@ -1653,4 +1653,8 @@
     <string name="messages_no_drafts">No message drafts.</string>
     <string name="homework_no_current">No current homework.</string>
     <string name="homework_no_past">No past or completed homework.</string>
+    <string name="settings_sync_mark_read_messages_text">Also mark messages and announcements as read</string>
+    <string name="settings_sync_mark_read_messages_subtext">The “Mark everything as read” action will also include Librus messages and announcements and update their status in the e-register.</string>
+    <string name="main_menu_mark_as_read_partial">Some items could not be marked as read. Please try again.</string>
+    <string name="main_menu_mark_as_read_cancelled">Marking items as read was interrupted.</string>
 </resources>

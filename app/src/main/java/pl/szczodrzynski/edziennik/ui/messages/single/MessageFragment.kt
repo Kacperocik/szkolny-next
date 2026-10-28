@@ -24,6 +24,7 @@ import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.api.edziennik.EdziennikTask
 import pl.szczodrzynski.edziennik.data.api.events.MessageGetEvent
+import pl.szczodrzynski.edziennik.data.api.events.ApiTaskErrorEvent
 import pl.szczodrzynski.edziennik.data.db.full.MessageFull
 import pl.szczodrzynski.edziennik.data.enums.LoginType
 import pl.szczodrzynski.edziennik.data.enums.NavTarget
@@ -189,6 +190,12 @@ class MessageFragment : BaseFragment<MessageFragmentBinding, MainActivity>(
         b.downloadButton.onClick {
             EdziennikTask.messageGet(App.profileId, message).enqueue(activity)
         }
+        b.retryDownload.enableExpressiveShapeMorph()
+        b.retryDownload.onClick {
+            b.downloadError.isVisible = false
+            b.progress.isVisible = true
+            EdziennikTask.messageGet(message.profileId, message).enqueue(activity)
+        }
 
         message = manager.getMessage(App.profileId, arguments) ?: run {
             if (isEmbedded) {
@@ -207,6 +214,22 @@ class MessageFragment : BaseFragment<MessageFragmentBinding, MainActivity>(
         EventBus.getDefault().removeStickyEvent(event)
         // TODO remove this: message = event.message
         showMessage()
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onMessageDownloadError(event: ApiTaskErrorEvent) {
+        val request = event.request as? EdziennikTask.MessageGetRequest ?: return
+        if (!this::message.isInitialized || !event.error.isCritical ||
+            request.message.id != message.id || request.message.profileId != message.profileId
+        ) return
+
+        b.progress.isVisible = false
+        if (message.body != null) {
+            showMessage()
+        } else {
+            b.downloadErrorText.text = event.error.getStringReason(activity)
+            b.downloadError.isVisible = true
+        }
     }
 
     private fun checkMessage() {
@@ -242,6 +265,7 @@ class MessageFragment : BaseFragment<MessageFragmentBinding, MainActivity>(
     }
 
     private fun showMessage() {
+        b.downloadError.isVisible = false
         b.body.text = MessagesUtils.htmlToSpannable(activity, message.body.toString())
         b.date.text = getString(R.string.messages_date_time_format, Date.fromMillis(message.addedDate).formattedStringShort, Time.fromMillis(message.addedDate).stringHM)
 

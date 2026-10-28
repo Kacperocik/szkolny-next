@@ -1679,4 +1679,8 @@
     <string name="messages_no_drafts">Keine Nachrichtenentwürfe.</string>
     <string name="homework_no_current">Keine aktuellen Hausaufgaben.</string>
     <string name="homework_no_past">Keine früheren oder erledigten Hausaufgaben.</string>
+    <string name="settings_sync_mark_read_messages_text">Auch Nachrichten und Mitteilungen als gelesen markieren</string>
+    <string name="settings_sync_mark_read_messages_subtext">Die Aktion „Alles als gelesen markieren“ umfasst auch Nachrichten und Mitteilungen in Librus und aktualisiert ihren Status im E-Klassenbuch.</string>
+    <string name="main_menu_mark_as_read_partial">Einige Einträge konnten nicht als gelesen markiert werden. Bitte erneut versuchen.</string>
+    <string name="main_menu_mark_as_read_cancelled">Das Markieren als gelesen wurde unterbrochen.</string>
 </resources>

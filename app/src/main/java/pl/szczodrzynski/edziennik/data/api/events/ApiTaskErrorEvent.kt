@@ -6,4 +6,4 @@ package pl.szczodrzynski.edziennik.data.api.events
 
 import pl.szczodrzynski.edziennik.data.api.models.ApiError
 
-class ApiTaskErrorEvent(val error: ApiError)
+class ApiTaskErrorEvent(val error: ApiError, val request: Any? = null)

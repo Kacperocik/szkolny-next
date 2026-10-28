@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.danielstone.materialaboutlibrary.MaterialAboutFragment
 import com.google.android.material.card.MaterialCardView
@@ -17,6 +18,7 @@ import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.ui.base.fragment.AppBarColorAnimator
 import pl.szczodrzynski.edziennik.ui.base.fragment.setupScrollListener
+import kotlin.math.roundToInt
 
 abstract class BaseSettingsFragment : MaterialAboutFragment() {
 
@@ -90,10 +92,15 @@ abstract class BaseSettingsFragment : MaterialAboutFragment() {
 
     private fun makeCardsTransparent(view: View) {
         val recyclerView = view.findViewById<RecyclerView>(R.id.mal_recyclerview) ?: return
+        val outerMargin = (4 * resources.displayMetrics.density).roundToInt()
         fun applyTransparent(child: View) {
             val cardView = child as? MaterialCardView ?: child.findViewById(R.id.mal_list_card)
             cardView?.setCardBackgroundColor(Color.TRANSPARENT)
             cardView?.strokeWidth = 0
+            cardView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = outerMargin
+                rightMargin = outerMargin
+            }
         }
         for (i in 0 until recyclerView.childCount) {
             applyTransparent(recyclerView.getChildAt(i))
