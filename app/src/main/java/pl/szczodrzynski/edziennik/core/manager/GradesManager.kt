@@ -12,6 +12,7 @@ import kotlinx.coroutines.Job
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.entity.Grade
+import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_DESCRIPTIVE
 import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_NORMAL
 import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_NO_GRADE
 import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_POINT_AVG
@@ -59,6 +60,7 @@ class GradesManager(val app: App) : CoroutineScope {
         get() = job + Dispatchers.Default
 
     private val gradeRegex by lazy { """([+-])?([0-6])([+-])?""".toRegex() }
+    private val descriptiveNumericGradeRegex = Regex("[1-6][+-]?")
     private val format = DecimalFormat("#.##")
 
     val orderBy
@@ -186,7 +188,8 @@ class GradesManager(val app: App) : CoroutineScope {
                     else -> grade.color and 0xffffff
                 }
             }
-            type in TYPE_NORMAL..TYPE_YEAR_FINAL -> {
+            type in TYPE_NORMAL..TYPE_YEAR_FINAL ||
+                (type == TYPE_DESCRIPTIVE && !defColor && descriptiveNumericGradeRegex.matches(grade.name)) -> {
                 when (grade.name.lowercase()) {
                     "+", "++", "+++" -> 0x4caf50
                     "0", "-", "-,", "-,-,", "np", "np.", "npnp", "np,", "np,np,", "bs", "nk", "bz" -> 0xff7043

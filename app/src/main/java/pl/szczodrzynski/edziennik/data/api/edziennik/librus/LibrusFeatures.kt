@@ -36,6 +36,7 @@ const val ENDPOINT_LIBRUS_API_DESCRIPTIVE_GRADES                       = 1033
 const val ENDPOINT_LIBRUS_API_TEXT_GRADES                              = 1034
 const val ENDPOINT_LIBRUS_API_DESCRIPTIVE_TEXT_GRADES                  = 1035
 const val ENDPOINT_LIBRUS_API_BEHAVIOUR_GRADES                         = 1036
+const val ENDPOINT_LIBRUS_API_PARTIAL_DESCRIPTIVE_GRADES               = 1037
 const val ENDPOINT_LIBRUS_API_EVENT_TYPES                              = 1040
 const val ENDPOINT_LIBRUS_API_EVENTS                                   = 1041
 const val ENDPOINT_LIBRUS_API_HOMEWORK                                 = 1050
@@ -118,8 +119,9 @@ val LibrusFeatures = listOf(
                 ENDPOINT_LIBRUS_API_DESCRIPTIVE_GRADES to LoginMethod.LIBRUS_API,
                 ENDPOINT_LIBRUS_API_TEXT_GRADES to LoginMethod.LIBRUS_API,
                 ENDPOINT_LIBRUS_API_DESCRIPTIVE_TEXT_GRADES to LoginMethod.LIBRUS_API,
-                ENDPOINT_LIBRUS_API_BEHAVIOUR_GRADES to LoginMethod.LIBRUS_API
-        )),
+                ENDPOINT_LIBRUS_API_BEHAVIOUR_GRADES to LoginMethod.LIBRUS_API,
+                ENDPOINT_LIBRUS_API_PARTIAL_DESCRIPTIVE_GRADES to LoginMethod.LIBRUS_API
+        )).withManualRefreshEndpoints(ENDPOINT_LIBRUS_API_PARTIAL_DESCRIPTIVE_GRADES),
         /**
          * Homework - using API.
          * Sync only if account has premium access.

@@ -394,4 +394,6 @@
     <string name="error_192_reason">Nie udało się wysłać usprawiedliwienia.</string>
     <string name="error_193" translatable="false">ERROR_LIBRUS_API_EXTRA_TIMETABLE_NOT_AVAILABLE</string>
     <string name="error_193_reason">Zajęcia dodatkowe nie są dostępne dla tego konta.</string>
+    <string name="error_194" translatable="false">ERROR_LIBRUS_API_DESCRIPTIVE_MODULE_NOT_AVAILABLE</string>
+    <string name="error_194_reason">Moduł ocen opisowych nie jest dostępny dla tego konta.</string>
 </resources>

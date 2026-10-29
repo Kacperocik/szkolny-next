@@ -76,7 +76,7 @@ class LibrusApiTextGrades(override val data: DataLibrus,
                 ))
             }
 
-            data.toRemove.add(DataRemoveModel.Grades.semesterWithType(profile.currentSemester, TYPE_DESCRIPTIVE))
+            data.toRemove.add(DataRemoveModel.Grades.semesterWithType(profile.currentSemester, TYPE_DESCRIPTIVE, idRange = 0L..Long.MAX_VALUE))
 
             data.setSyncNext(ENDPOINT_LIBRUS_API_TEXT_GRADES, SYNC_ALWAYS)
             onSuccess(ENDPOINT_LIBRUS_API_TEXT_GRADES)

@@ -91,6 +91,10 @@ abstract class GradeDao : BaseDao<Grade, GradeFull> {
     @Query("UPDATE grades SET keep = 0 WHERE profileId = :profileId AND gradeSemester = :semester AND gradeType = :type")
     abstract fun dontKeepForSemesterWithType(profileId: Int, semester: Int, type: Int)
 
+    @Query("UPDATE grades SET keep = 0 WHERE profileId = :profileId AND gradeType = :type AND gradeId BETWEEN :idFrom AND :idTo AND (:semester IS NULL OR gradeSemester = :semester)")
+    abstract fun dontKeepWithTypeAndIds(profileId: Int, type: Int, idFrom: Long, idTo: Long, semester: Int?)
+
+
 
 
     // GRADE DETAILS - MOBIDZIENNIK

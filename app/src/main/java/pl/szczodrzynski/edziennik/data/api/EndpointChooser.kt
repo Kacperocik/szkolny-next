@@ -65,6 +65,7 @@ fun Data.prepare(
             if (
                 onlyEndpoints?.contains(endpoint.first) == true ||
                 timer.nextSync == SYNC_ALWAYS ||
+                forceFeatureType == feature.featureType && endpoint.first in feature.manualRefreshEndpoints && timer.nextSync != SYNC_NEVER ||
                 refreshSelectedWeek && feature.featureType == FeatureType.TIMETABLE && timer.nextSync != SYNC_NEVER ||
                 forceFeatureType != null && timer.featureType == forceFeatureType ||
                 timer.nextSync != SYNC_NEVER && timer.nextSync < timestamp

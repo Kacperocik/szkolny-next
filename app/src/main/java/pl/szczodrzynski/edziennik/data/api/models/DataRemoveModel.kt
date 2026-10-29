@@ -31,15 +31,19 @@ open class DataRemoveModel {
         }
     }
 
-    data class Grades(private val all: Boolean, private val semester: Int?, private val type: Int?) : DataRemoveModel() {
+    data class Grades(private val all: Boolean, private val semester: Int?, private val type: Int?, private val idRange: LongRange? = null) : DataRemoveModel() {
         companion object {
             fun all() = Grades(true, null, null)
-            fun allWithType(type: Int) = Grades(true, null, type)
+            fun allWithType(type: Int, idRange: LongRange? = null) = Grades(true, null, type, idRange)
             fun semester(semester: Int) = Grades(false, semester, null)
-            fun semesterWithType(semester: Int, type: Int) = Grades(false, semester, type)
+            fun semesterWithType(semester: Int, type: Int, idRange: LongRange? = null) = Grades(false, semester, type, idRange)
         }
 
         fun commit(profileId: Int, dao: GradeDao) {
+            if (type != null && idRange != null) {
+                dao.dontKeepWithTypeAndIds(profileId, type, idRange.first, idRange.last, semester)
+                return
+            }
             if (all) {
                 if (type != null) dao.dontKeepWithType(profileId, type)
                 else dao.clear(profileId)

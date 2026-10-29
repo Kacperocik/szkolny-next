@@ -143,6 +143,10 @@ class LibrusData(val data: DataLibrus, val onSuccess: () -> Unit) {
                 data.startProgress(R.string.edziennik_progress_endpoint_descriptive_grades)
                 LibrusApiTextGrades(data, lastSync, onSuccess)
             }
+            ENDPOINT_LIBRUS_API_PARTIAL_DESCRIPTIVE_GRADES -> {
+                data.startProgress(R.string.edziennik_progress_endpoint_descriptive_grades)
+                LibrusApiPartialDescriptiveGrades(data, lastSync, onSuccess)
+            }
             ENDPOINT_LIBRUS_API_POINT_GRADES -> {
                 data.startProgress(R.string.edziennik_progress_endpoint_point_grades)
                 LibrusApiPointGrades(data, lastSync, onSuccess)

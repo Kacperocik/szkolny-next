@@ -27,6 +27,13 @@ data class Feature(
         return this
     }
 
+    var manualRefreshEndpoints: Set<Int> = emptySet()
+        private set
+
+    fun withManualRefreshEndpoints(vararg endpointIds: Int): Feature = apply {
+        manualRefreshEndpoints = endpointIds.toSet()
+    }
+
     var shouldSync: ((Data) -> Boolean)? = null
     fun withShouldSync(shouldSync: ((Data) -> Boolean)?): Feature {
         this.shouldSync = shouldSync
