@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/excuseStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="?colorSecondary"
+                tools:text="Wysłane" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/excuseStatusHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textSize="14sp"
+                tools:text="Oczekuje na decyzję wychowawcy." />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/excuses_details_period"
+                android:textStyle="bold"
+                android:textColor="?colorSecondary" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/excusePeriod"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="7 września" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/excuseLessonsLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/excuses_details_lessons"
+                android:textStyle="bold"
+                android:textColor="?colorSecondary" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/excuseLessons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="7. Przyroda" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/excuses_details_message"
+                android:textStyle="bold"
+                android:textColor="?colorSecondary" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/excuseMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Dziecko chore." />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/excuses_details_justified"
+                android:textStyle="bold"
+                android:textColor="?colorSecondary" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/excuseJustified"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="0" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/excuseTeachersLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/excuses_details_teachers"
+                android:textStyle="bold"
+                android:textColor="?colorSecondary" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/excuseTeachers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Kowalska Anna" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/excuses_details_post_date"
+                android:textStyle="bold"
+                android:textColor="?colorSecondary" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/excusePostDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                tools:text="8 września, 08:18" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/excuseAttachment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/excuses_details_has_attachment"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
+    </ScrollView>
+</layout>

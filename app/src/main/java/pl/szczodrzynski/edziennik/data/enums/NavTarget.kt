@@ -4,6 +4,9 @@
 
 package pl.szczodrzynski.edziennik.data.enums
 
+import pl.szczodrzynski.edziennik.data.db.entity.Profile
+import pl.szczodrzynski.edziennik.ui.excuses.ExcusesFragment
+
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
@@ -56,6 +59,7 @@ enum class NavTarget(
     val badgeType: MetadataType? = null,
     val featureType: FeatureType? = null,
     val devModeOnly: Boolean = false,
+    val isAvailable: ((Profile) -> Boolean)? = null,
 ) {
     HOME(
         id = 1,
@@ -144,6 +148,16 @@ enum class NavTarget(
         popTo = HOME,
         badgeType = MetadataType.ATTENDANCE,
         featureType = FeatureType.ATTENDANCE,
+    ),
+    EXCUSES(
+        id = 24,
+        fragmentClass = ExcusesFragment::class.java,
+        location = NavTargetLocation.DRAWER_MORE,
+        nameRes = R.string.menu_excuses,
+        icon = CommunityMaterial.Icon2.cmd_file_check_outline,
+        popTo = HOME,
+        featureType = FeatureType.EXCUSES,
+        isAvailable = { it.loginStoreType == LoginType.LIBRUS && it.isParent && !it.config.librusExcusesUnavailable },
     ),
     ANNOUNCEMENTS(
         id = 18,
@@ -299,6 +313,7 @@ enum class NavTarget(
             HOMEWORK,
             BEHAVIOUR,
             ATTENDANCE,
+            EXCUSES,
             ANNOUNCEMENTS,
             NOTES,
         )

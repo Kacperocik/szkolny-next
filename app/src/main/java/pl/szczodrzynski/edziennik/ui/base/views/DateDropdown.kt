@@ -115,7 +115,14 @@ class DateDropdown : TextInputDropDown {
                 while (weekDay < 5) {
                     dates += Item(
                             date.value.toLong(),
-                            context.getString(R.string.dialog_event_manual_date_next_week, Week.getFullDayName(weekDay), date.formattedString),
+                            context.getString(
+                                if (weekDay == Week.WEDNESDAY)
+                                    R.string.dialog_event_manual_date_next_week_feminine
+                                else
+                                    R.string.dialog_event_manual_date_next_week,
+                                Week.getFullDayName(weekDay),
+                                date.formattedString,
+                            ),
                             tag = date.clone()
                     )
                     date.stepForward(0, 0, 1) // step one day forward

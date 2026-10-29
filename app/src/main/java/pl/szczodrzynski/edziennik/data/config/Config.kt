@@ -11,6 +11,7 @@ import pl.szczodrzynski.edziennik.data.config.migration.ConfigMigration11
 import pl.szczodrzynski.edziennik.data.api.szkolny.response.RegisterAvailabilityStatus
 import pl.szczodrzynski.edziennik.data.api.szkolny.response.Update
 import pl.szczodrzynski.edziennik.data.config.migration.ConfigMigration14
+import pl.szczodrzynski.edziennik.data.config.migration.ConfigMigration15
 import pl.szczodrzynski.edziennik.data.enums.NavTarget
 import pl.szczodrzynski.edziennik.data.enums.Theme
 import pl.szczodrzynski.edziennik.ext.HOUR
@@ -19,11 +20,12 @@ import pl.szczodrzynski.edziennik.utils.models.Time
 
 class Config(app: App) : BaseConfig<Config>(app, profileId = null) {
 
-    override val dataVersion = 14
+    override val dataVersion = 15
     override val migrations
         get() = mapOf(
             11 to ConfigMigration11(),
             14 to ConfigMigration14(),
+            15 to ConfigMigration15(),
         )
 
     private val profileConfigs: HashMap<Int, ProfileConfig> = hashMapOf()
@@ -85,7 +87,7 @@ class Config(app: App) : BaseConfig<Config>(app, profileId = null) {
         var miniMenuVisible by config<Boolean>(false)
         var fixedDrawerCollapsed by config<Boolean>(false)
         var miniMenuButtons by config(NavTarget.Companion::getDefaultConfig)
-        var drawerMoreButtons by config<Set<NavTarget>> { setOf(NavTarget.NOTES) }
+        var drawerMoreButtons by config<Set<NavTarget>> { setOf(NavTarget.NOTES, NavTarget.EXCUSES) }
         var openDrawerOnBackPressed by config<Boolean>(false)
         var appFullscreen by config<Boolean>(false)
         var toolbarAtBottom by config<Boolean>(false)

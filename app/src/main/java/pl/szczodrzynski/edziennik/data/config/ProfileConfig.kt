@@ -44,6 +44,7 @@ class ProfileConfig(
     val attendance by lazy { Attendance() }
 
     var shareByDefault by config<Boolean>(false)
+    var librusExcusesUnavailable by config<Boolean>(false)
     var importedUiFeatures by config<Set<FeatureType>> { emptySet() }
 
     inner class Grades {

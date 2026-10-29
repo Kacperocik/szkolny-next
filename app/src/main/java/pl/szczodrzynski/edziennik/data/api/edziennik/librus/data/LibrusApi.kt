@@ -26,9 +26,9 @@ open class LibrusApi(open val data: DataLibrus, open val lastSync: Long?) {
     val profile
         get() = data.profile
 
-    fun apiGet(tag: String, endpoint: String, method: Int = GET, payload: JsonObject? = null, ignoreErrors: List<Int> = emptyList(), onSuccess: (json: JsonObject) -> Unit) {
+    fun apiGet(tag: String, endpoint: String, method: Int = GET, payload: JsonObject? = null, ignoreErrors: List<Int> = emptyList(), baseUrl: String = LIBRUS_API_URL, onSuccess: (json: JsonObject) -> Unit) {
 
-        Timber.tag(tag).d("Request: Librus/Api - ${if (data.fakeLogin) FAKE_LIBRUS_API else LIBRUS_API_URL}/$endpoint")
+        Timber.tag(tag).d("Request: Librus/Api - ${if (data.fakeLogin) FAKE_LIBRUS_API else baseUrl}/$endpoint")
 
         val callback = object : JsonCallbackHandler() {
             override fun onSuccess(json: JsonObject?, response: Response?) {
@@ -75,7 +75,12 @@ open class LibrusApi(open val data: DataLibrus, open val lastSync: Long?) {
                         "Maintenance" -> ERROR_LIBRUS_API_MAINTENANCE
                         "TeacherFreeDaysIsNotActive" -> ERROR_LIBRUS_API_TEACHER_FREE_DAYS_NOT_PUBLIC
                         else -> ERROR_LIBRUS_API_OTHER
-                    }.let { errorCode ->
+                    }.let { mappedError ->
+                        val errorCode = if (method == GET && endpoint.substringBefore('?') == "Justifications" &&
+                            response?.code() in listOf(HTTP_FORBIDDEN, HTTP_NOT_FOUND) &&
+                            mappedError in listOf(ERROR_LIBRUS_API_ACCESS_DENIED, ERROR_LIBRUS_API_RESOURCE_ACCESS_DENIED,
+                                ERROR_LIBRUS_API_RESOURCE_NOT_FOUND, ERROR_LIBRUS_API_DATA_NOT_FOUND)
+                        ) ERROR_LIBRUS_API_JUSTIFICATIONS_NOT_AVAILABLE else mappedError
                         if (errorCode !in ignoreErrors) {
                             data.error(ApiError(tag, errorCode)
                                     .withApiResponse(json)
@@ -110,7 +115,7 @@ open class LibrusApi(open val data: DataLibrus, open val lastSync: Long?) {
         }
 
         Request.builder()
-                .url("${if (data.fakeLogin) FAKE_LIBRUS_API else LIBRUS_API_URL}/$endpoint")
+                .url("${if (data.fakeLogin) FAKE_LIBRUS_API else baseUrl}/$endpoint")
                 .userAgent(LIBRUS_USER_AGENT)
                 .addHeader("Authorization", "Bearer ${data.apiAccessToken}")
                 .apply {

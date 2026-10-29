@@ -179,6 +179,10 @@ class LibrusData(val data: DataLibrus, val onSuccess: () -> Unit) {
                 data.startProgress(R.string.edziennik_progress_endpoint_announcements)
                 LibrusApiAnnouncements(data, lastSync, onSuccess)
             }
+            ENDPOINT_LIBRUS_API_JUSTIFICATIONS -> {
+                data.startProgress(R.string.edziennik_progress_endpoint_excuses)
+                LibrusApiJustifications(data, lastSync, onSuccess)
+            }
             ENDPOINT_LIBRUS_API_PT_MEETINGS -> {
                 data.startProgress(R.string.edziennik_progress_endpoint_pt_meetings)
                 LibrusApiPtMeetings(data, lastSync, onSuccess)

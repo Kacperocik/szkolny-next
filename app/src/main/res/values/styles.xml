@@ -312,4 +312,10 @@
         <item name="android:textColor">?colorPrimary</item>
     </style>
 
+    <style name="AppStyle.PickerTitle" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textFontWeight">700</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
 </resources>

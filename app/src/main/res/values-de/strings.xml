@@ -185,6 +185,7 @@
     <string name="dialog_event_manual_date_header">Termin</string>
     <string name="dialog_event_manual_date_next_lesson">nächste lektion %s</string>
     <string name="dialog_event_manual_date_next_week">nächste %s (%s)</string>
+    <string name="dialog_event_manual_date_next_week_feminine">@string/dialog_event_manual_date_next_week</string>
     <string name="dialog_event_manual_date_other">--andere Datum--</string>
     <string name="dialog_event_manual_date_today">heute (%s)</string>
     <string name="dialog_event_manual_date_tomorrow">morgen (%s)</string>

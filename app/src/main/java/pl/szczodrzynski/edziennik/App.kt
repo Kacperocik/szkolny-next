@@ -16,6 +16,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.multidex.MultiDexApplication
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.timepicker.MaterialTimePicker
+import pl.szczodrzynski.edziennik.ext.refreshPickerOnRotation
+import pl.szczodrzynski.edziennik.ext.applyPickerDialogStyle
 import pl.szczodrzynski.edziennik.ext.applyExpressiveShapeMorphToButtons
 import androidx.work.Configuration
 import cat.ereza.customactivityoncrash.config.CaocConfig
@@ -222,6 +226,10 @@ class App : MultiDexApplication(), Configuration.Provider, CoroutineScope {
                                 v: View,
                                 savedInstanceState: Bundle?
                             ) {
+                                if (f is MaterialDatePicker<*> || f is MaterialTimePicker) {
+                                    v.applyPickerDialogStyle()
+                                    (f as androidx.fragment.app.DialogFragment).refreshPickerOnRotation(v)
+                                }
                                 v.applyExpressiveShapeMorphToButtons()
                             }
                         },

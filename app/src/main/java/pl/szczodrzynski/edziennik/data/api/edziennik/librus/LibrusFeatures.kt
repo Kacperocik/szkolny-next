@@ -49,6 +49,7 @@ const val ENDPOINT_LIBRUS_API_TEACHER_FREE_DAY_TYPES                   = 1109
 const val ENDPOINT_LIBRUS_API_TEACHER_FREE_DAYS                        = 1110
 const val ENDPOINT_LIBRUS_API_SCHOOL_FREE_DAYS                         = 1120
 const val ENDPOINT_LIBRUS_API_CLASS_FREE_DAYS                          = 1130
+const val ENDPOINT_LIBRUS_API_JUSTIFICATIONS = 1140
 const val ENDPOINT_LIBRUS_SYNERGIA_INFO                                = 2010
 const val ENDPOINT_LIBRUS_SYNERGIA_GRADES                              = 2020
 const val ENDPOINT_LIBRUS_SYNERGIA_HOMEWORK                            = 2030
@@ -142,6 +143,9 @@ val LibrusFeatures = listOf(
         /**
          * Announcements - using API.
          */
+        Feature(LoginType.LIBRUS, FeatureType.EXCUSES, listOf(
+            ENDPOINT_LIBRUS_API_JUSTIFICATIONS to LoginMethod.LIBRUS_API
+        )).withShouldSync { it.profile?.isParent == true },
         Feature(LoginType.LIBRUS, FeatureType.ANNOUNCEMENTS, listOf(
                 ENDPOINT_LIBRUS_API_ANNOUNCEMENTS to LoginMethod.LIBRUS_API
         )),

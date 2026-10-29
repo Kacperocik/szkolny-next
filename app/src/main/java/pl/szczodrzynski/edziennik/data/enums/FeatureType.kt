@@ -20,6 +20,7 @@ enum class FeatureType(
     ATTENDANCE(id = 6, isAlwaysNeeded = false, nameRes = R.string.menu_attendance),
     MESSAGES_INBOX(id = 7, isAlwaysNeeded = false, nameRes = R.string.title_messages_inbox_single),
     MESSAGES_SENT(id = 8, isAlwaysNeeded = false, nameRes = R.string.title_messages_sent_single),
+    EXCUSES(id = 10, isAlwaysNeeded = false, nameRes = R.string.menu_excuses),
     ANNOUNCEMENTS(id = 9, isAlwaysNeeded = false, nameRes = R.string.menu_announcements),
 
     ALWAYS_NEEDED(id = 100, isAlwaysNeeded = true),

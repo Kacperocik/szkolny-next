@@ -51,6 +51,7 @@ class ProfileRemoveDialog(
             app.db.gradeDao().clear(profileId)
             app.db.lessonRangeDao().clear(profileId)
             app.db.librusLessonDao().clear(profileId)
+            app.db.librusExcuseDao().clear(profileId)
             app.db.luckyNumberDao().clear(profileId)
             app.db.messageDao().clear(profileId)
             app.db.messageRecipientDao().clear(profileId)

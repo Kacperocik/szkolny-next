@@ -831,3 +831,56 @@ fun Dialog.dismissWithAnimation(onDismissed: (() -> Unit)? = null) {
         }
         .start()
 }
+
+/** Aligns Material date/time picker headings and action spacing with app dialogs. */
+fun View.applyPickerDialogStyle() {
+    val title = findViewById<TextView>(com.google.android.material.R.id.mtrl_picker_title_text)
+        ?: findViewById<TextView>(com.google.android.material.R.id.header_title)
+        ?: return
+    androidx.core.widget.TextViewCompat.setAutoSizeTextTypeWithDefaults(
+        title, androidx.core.widget.TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE,
+    )
+    androidx.core.widget.TextViewCompat.setTextAppearance(title, R.style.AppStyle_PickerTitle)
+    title.isSingleLine = false
+    title.maxLines = 2
+    for (contentId in intArrayOf(
+        com.google.android.material.R.id.material_timepicker_view,
+        com.google.android.material.R.id.material_textinput_timepicker,
+    )) {
+        findViewById<View>(contentId)?.updateLayoutParams<androidx.constraintlayout.widget.ConstraintLayout.LayoutParams> {
+            topToTop = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.UNSET
+            topToBottom = com.google.android.material.R.id.header_title
+            topMargin = 16.dp
+        }
+    }
+    for (buttonId in intArrayOf(
+        com.google.android.material.R.id.material_timepicker_cancel_button,
+        com.google.android.material.R.id.material_timepicker_ok_button,
+    )) {
+        findViewById<View>(buttonId)?.updateLayoutParams<androidx.constraintlayout.widget.ConstraintLayout.LayoutParams> {
+            topToTop = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.UNSET
+            bottomToBottom = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+            topMargin = 0
+        }
+    }
+    updatePaddingRelative(bottom = max(paddingBottom, 16.dp))
+}
+
+/** Re-inflates orientation-specific picker layouts when the activity handles rotation itself. */
+fun androidx.fragment.app.DialogFragment.refreshPickerOnRotation(pickerView: View) {
+    var orientation = pickerView.resources.configuration.orientation
+    pickerView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+        val currentOrientation = pickerView.resources.configuration.orientation
+        if (orientation != currentOrientation) {
+            orientation = currentOrientation
+            pickerView.post {
+                if (!isAdded || view !== pickerView) return@post
+                val manager = parentFragmentManager
+                if (manager.isStateSaved) return@post
+                // Separate transactions recreate the view while retaining the selection and callbacks.
+                manager.beginTransaction().detach(this).commitNow()
+                manager.beginTransaction().attach(this).commitNow()
+            }
+        }
+    }
+}

@@ -388,4 +388,8 @@
     <string name="error_940_reason">Zgłoś błąd: wyjątek w API PPE</string>
 
     <string name="error_1201_reason">Nie podano parametrów</string>
+    <string name="error_191" translatable="false">ERROR_LIBRUS_API_JUSTIFICATIONS_NOT_AVAILABLE</string>
+    <string name="error_192" translatable="false">ERROR_LIBRUS_API_JUSTIFICATION_NOT_SENT</string>
+    <string name="error_191_reason">Moduł e-Usprawiedliwienia nie jest dostępny dla tego konta.</string>
+    <string name="error_192_reason">Nie udało się wysłać usprawiedliwienia.</string>
 </resources>

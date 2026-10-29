@@ -149,6 +149,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     val bottomSheet: NavBottomSheet by lazy { navView.bottomSheet }
     val mainSnackbar: MainSnackbar by lazy { MainSnackbar(this) }
     val errorSnackbar: ErrorSnackbar by lazy { ErrorSnackbar(this) }
+    private var excusesAvailableInDrawer = false
     val requestHandler by lazy { MainActivityRequestHandler(this) }
 
     val swipeRefreshLayout: SwipeRefreshLayout by lazy { b.swipeRefreshLayout }
@@ -657,6 +658,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         )
 
         for (target in NavTarget.values()) {
+            if (target.isAvailable?.invoke(app.profile) == false)
+                continue
             if (target.location != NavTargetLocation.BOTTOM_SHEET)
                 continue
             if (target.devModeOnly && !App.devMode)
@@ -865,6 +868,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
         if (event.profileId == App.profileId) {
             updateLastSyncSubtitle()
+            if (excusesAvailableInDrawer != (NavTarget.EXCUSES.isAvailable?.invoke(app.profile) == true)) {
+                setDrawerItems()
+            }
         }
     }
 
@@ -1215,7 +1221,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val navTarget = resolveNavTarget(rawNavTarget)
         Timber.d("navigateImpl(profileId = ${profile.id}, target = ${navTarget.name}, args = $args)")
 
-        if (navTarget.featureType != null && !profile.hasUIFeature(navTarget.featureType)) {
+        if (navTarget.isAvailable?.invoke(profile) == false ||
+            (navTarget.featureType != null && !profile.hasUIFeature(navTarget.featureType))) {
             navigateImpl(profile, NavTarget.HOME, args, profileChanged)
             return
         }
@@ -1523,6 +1530,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     fun setDrawerItems() {
+        excusesAvailableInDrawer = NavTarget.EXCUSES.isAvailable?.invoke(app.profile) == true
         Timber.d("setDrawerItems() app.profile = ${app.profile}")
         val drawerItems = arrayListOf<IDrawerItem<*>>()
         val drawerItemsMore = arrayListOf<IDrawerItem<*>>()
@@ -1531,6 +1539,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val drawerProfiles = arrayListOf<ProfileSettingDrawerItem>()
 
         for (target in NavTarget.values()) {
+            if (target.isAvailable?.invoke(app.profile) == false)
+                continue
             if (target.devModeOnly && !App.devMode)
                 continue
             if (target.featureType != null && !app.profile.hasUIFeature(target.featureType))

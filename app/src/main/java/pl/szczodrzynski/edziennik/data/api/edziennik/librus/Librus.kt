@@ -4,6 +4,9 @@
 
 package pl.szczodrzynski.edziennik.data.api.edziennik.librus
 
+import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.api.LibrusApiSendJustification
+import pl.szczodrzynski.edziennik.utils.models.Date
+
 import com.google.gson.JsonObject
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.data.api.*
@@ -154,6 +157,13 @@ class Librus(val app: App, val profile: Profile?, val loginStore: LoginStore, va
             LibrusSynergiaGetHomework(data, eventFull) {
                 completed()
             }
+        }
+    }
+
+    override fun sendExcuse(dateFrom: Date, dateTo: Date, lessons: List<Int>, message: String, sendNotify: Boolean) {
+        require(data.profile?.isParent == true) { "A Librus parent account is required" }
+        login(LoginMethod.LIBRUS_API) {
+            LibrusApiSendJustification(data, dateFrom, dateTo, lessons, message, sendNotify) { completed() }
         }
     }
 

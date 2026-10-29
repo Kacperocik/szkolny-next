@@ -4,6 +4,8 @@
 
 package pl.szczodrzynski.edziennik.data.api.edziennik
 
+import pl.szczodrzynski.edziennik.utils.models.Date
+
 import com.google.gson.JsonObject
 import org.greenrobot.eventbus.EventBus
 import pl.szczodrzynski.edziennik.App
@@ -51,6 +53,7 @@ open class EdziennikTask(override val profileId: Int, val request: Any) : IApiTa
         fun announcementGet(profileId: Int, announcement: AnnouncementFull) = EdziennikTask(profileId, AnnouncementGetRequest(announcement))
         fun attachmentGet(profileId: Int, owner: Any, attachmentId: Long, attachmentName: String) = EdziennikTask(profileId, AttachmentGetRequest(owner, attachmentId, attachmentName))
         fun recipientListGet(profileId: Int) = EdziennikTask(profileId, RecipientListGetRequest())
+        fun excuseSend(profileId: Int, dateFrom: Date, dateTo: Date, lessons: List<Int>, message: String, sendNotify: Boolean) = EdziennikTask(profileId, ExcuseSendRequest(dateFrom, dateTo, lessons, message, sendNotify))
         fun eventGet(profileId: Int, event: EventFull) = EdziennikTask(profileId, EventGetRequest(event))
     }
 
@@ -145,6 +148,7 @@ open class EdziennikTask(override val profileId: Int, val request: Any) : IApiTa
             is AnnouncementGetRequest -> edziennikInterface?.getAnnouncement(request.announcement)
             is AttachmentGetRequest -> edziennikInterface?.getAttachment(request.owner, request.attachmentId, request.attachmentName)
             is RecipientListGetRequest -> edziennikInterface?.getRecipientList()
+            is ExcuseSendRequest -> edziennikInterface?.sendExcuse(request.dateFrom, request.dateTo, request.lessons, request.message, request.sendNotify)
             is EventGetRequest -> edziennikInterface?.getEvent(request.event)
         }
     }
@@ -168,5 +172,6 @@ open class EdziennikTask(override val profileId: Int, val request: Any) : IApiTa
     data class AnnouncementGetRequest(val announcement: AnnouncementFull)
     data class AttachmentGetRequest(val owner: Any, val attachmentId: Long, val attachmentName: String)
     class RecipientListGetRequest
+    data class ExcuseSendRequest(val dateFrom: Date, val dateTo: Date, val lessons: List<Int>, val message: String, val sendNotify: Boolean)
     data class EventGetRequest(val event: EventFull)
 }

@@ -36,6 +36,7 @@ const val LIBRUS_ACCOUNTS_URL = "/v3/SynergiaAccounts"
 
 /** https://api.librus.pl/2.0 */
 const val LIBRUS_API_URL = "https://api.librus.pl/2.0"
+const val LIBRUS_API_3_URL = "https://api.librus.pl/3.0"
 /** https://portal.librus.pl/api */
 const val LIBRUS_PORTAL_URL = "https://portal.librus.pl/api"
 /** https://api.librus.pl/OAuth/Token */
