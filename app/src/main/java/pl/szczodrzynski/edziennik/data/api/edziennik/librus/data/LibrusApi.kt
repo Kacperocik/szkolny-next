@@ -80,7 +80,12 @@ open class LibrusApi(open val data: DataLibrus, open val lastSync: Long?) {
                             response?.code() in listOf(HTTP_FORBIDDEN, HTTP_NOT_FOUND) &&
                             mappedError in listOf(ERROR_LIBRUS_API_ACCESS_DENIED, ERROR_LIBRUS_API_RESOURCE_ACCESS_DENIED,
                                 ERROR_LIBRUS_API_RESOURCE_NOT_FOUND, ERROR_LIBRUS_API_DATA_NOT_FOUND)
-                        ) ERROR_LIBRUS_API_JUSTIFICATIONS_NOT_AVAILABLE else mappedError
+                        ) ERROR_LIBRUS_API_JUSTIFICATIONS_NOT_AVAILABLE
+                        else if (method == GET && endpoint.substringBefore('?') in listOf("Timetables/OtherActivitiesRegister", "Timetables/OneToOneLearningPlan") &&
+                            response?.code() in listOf(HTTP_FORBIDDEN, HTTP_NOT_FOUND) &&
+                            mappedError in listOf(ERROR_LIBRUS_API_ACCESS_DENIED, ERROR_LIBRUS_API_RESOURCE_ACCESS_DENIED,
+                                ERROR_LIBRUS_API_RESOURCE_NOT_FOUND, ERROR_LIBRUS_API_DATA_NOT_FOUND, ERROR_LIBRUS_API_TIMETABLE_NOT_PUBLIC)
+                        ) ERROR_LIBRUS_API_EXTRA_TIMETABLE_NOT_AVAILABLE else mappedError
                         if (errorCode !in ignoreErrors) {
                             data.error(ApiError(tag, errorCode)
                                     .withApiResponse(json)

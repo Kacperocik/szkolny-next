@@ -11,16 +11,19 @@ import pl.szczodrzynski.edziennik.data.db.dao.TimetableDao
 import pl.szczodrzynski.edziennik.utils.models.Date
 
 open class DataRemoveModel {
-    data class Timetable(private val dateFrom: Date?, private val dateTo: Date?, private val isExtra: Boolean?) : DataRemoveModel() {
+    data class Timetable(private val dateFrom: Date?, private val dateTo: Date?, private val isExtra: Boolean?, private val idRange: LongRange? = null) : DataRemoveModel() {
         companion object {
             fun from(dateFrom: Date, isExtra: Boolean? = null) = Timetable(dateFrom, null, isExtra)
             fun to(dateTo: Date, isExtra: Boolean? = null) = Timetable(null, dateTo, isExtra)
-            fun between(dateFrom: Date, dateTo: Date, isExtra: Boolean? = null) = Timetable(dateFrom, dateTo, isExtra)
+            fun between(dateFrom: Date, dateTo: Date, isExtra: Boolean? = null, idRange: LongRange? = null) = Timetable(dateFrom, dateTo, isExtra, idRange)
         }
 
         fun commit(profileId: Int, dao: TimetableDao) {
             if (dateFrom != null && dateTo != null) {
-                dao.dontKeepBetweenDates(profileId, dateFrom, dateTo, isExtra ?: false)
+                if (idRange != null)
+                    dao.dontKeepBetweenDatesWithIds(profileId, dateFrom, dateTo, isExtra ?: false, idRange.first, idRange.last)
+                else
+                    dao.dontKeepBetweenDates(profileId, dateFrom, dateTo, isExtra ?: false)
             } else {
                 dateFrom?.let { dateFrom -> dao.dontKeepFromDate(profileId, dateFrom, isExtra ?: false) }
                 dateTo?.let { dateTo -> dao.dontKeepToDate(profileId, dateTo, isExtra ?: false) }

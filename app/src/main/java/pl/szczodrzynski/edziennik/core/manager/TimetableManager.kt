@@ -97,3 +97,17 @@ class TimetableManager(val app: App) : CoroutineScope {
         return Colors.stringToMaterialColorCRC(name ?: "")
     }
 }
+
+
+internal fun filterTimetableLessons(lessons: List<LessonFull>, hideClassLessons: Boolean): List<LessonFull> {
+    if (!hideClassLessons) return lessons
+    return lessons.groupBy { it.profileId to it.displayDate }.flatMap { (day, entries) ->
+        val visible = entries.filter { it.isExtra || it.type == Lesson.TYPE_NO_LESSONS }
+        if (visible.isNotEmpty() || day.second == null) visible else listOf(
+            LessonFull(day.first, day.second!!.value.toLong()).apply {
+                type = Lesson.TYPE_NO_LESSONS
+                date = day.second
+            }
+        )
+    }
+}

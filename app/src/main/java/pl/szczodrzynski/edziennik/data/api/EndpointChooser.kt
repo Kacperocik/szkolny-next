@@ -8,6 +8,7 @@ import pl.szczodrzynski.edziennik.data.db.entity.SYNC_NEVER
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
 import pl.szczodrzynski.edziennik.data.enums.LoginMethod
 import pl.szczodrzynski.edziennik.ext.isNotNullNorEmpty
+import pl.szczodrzynski.edziennik.ext.getString
 
 fun Data.prepare(
     features: List<Feature>,
@@ -29,6 +30,8 @@ fun Data.prepare(
         else -> FeatureType.getUnnecessary()
     } + FeatureType.getNecessary()
     val forceFeatureType = featureTypes?.singleOrNull()
+    val refreshSelectedWeek = forceFeatureType == FeatureType.TIMETABLE &&
+            !arguments.getString("weekStart").isNullOrBlank()
 
     this.targetEndpoints.clear()
     this.targetLoginMethods.clear()
@@ -62,6 +65,7 @@ fun Data.prepare(
             if (
                 onlyEndpoints?.contains(endpoint.first) == true ||
                 timer.nextSync == SYNC_ALWAYS ||
+                refreshSelectedWeek && feature.featureType == FeatureType.TIMETABLE && timer.nextSync != SYNC_NEVER ||
                 forceFeatureType != null && timer.featureType == forceFeatureType ||
                 timer.nextSync != SYNC_NEVER && timer.nextSync < timestamp
             ) {

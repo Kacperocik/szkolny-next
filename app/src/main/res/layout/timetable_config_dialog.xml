@@ -116,6 +116,46 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/hideClassLessonsCard"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="@{() -> hideClassLessonsCheckbox.performClick()}"
+                app:cardBackgroundColor="?attr/colorCard"
+                app:cardElevation="0dp"
+                app:cardPreventCornerOverlap="false"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.GroupMiddle"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    style="@style/AppStyle.SettingsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/hideClassLessonsCheckbox"
+                        style="@style/AppStyle.SettingsCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="@={config.timetableHideClassLessons}"
+         />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+
+                        android:text="@string/timetable_config_hide_class_lessons"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?android:attr/textColorPrimary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Item 3: Color Subject Name -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"

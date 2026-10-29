@@ -148,6 +148,7 @@
     <string name="concat_2_strings" translatable="false">%s%s</string>
     <string name="configure">Konfiguruj</string>
     <string name="copied_to_clipboard">Skopiowano do schowka</string>
+    <string name="copy">Kopiuj</string>
     <string name="copy_to_clipboard">Skopiuj do schowka</string>
     <string name="counter_activity">Odliczanie</string>
     <string name="counter_activity_sync">Synchronizuj</string>
@@ -181,7 +182,7 @@
     <string name="dialog_averages_unavailable_format">Średnie ocen na semestr %d nie są dostępne</string>
     <string name="dialog_averages_unavailable_yearly">Roczna średnia ocen nie jest dostępna</string>
     <string name="dialog_day_date_format" translatable="false">%s, %s</string>
-    <string name="dialog_day_lessons_info">%s - %s (%s lekcji - %s godzin %s minut)</string>
+    <string name="dialog_day_lessons_info">%1$s - %2$s (%3$s - %4$s %5$s)</string>
     <string name="dialog_day_no_events">Brak wydarzeń tego dnia.</string>
     <string name="dialog_error_details_title">Szczegóły błędu</string>
     <string name="dialog_event_details_added_by">Dodano</string>
@@ -346,6 +347,7 @@
     <string name="edziennik_progress_endpoint_teachers">Pobieranie listy nauczycieli…</string>
     <string name="edziennik_progress_endpoint_teams">Pobieranie grup klasowych…</string>
     <string name="edziennik_progress_endpoint_timetable">Pobieranie planu lekcji…</string>
+    <string name="edziennik_progress_endpoint_extra_timetable">Pobieranie zajęć dodatkowych i nauczania indywidualnego…</string>
     <string name="edziennik_progress_endpoint_units">Pobieranie informacji o jednostce…</string>
     <string name="edziennik_progress_login_librus_api">Logowanie do API</string>
     <string name="edziennik_progress_login_librus_messages">Logowanie do wiadomości LIBRUS®</string>
@@ -1652,6 +1654,7 @@
     <string name="menu_timetable_config">Ustawienia planu lekcji</string>
     <string name="timetable_config_show_events">Pokazuj wydarzenia przy lekcjach</string>
     <string name="timetable_config_show_attendance">Pokazuj rodzaj obecności na lekcji</string>
+    <string name="timetable_config_hide_class_lessons">Ukryj lekcje całej klasy</string>
     <string name="timetable_config_color_subject_name">Koloruj nazwę przedmiotu</string>
     <string name="timetable_config_color_borders">Koloruj obramowania</string>
     <string name="timetable_config_change_subject_colors">Zmień kolory przedmiotów</string>

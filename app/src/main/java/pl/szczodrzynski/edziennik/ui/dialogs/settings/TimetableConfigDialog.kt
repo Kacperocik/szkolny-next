@@ -6,6 +6,9 @@ package pl.szczodrzynski.edziennik.ui.dialogs.settings
 
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.databinding.TimetableConfigDialogBinding
 import pl.szczodrzynski.edziennik.ext.Intent
@@ -31,7 +34,10 @@ class TimetableConfigDialog(
     }
 
     override suspend fun loadConfig() {
-        b.config = app.profile.config.ui
+        val profile = app.profile
+        b.config = profile.config.ui
+        b.hideClassLessonsCard.isVisible = profile.config.ui.timetableHideClassLessons ||
+            withContext(Dispatchers.IO) { app.db.timetableDao().hasExtraLessons(profile.id) }
     }
 
     override suspend fun saveConfig() {

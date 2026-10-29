@@ -30,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import pl.szczodrzynski.edziennik.core.manager.filterTimetableLessons
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
@@ -298,12 +299,13 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
     }
 
     private fun processLessonList(
-        lessons: List<LessonFull>,
+        allLessons: List<LessonFull>,
         events: List<EventFull>,
         attendanceList: List<AttendanceFull>,
     ) {
         val generation = ++placeholderGeneration
-        lastLessons = lessons
+        lastLessons = allLessons
+        val lessons = filterTimetableLessons(allLessons, app.profile.config.ui.timetableHideClassLessons)
         lastEvents = events
         lastAttendanceList = attendanceList
 

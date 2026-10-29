@@ -103,6 +103,9 @@ abstract class TimetableDao : BaseDao<Lesson, LessonFull> {
     fun getBetweenDatesNow(dateFrom: Date, dateTo: Date) =
             getRawNow("$QUERY WHERE (type != 3 AND date >= '${dateFrom.stringY_m_d}' AND date <= '${dateTo.stringY_m_d}') OR ((type = 3 OR type = 1) AND oldDate >= '${dateFrom.stringY_m_d}' AND oldDate <= '${dateTo.stringY_m_d}') $ORDER_BY")
 
+    @Query("SELECT EXISTS(SELECT 1 FROM timetable WHERE profileId = :profileId AND isExtra = 1 AND type != -1)")
+    abstract fun hasExtraLessons(profileId: Int): Boolean
+
     // GET ONE - NOW
     fun getByIdNow(profileId: Int, id: Long) =
             getOneNow("$QUERY WHERE timetable.profileId = $profileId AND timetable.id = $id")
@@ -118,4 +121,8 @@ abstract class TimetableDao : BaseDao<Lesson, LessonFull> {
 
     @Query("UPDATE timetable SET keep = 0 WHERE profileId = :profileId AND isExtra = :isExtra AND type != -1 AND ((type != 3 AND date >= :dateFrom AND date <= :dateTo) OR ((type = 3 OR type = 1) AND oldDate >= :dateFrom AND oldDate <= :dateTo))")
     abstract fun dontKeepBetweenDates(profileId: Int, dateFrom: Date, dateTo: Date, isExtra: Boolean)
+
+    @Query("UPDATE timetable SET keep = 0 WHERE profileId = :profileId AND isExtra = :isExtra AND id BETWEEN :idFrom AND :idTo AND type != -1 AND ((type != 3 AND date >= :dateFrom AND date <= :dateTo) OR ((type = 3 OR type = 1) AND oldDate >= :dateFrom AND oldDate <= :dateTo))")
+    abstract fun dontKeepBetweenDatesWithIds(profileId: Int, dateFrom: Date, dateTo: Date, isExtra: Boolean, idFrom: Long, idTo: Long)
+
 }

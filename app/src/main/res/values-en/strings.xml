@@ -119,6 +119,7 @@
     <string name="compose_title">Compose</string>
     <string name="configure">Configure</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="copy">Copy</string>
     <string name="copy_to_clipboard">Copy to clipboard</string>
     <string name="counter_activity">Countdown</string>
     <string name="counter_activity_sync">Synchronize</string>
@@ -147,7 +148,7 @@
     <string name="dialog_averages_title">Grade averages</string>
     <string name="dialog_averages_unavailable_format">Averages of semester %d are not available</string>
     <string name="dialog_averages_unavailable_yearly">Yearly average is not available</string>
-    <string name="dialog_day_lessons_info">%s - %s (%s lessons - %s hours %s minutes)</string>
+    <string name="dialog_day_lessons_info">%1$s - %2$s (%3$s - %4$s %5$s)</string>
     <string name="dialog_day_no_events">No events this day</string>
     <string name="dialog_error_details_title">Error details</string>
     <string name="dialog_event_details_added_by">Added</string>
@@ -308,6 +309,7 @@
     <string name="edziennik_progress_endpoint_teachers">Syncing teachers…</string>
     <string name="edziennik_progress_endpoint_teams">Syncing class groups…</string>
     <string name="edziennik_progress_endpoint_timetable">Syncing timetable…</string>
+    <string name="edziennik_progress_endpoint_extra_timetable">Syncing extracurricular activities and individual tuition…</string>
     <string name="edziennik_progress_endpoint_units">Syncing unit info…</string>
     <string name="edziennik_progress_login_librus_api">Logging in to the API…</string>
     <string name="edziennik_progress_login_librus_messages">Logging in to LIBRUS® messages…</string>
@@ -1604,6 +1606,7 @@
     <string name="menu_timetable_config">Timetable settings</string>
     <string name="timetable_config_show_events">Show events next to lessons</string>
     <string name="timetable_config_show_attendance">Show attendance type on lesson</string>
+    <string name="timetable_config_hide_class_lessons">Hide whole-class lessons</string>
     <string name="timetable_config_color_subject_name">Color subject name</string>
     <string name="timetable_config_color_borders">Color borders</string>
     <string name="timetable_config_change_subject_colors">Change subject colors</string>

@@ -81,8 +81,11 @@ class DayDialog(
             date.formattedString
         )
 
+        val hideClassLessons = withContext(Dispatchers.IO) {
+            app.db.profileDao().getByIdNow(profileId)?.config?.ui?.timetableHideClassLessons == true
+        }
         val lessonSummary = withContext(Dispatchers.Default) {
-            summarizeDayLessons(app.db.timetableDao().getAllForDateNow(profileId, date))
+            summarizeDayLessons(app.db.timetableDao().getAllForDateNow(profileId, date), hideClassLessons)
         }
 
         b.lessonsInfo.isVisible = lessonSummary != null
@@ -92,14 +95,15 @@ class DayDialog(
                 R.string.dialog_day_lessons_info,
                 lessonSummary.startTime.stringHM,
                 lessonSummary.endTime.stringHM,
-                lessonSummary.lessonCount.toString(),
-                diff.hour.toString(),
-                diff.minute.toString()
+                activity.resources.getQuantityString(R.plurals.dialog_day_lessons, lessonSummary.lessonCount, lessonSummary.lessonCount),
+                activity.resources.getQuantityString(R.plurals.dialog_day_hours, diff.hour, diff.hour),
+                activity.resources.getQuantityString(R.plurals.dialog_day_minutes, diff.minute, diff.minute)
             )
         }
 
         val lessonChanges = withContext(Dispatchers.Default) {
             app.db.timetableDao().getChangesForDateNow(profileId, date)
+                .filter { !hideClassLessons || it.isExtra }
         }
 
         lessonChanges.ifNotEmpty {
@@ -117,6 +121,7 @@ class DayDialog(
                     activity,
                     profileId,
                     date,
+                    hideClassLessons = hideClassLessons,
                 ).show()
             }
         }

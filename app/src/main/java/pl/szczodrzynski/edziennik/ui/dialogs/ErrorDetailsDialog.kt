@@ -38,11 +38,18 @@ class ErrorDetailsDialog(
     override fun isCancelable() = false
     override fun getPositiveButtonText() = R.string.close
     override fun getNeutralButtonText() = R.string.report
+    override fun getNegativeButtonText() = R.string.copy
 
     private val api by lazy { SzkolnyApi(activity.applicationContext as App) }
 
     override suspend fun onBeforeShow(): Boolean {
         return errors.isNotEmpty()
+    }
+
+    override suspend fun onNegativeClick(): Boolean {
+        getMessage().toString().copyToClipboard(activity)
+        Toast.makeText(activity, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+        return NO_DISMISS
     }
 
     override suspend fun onNeutralClick(): Boolean {

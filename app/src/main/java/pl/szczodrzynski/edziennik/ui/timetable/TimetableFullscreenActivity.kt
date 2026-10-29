@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.commitNow
+import pl.szczodrzynski.edziennik.core.manager.filterTimetableLessons
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.entity.Lesson
@@ -46,7 +47,10 @@ class TimetableFullscreenActivity : AppCompatActivity() {
         var endHour = intent.getIntExtra("endHour", TimetableFragment.DEFAULT_END_HOUR)
         if (app.profile.config.ui.timetableTrimHourRange) {
             val weekEnd = weekStart.clone().stepForward(0, 0, 4)
-            val weekLessons = app.db.timetableDao().getBetweenDatesNow(weekStart, weekEnd)
+            val weekLessons = filterTimetableLessons(
+                app.db.timetableDao().getBetweenDatesNow(weekStart, weekEnd),
+                app.profile.config.ui.timetableHideClassLessons
+            )
                 .filter {
                     it.profileId == App.profileId &&
                         it.type != Lesson.TYPE_NO_LESSONS &&

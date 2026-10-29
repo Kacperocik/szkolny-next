@@ -20,6 +20,7 @@ const val ENDPOINT_LIBRUS_API_CLASSROOMS                               = 1008
 const val ENDPOINT_LIBRUS_API_LESSONS                                  = 1009
 const val ENDPOINT_LIBRUS_API_PUSH_CONFIG                              = 1010
 const val ENDPOINT_LIBRUS_API_TIMETABLES                               = 1015
+const val ENDPOINT_LIBRUS_API_EXTRA_TIMETABLES                         = 1018
 const val ENDPOINT_LIBRUS_API_SUBSTITUTIONS                            = 1016
 const val ENDPOINT_LIBRUS_API_NORMAL_GRADE_CATEGORIES                  = 1021
 const val ENDPOINT_LIBRUS_API_POINT_GRADE_CATEGORIES                   = 1022
@@ -82,6 +83,7 @@ val LibrusFeatures = listOf(
          */
         Feature(LoginType.LIBRUS, FeatureType.TIMETABLE, listOf(
                 ENDPOINT_LIBRUS_API_TIMETABLES to LoginMethod.LIBRUS_API,
+                ENDPOINT_LIBRUS_API_EXTRA_TIMETABLES to LoginMethod.LIBRUS_API,
                 ENDPOINT_LIBRUS_API_SUBSTITUTIONS to LoginMethod.LIBRUS_API
         )),
         /**

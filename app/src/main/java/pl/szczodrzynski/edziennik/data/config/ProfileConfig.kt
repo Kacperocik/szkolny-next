@@ -101,6 +101,7 @@ class ProfileConfig(
 
         var timetableShowAttendance by config<Boolean>(true)
         var timetableShowEvents by config<Boolean>(true)
+        var timetableHideClassLessons by config<Boolean>(false)
         var timetableTrimHourRange by config<Boolean>(false)
         var timetableColorSubjectName by config<Boolean>(false)
         var timetableColorBorders by config<Boolean>(true)

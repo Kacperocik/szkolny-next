@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="dialog_day_lessons">
+        <item quantity="one">%d Lektion</item>
+        <item quantity="other">%d Lektionen</item>
+    </plurals>
+    <plurals name="dialog_day_hours">
+        <item quantity="one">%d Stunde</item>
+        <item quantity="other">%d Stunden</item>
+    </plurals>
+    <plurals name="dialog_day_minutes">
+        <item quantity="one">%d Minute</item>
+        <item quantity="other">%d Minuten</item>
+    </plurals>
+</resources>

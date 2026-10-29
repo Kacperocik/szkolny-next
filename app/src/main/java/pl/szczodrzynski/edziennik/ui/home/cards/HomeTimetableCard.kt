@@ -29,6 +29,7 @@ import pl.szczodrzynski.edziennik.ext.applyExpressiveShapeMorphToButtons
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
+import pl.szczodrzynski.edziennik.core.manager.filterTimetableLessons
 import pl.szczodrzynski.edziennik.data.api.edziennik.EdziennikTask
 import pl.szczodrzynski.edziennik.data.api.events.ApiTaskAllFinishedEvent
 import pl.szczodrzynski.edziennik.data.db.entity.Event
@@ -181,9 +182,14 @@ class HomeTimetableCard(
             // get the current bell-synced time
             val now = syncedNow
 
+            val visibleLessons = filterTimetableLessons(
+                allLessons.filter { it.profileId == profile.id },
+                profile.config.ui.timetableHideClassLessons
+            ).sortedWith(compareBy({ it.displayDate }, { it.displayStartTime }))
+
             // search for lessons to display
             val timetableDate = Date.getToday()
-            lessons = allLessons.filter {
+            lessons = visibleLessons.filter {
                 it.profileId == profile.id
                         && it.displayDate == timetableDate
                         && it.displayEndTime > now
@@ -202,7 +208,7 @@ class HomeTimetableCard(
                     }) && checkedDays < 7) {
 
                 timetableDate.stepForward(0, 0, 1)
-                lessons = allLessons.filter {
+                lessons = visibleLessons.filter {
                     it.profileId == profile.id
                             && it.displayDate == timetableDate
                 }

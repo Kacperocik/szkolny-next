@@ -114,4 +114,16 @@
         <item quantity="one">Found %d result</item>
         <item quantity="other">Found %d results</item>
     </plurals>
+    <plurals name="dialog_day_lessons">
+        <item quantity="one">%d lesson</item>
+        <item quantity="other">%d lessons</item>
+    </plurals>
+    <plurals name="dialog_day_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="dialog_day_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
 </resources>

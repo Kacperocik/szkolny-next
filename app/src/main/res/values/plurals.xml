@@ -234,4 +234,22 @@
         <item quantity="few">Znaleziono %d wyniki</item>
         <item quantity="other">Znaleziono %d wyników</item>
     </plurals>
+    <plurals name="dialog_day_lessons">
+        <item quantity="one">%d lekcja</item>
+        <item quantity="few">%d lekcje</item>
+        <item quantity="many">%d lekcji</item>
+        <item quantity="other">%d lekcji</item>
+    </plurals>
+    <plurals name="dialog_day_hours">
+        <item quantity="one">%d godzina</item>
+        <item quantity="few">%d godziny</item>
+        <item quantity="many">%d godzin</item>
+        <item quantity="other">%d godzin</item>
+    </plurals>
+    <plurals name="dialog_day_minutes">
+        <item quantity="one">%d minuta</item>
+        <item quantity="few">%d minuty</item>
+        <item quantity="many">%d minut</item>
+        <item quantity="other">%d minut</item>
+    </plurals>
 </resources>

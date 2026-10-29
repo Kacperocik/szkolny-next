@@ -15,6 +15,7 @@ class LessonChangesDialog(
     activity: AppCompatActivity,
     private val profileId: Int,
     private val defaultDate: Date,
+    private val hideClassLessons: Boolean = false,
 ) : BindingDialog<DialogLessonChangeListBinding>(activity) {
 
     override fun getTitle(): String = defaultDate.formattedString
@@ -27,6 +28,7 @@ class LessonChangesDialog(
     override suspend fun onShow() {
         val lessonChanges = withContext(Dispatchers.Default) {
             app.db.timetableDao().getChangesForDateNow(profileId, defaultDate)
+                .filter { !hideClassLessons || it.isExtra }
         }
 
         val adapter = LessonChangesAdapter(
