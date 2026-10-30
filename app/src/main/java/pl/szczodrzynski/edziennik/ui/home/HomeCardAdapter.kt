@@ -31,8 +31,7 @@ class HomeCardAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         (holder as ViewHolder).bind(itemTouchHelper)
         (holder.root.layoutParams as? StaggeredGridLayoutManager.LayoutParams)?.apply {
-            // debug, archive & availability cards span the whole width
-            isFullSpan = items[position].id >= 100
+            isFullSpan = false
             leftMargin = cardHorizontalMargin
             rightMargin = cardHorizontalMargin
         }

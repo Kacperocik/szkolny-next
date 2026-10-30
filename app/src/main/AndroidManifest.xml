@@ -54,6 +54,11 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.surveys.SurveyWebActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".ui.timetable.TimetableFullscreenActivity"
             android:configChanges="orientation|screenSize"
             android:exported="false"

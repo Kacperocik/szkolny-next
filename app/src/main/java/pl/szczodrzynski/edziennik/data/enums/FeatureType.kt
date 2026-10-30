@@ -25,6 +25,8 @@ enum class FeatureType(
 
     LESSON_TOPICS(id = 11, isAlwaysNeeded = false, nameRes = R.string.menu_lesson_topics),
 
+    SURVEYS(id = 12, isAlwaysNeeded = false, nameRes = R.string.surveys_title),
+
     ALWAYS_NEEDED(id = 100, isAlwaysNeeded = true),
     STUDENT_INFO(id = 101, isAlwaysNeeded = true),
     STUDENT_NUMBER(id = 109, isAlwaysNeeded = true),

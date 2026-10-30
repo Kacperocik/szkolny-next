@@ -107,6 +107,7 @@
     <string name="card_type_events">Upcoming events</string>
     <string name="card_type_grades">Recent grades</string>
     <string name="card_type_lucky_number">Lucky number</string>
+    <string name="card_type_surveys">Available surveys</string>
     <string name="card_type_timetable">Timetable</string>
     <string name="card_update_button">Download</string>
     <string name="card_update_text_format">You have version %s, while %s is available.</string>
@@ -1069,6 +1070,11 @@
     <string name="student_duty_period">%1$s – %2$s</string>
     <string name="student_duty_sync">Downloading class duties…</string>
     <string name="student_duty_title">Class duty</string>
+    <string name="survey_open_error">Could not open the survey. Check your connection and try again.</string>
+    <string name="survey_open_hint">Tap a survey to open its page in Synergia.</string>
+    <string name="survey_published_format">Published %1$s</string>
+    <string name="surveys_sync">Downloading surveys…</string>
+    <string name="surveys_title">Surveys</string>
     <string name="sync_action_authorizing">Authorizing</string>
     <string name="sync_action_creating_notifications">Creating notifications</string>
     <string name="sync_action_getting_account">Getting account info</string>

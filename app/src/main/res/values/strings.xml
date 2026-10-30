@@ -135,6 +135,7 @@
     <string name="card_type_events">Najbliższe wydarzenia</string>
     <string name="card_type_grades">Ostatnie oceny</string>
     <string name="card_type_lucky_number">Szczęśliwy numerek</string>
+    <string name="card_type_surveys">Dostępne ankiety</string>
     <string name="card_type_timetable">Plan lekcji</string>
     <string name="card_update_button">Pobierz</string>
     <string name="card_update_text_format">Posiadasz wersję %s, dostępna jest %s.</string>
@@ -1143,6 +1144,11 @@
     <string name="student_duty_period">%1$s – %2$s</string>
     <string name="student_duty_sync">Pobieranie dyżurów…</string>
     <string name="student_duty_title">Dyżur</string>
+    <string name="survey_open_error">Nie udało się otworzyć ankiety. Sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="survey_open_hint">Dotknij ankiety, aby otworzyć jej stronę w Synergii.</string>
+    <string name="survey_published_format">Opublikowano %1$s</string>
+    <string name="surveys_sync">Pobieranie ankiet…</string>
+    <string name="surveys_title">Ankiety</string>
     <string name="sync_action_authorizing">Autoryzacja</string>
     <string name="sync_action_creating_notifications">Tworzenie powiadomień</string>
     <string name="sync_action_format" translatable="false">%s…</string>

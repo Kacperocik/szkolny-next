@@ -60,6 +60,7 @@ const val ENDPOINT_LIBRUS_SYNERGIA_GRADES                              = 2020
 const val ENDPOINT_LIBRUS_SYNERGIA_HOMEWORK                            = 2030
 const val ENDPOINT_LIBRUS_SYNERGIA_MESSAGES_RECEIVED                   = 2040
 const val ENDPOINT_LIBRUS_SYNERGIA_MESSAGES_SENT                       = 2050
+const val ENDPOINT_LIBRUS_SYNERGIA_SURVEYS                             = 2060
 const val ENDPOINT_LIBRUS_MESSAGES_RECEIVED                            = 3010
 const val ENDPOINT_LIBRUS_MESSAGES_SENT                                = 3020
 const val ENDPOINT_LIBRUS_MESSAGES_TRASH                               = 3030
@@ -219,6 +220,13 @@ val LibrusFeatures = listOf(
         Feature(LoginType.LIBRUS, FeatureType.CLASSROOMS, listOf(
                 ENDPOINT_LIBRUS_API_CLASSROOMS to LoginMethod.LIBRUS_API
         )),
+
+        /**
+         * Available surveys - using Synergia.
+         */
+        Feature(LoginType.LIBRUS, FeatureType.SURVEYS, listOf(
+                ENDPOINT_LIBRUS_SYNERGIA_SURVEYS to LoginMethod.LIBRUS_SYNERGIA
+        )).withManualRefreshEndpoints(ENDPOINT_LIBRUS_SYNERGIA_SURVEYS),
 
         /**
          * Student info - using synergia scrapper.

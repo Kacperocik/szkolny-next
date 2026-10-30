@@ -44,8 +44,9 @@ import pl.szczodrzynski.edziennik.data.db.migration.*
     Metadata::class,
     LibrusExcuse::class,
     LessonTopic::class,
-    StudentDuty::class
-], version = 105)
+    StudentDuty::class,
+    LibrusSurvey::class
+], version = 106)
 @TypeConverters(
         ConverterTime::class,
         ConverterDate::class,
@@ -89,6 +90,7 @@ abstract class AppDb : RoomDatabase() {
     abstract fun metadataDao(): MetadataDao
     abstract fun librusExcuseDao(): LibrusExcuseDao
     abstract fun lessonTopicDao(): LessonTopicDao
+    abstract fun librusSurveyDao(): LibrusSurveyDao
     abstract fun studentDutyDao(): StudentDutyDao
 
     companion object {
@@ -198,6 +200,7 @@ abstract class AppDb : RoomDatabase() {
                 Migration103(),
                 Migration104(),
                 Migration105(),
+                Migration106(),
         ).allowMainThreadQueries().build()
     }
 }

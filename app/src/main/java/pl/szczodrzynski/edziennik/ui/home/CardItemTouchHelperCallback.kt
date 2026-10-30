@@ -55,6 +55,8 @@ class CardItemTouchHelperCallback(
     }
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+        if (cardAdapter.items.getOrNull(viewHolder.bindingAdapterPosition)?.id == HomeCard.CARD_SURVEYS)
+            return makeMovementFlags(0, 0)
         val spanCount = (recyclerView.layoutManager as? StaggeredGridLayoutManager)?.spanCount ?: 1
         val dragFlags = if (spanCount > 1) DRAG_FLAGS or LEFT or RIGHT else DRAG_FLAGS
         return makeMovementFlags(dragFlags, SWIPE_FLAGS)

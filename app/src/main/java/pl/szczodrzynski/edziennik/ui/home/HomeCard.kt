@@ -26,6 +26,11 @@ interface HomeCard {
         const val CARD_EVENTS = 4
         const val CARD_NOTES = 5
         const val CARD_ANNOUNCEMENTS = 6
+
+        // IDs >= 100 identify cards with a fixed position.
+        const val CARD_ARCHIVE = 101
+        const val CARD_AVAILABILITY = 102
+        const val CARD_SURVEYS = 103
     }
 
     val id: Int

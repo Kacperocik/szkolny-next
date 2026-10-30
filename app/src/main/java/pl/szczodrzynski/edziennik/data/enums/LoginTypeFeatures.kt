@@ -29,6 +29,7 @@ internal val FEATURES_MOBIDZIENNIK = setOf(
 )
 
 internal val FEATURES_LIBRUS = setOf(
+    SURVEYS,
     LESSON_TOPICS,
     EXCUSES,
     TIMETABLE,

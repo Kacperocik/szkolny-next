@@ -79,6 +79,7 @@ class ProfileConfig(
         var agendaCalendarWeeks by config<Int>(0)
 
         var homeCards by config<List<HomeCardModel>> { listOf() }
+        var homeSurveysEnabled by config<Boolean>(true)
         var homeCardsLocked by config<Boolean>(false)
         var homeEventsLimit by config<Int>(5)
         var homeEventsWeeks by config<Int>(2)

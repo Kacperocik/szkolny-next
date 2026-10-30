@@ -27,6 +27,7 @@ import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
+import pl.szczodrzynski.edziennik.data.enums.LoginType
 import pl.szczodrzynski.edziennik.databinding.FragmentHomeBinding
 import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ext.hasUIFeature
@@ -43,6 +44,7 @@ import pl.szczodrzynski.edziennik.ui.home.cards.HomeEventsCard
 import pl.szczodrzynski.edziennik.ui.home.cards.HomeGradesCard
 import pl.szczodrzynski.edziennik.ui.home.cards.HomeLuckyNumberCard
 import pl.szczodrzynski.edziennik.ui.home.cards.HomeNotesCard
+import pl.szczodrzynski.edziennik.ui.home.cards.HomeSurveysCard
 import pl.szczodrzynski.edziennik.ui.home.cards.HomeTimetableCard
 import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetGroup
 import pl.szczodrzynski.navlib.bottomsheet.items.BottomSheetPrimaryItem
@@ -76,9 +78,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, MainActivity>(
 
         fun removeCard(position: Int, cardAdapter: HomeCardAdapter) {
             val homeCards = App.profile.config.ui.homeCards.toMutableList()
-            if (position >= homeCards.size)
-                return
-            val card = cardAdapter.items[position]
+            val card = cardAdapter.items.getOrNull(position) ?: return
             if (card.id >= 100) {
                 // debug & archive cards are not removable
                 return
@@ -176,12 +176,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, MainActivity>(
             } as HomeCard?
         }
         if (app.profile.archived)
-            items.add(0, HomeArchiveCard(101, app, activity, this, app.profile))
+            items.add(0, HomeArchiveCard(HomeCard.CARD_ARCHIVE, app, activity, this, app.profile))
 
         val status = app.availabilityManager.check(app.profile, cacheOnly = true)?.status
         val update = app.config.update
         if (update != null && app.updateManager.isApplicable(update) || status?.userMessage != null) {
-            items.add(0, HomeAvailabilityCard(102, app, activity, this, app.profile))
+            items.add(0, HomeAvailabilityCard(HomeCard.CARD_AVAILABILITY, app, activity, this, app.profile))
         }
 
         val list = b.list
@@ -208,6 +208,24 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, MainActivity>(
         b.list.layoutManager = layoutManager
         b.list.adapter = adapter
         b.list.isNestedScrollingEnabled = false
+        if (app.profile.loginStoreType == LoginType.LIBRUS && app.profile.config.ui.homeSurveysEnabled) {
+            app.db.librusSurveyDao().getAll(app.profile.id).observe(viewLifecycleOwner) { surveys ->
+                val index = adapter.items.indexOfFirst { it.id == HomeCard.CARD_SURVEYS }
+                if (surveys.isEmpty()) {
+                    if (index >= 0) {
+                        adapter.items.removeAt(index)
+                        adapter.notifyItemRemoved(index)
+                    }
+                } else if (index >= 0) {
+                    (adapter.items[index] as HomeSurveysCard).surveys = surveys
+                    adapter.notifyItemChanged(index)
+                } else {
+                    adapter.items.add(0, HomeSurveysCard(activity, surveys))
+                    adapter.notifyItemInserted(0)
+                }
+                scheduleRebalance()
+            }
+        }
         updateColumns()
         b.scrollView.addOnLayoutChangeListener { _, left, _, right, _, oldLeft, _, oldRight, _ ->
             if (right - left != oldRight - oldLeft)

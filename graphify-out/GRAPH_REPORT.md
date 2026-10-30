@@ -1,24 +1,24 @@
 # Graph Report - szkolny2  (2026-10-30)
 
 ## Corpus Check
-- 900 files · ~269,440 words
+- 907 files · ~270,819 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 21 file(s) not represented in the graph (top: .pro 8, (none) 6, .properties 3)
 
 ## Summary
-- 9037 nodes · 23462 edges · 454 communities (155 shown, 299 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 909 edges (avg confidence: 0.85)
+- 9108 nodes · 23642 edges · 439 communities (151 shown, 288 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 911 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9eba6ac2`
+- Built from commit: `9a7b2bb7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - DataLibrus
-- Notification
-- App
+- NotificationType
+- AttendanceAdapter
 - LessonFull
 - Profile
 - ColorPickerCustomViews.kt
@@ -26,32 +26,32 @@
 - Intent
 - ApiError
 - LoginProgressFragment.kt
-- EventFull
+- date
 - SettingsUtil
-- Response
-- Bundle
+- UsosApi
+- App
 - sync_always
 - Animation
 - _utils.py
-- onconflictstrategy
-- communitymaterial
+- Bundle
+- isVisible
 - DataPodlasie
 - .run
 - NavBottomSheet
-- FeatureType
-- Bundle
+- BottomSheetPrimaryItem
+- MessageFull
 - Date
-- Team
-- MessagesComposeChipCreator.kt
-- LoginChooserAdapter
-- LessonTopic
-- Lesson
+- .syncProfile
+- UserActionRequiredEvent
+- LibrusSynergiaStudentDuties.kt
+- TimetableManual
+- Grade
 - SettingsThemeCard.kt
 - Note
 - ColorPickerDialog
-- Teacher
-- AttendanceAdapter
-- BottomSheetPrimaryItem
+- Profile
+- Message
+- .title
 - LoginSyncFragment.kt
 - FeedbackMessage
 - Utils.java
@@ -65,14 +65,13 @@
 - Utils
 - Config
 - Intent
-- ExcuseEditorDialog
+- Observer
 - Animation
 - Time
 - ViewExtensions.kt
 - PagerFragment
-- date
 - androidx.room.Query
-- SzkolnyAppFirebase.kt
+- LoginEggsFragment.kt
 - MiscExtensions.kt
 - AppDb
 - GradeDao
@@ -80,7 +79,7 @@
 - SzkolnyApi
 - EventDao
 - AgendaNewAdapter
-- VulcanWebMain
+- Teacher
 - build
 - PermissionChecker
 - PillTabIndicatorDrawable
@@ -103,22 +102,22 @@
 - LuckyNumberDao
 - TeacherAbsenceDao
 - GradesListFragment
-- OnHierarchyChangeListener
+- GraphicsExtensions.kt
 - DumbCookieJar
 - MessagesFragment
 - MessageDao
 - EventManualDialog
 - WidgetTimetableProvider.kt
 - AgendaFragmentDefault
-- ErrorSnackbar
+- communitymaterial
 - DebugFragment.java
-- AttendanceFull
+- LessonTopicDetailsDialog
 - Noteable
-- Teacher
+- LoginChooserAdapter
 - JsonObject
 - AttendanceDao
 - AnnouncementDao
-- BaseDialog.kt
+- Team
 - WidgetLuckyNumberProvider.kt
 - MaterialAboutProfileItem
 - DevModeDialog
@@ -126,9 +125,9 @@
 - secrets
 - ProfileExtensions.kt
 - Subject
-- LoginEggsFragment.kt
-- EventColorsAdapter
-- MessageRecipient
+- LoginChooserFragment.kt
+- LibrusSurvey
+- ConverterEnums
 - .runCatching
 - RecaptchaDialog
 - BaseConfig
@@ -137,94 +136,94 @@
 - inputs
 - with
 - WidgetTimetableFactory
-- NavView
-- NavBottomBar
+- NavView.kt
+- GraphicsExtensions.kt
 - WidgetNotificationsFactory.kt
 - NotesFragment
 - MessageManager
 - Override
-- .setupMainEventsList
+- AnimatorListenerAdapter
 - EndpointTimer
-- TimetableManual
-- SettingsAboutCard
+- NetworkExtensions.kt
+- onconflictstrategy
 - NoteEditorDialog
-- GenerateBlockTimetableDialog.kt
+- LoginFormFragment
 - GradeFull
-- AttendanceSummaryFragment
+- BellSyncConfigDialog
 - LabJsonAdapter
 - StudentDutyDao
-- AttendanceTypeDao
-- .select
+- AttendanceType
+- EventDetailsDialog
 - LoginPlatformAdapter
 - ArrayExtensions.kt
-- MessagesComposeSuggestionAdapter.kt
+- MessagesComposeChipCreator.kt
 - UiManager.kt
 - GradesAdapter
 - NoteListAdapter
 - EmptyViewHolder
 - ApiResponse
 - WebPushBrowserAdapter
-- index
-- EventTypeDao
+- OAuthLoginActivity.kt
+- ColorPickerCustomViews.kt
 - MainActivityRequestHandler.kt
 - MessagesListFragment
 - EdziennikNotification
-- LoginChooserFragment.kt
+- ThemeChooserDialog.kt
 - MessagesAdapter
 - App.kt
 - SearchableAdapter
 - SearchTextWatcher
-- SettingsSyncCard.kt
-- Classroom
+- SurveyWebActivity.kt
+- index
 - NotificationDao
 - EnumExtensions.kt
 - BellSyncTimeChooseDialog
-- FeedbackChatAdapter
+- EventManager
 - ProfileDao
 - env
 - TeacherAbsenceType
-- JsonExtensions.kt
+- LessonTopic
 - BuildManager
 - PermissionManager.kt
 - SyncWorker.kt
 - ExpressiveSwipeRefreshLayout
-- LibrusExcuseDao
+- ExcuseListAdapter
 - AgendaFragment
 - AnnouncementsFragment
-- GradeCategory
-- ThemeChooserDialog.kt
-- CornerPosition
-- .onCreateViewHolder
-- android.content.Context
-- Searchable
-- AgendaEventRenderer.kt
+- LoginMode
+- QrScannerDialog
+- EventListAdapter
+- UnknownSubjectViewHolder
+- TimetableDayFragment.kt
+- AnnouncementFull
+- AgendaEvent
 - CheckableImageView
 - BundleExtensions.kt
 - GenerateBlockTimetableDialog
-- BellSyncConfigDialog
+- Update
 - RegisterAvailabilityStatus
 - SettingsRegisterCard.kt
-- BaseSettingsFragment
+- GradesSubject
 - TextInputKeyboardEdit
 - with
-- ExcuseListAdapter
-- EventListAdapter
-- TimetableDayFragment.kt
+- WidgetNotificationsProvider.kt
+- TimeDropdown
+- BaseSettingsFragment
 - SubjectDropdown
-- AgendaNewFragment.kt
+- LessonChangesEvent
 - Notifications
 - LogEntry
 - TextExtensions.kt
-- AttendanceManager
-- BetterLinkMovementMethod
-- LibrusExcuse
-- WidgetNotificationsProvider.kt
-- AnnouncementFull
+- SystemBarsUtil.kt
+- color
+- android.content.Context
+- LoginSummaryFragment.kt
+- AttachmentsView
 - MaterialAboutCategoryItem.kt
-- init
+- Classroom
 - steps
 - LessonChangesAdapter
-- FeedbackFragment
+- GradeCategory
 - Java_pl_szczodrzynski_edziennik_data_api_szkolny_interceptor_Signing_iLoveApple
 - LessonRange
 - EnumExtensions.kt
@@ -233,127 +232,127 @@
 - WeekDaysAdapter
 - AttachmentAdapter
 - LoginPlatformListFragment.kt
-- TeamDropdown
-- TimeDropdown
+- TextInputDropDown
+- AppCropImageActivity
 - MessageFragment
 - SettingsLicenseActivity.kt
 - TemplateAdapter
 - build
 - Grades
-- Migration92.kt
-- UpdateAvailableDialog
-- .buildDatabase
-- NoteDetailsDialog
-- CrashActivity
+- LibrusExcuseDao
+- ProfileConfig.kt
+- Migration101
+- Searchable
+- LoginInfo
 - NoticeType
-- AttendanceDetailsDialog
+- NoteDetailsDialog
 - MonthCalendarAdapter
-- QrScannerDialog
-- ConfigDialog
+- LoginPrizeFragment.kt
+- ContributorsFragment
 - NotificationsAdapter
-- MainActivity.kt
+- EdziennikCallback
 - Migration72
 - ContributorsAdapter.kt
-- ItemCornerPositions
+- ChangelogDialog
 - AgendaEventGroup
 - Binding
-- ProfileRemoveDialog
-- spanned
+- OnBackPressedCallback
+- Migration92.kt
 - GradeDetailsDialog
-- color
+- RecaptchaActivity.kt
 - NavDrawer.kt
-- LoginFinishFragment.kt
-- ExcusesFragment
+- RegistrationConfigDialog
+- ExcuseEditorDialog
 - LoginSummaryAdapter
 - LoginSyncErrorFragment.kt
 - StudentDutyEventRenderer
 - Colors
 - aes.c
-- MobidziennikWebTimetable
+- Lesson
 - TeachersAdapter
 - Icon
 - DayDialog
 - WidgetConfigActivity
-- .onCreate
-- .onSuccess
+- ConfigDialog
+- ExcusesFragment
 - UpdateWorker.kt
 - ProfileBackupManager
-- View
-- SubjectColorsAdapter
+- ErrorDetailsDialog
 - TemplateDialog
-- SzkolnyReceiver.kt
-- MutableLazyImpl
-- LibrusLoginApi
-- MarkAllReadTask
 - ExcuseDetailsDialog
+- spanned
+- MutableLazyImpl
+- LibrusExcuse
+- MarkAllReadTask
 - EdziennikCallback
-- JsonArrayViewHolder.kt
-- ViewHolderProvider.kt
+- Migration106
+- ConverterListLong.kt
 - render.py
-- EventColorsDialog
+- Migration23
 - CounterActivity.kt
 - LessonDetailsDialog
-- ChangelogDialog
+- Migration46
 - CardItemTouchHelperCallback.kt
 - BetterHtml.kt
-- LoginActivity
+- LoginFinishFragment.kt
 - AttendanceBar
-- AttachmentsView
+- SemesterViewHolder
 - Migration18
 - Migration103
 - Migration60
 - LibrusRecaptchaHelper.kt
 - ConfigDelegate
 - Migration77
-- Migration64
+- .buildDatabase
 - ConverterListString.kt
-- QuietHoursConfigDialog
+- Adapter
 - EventTypeDropdown
-- Drawable
+- AdapterDataObserver
 - AnnouncementsAdapter
 - DateAdapter.kt
-- BottomSheetAdapter
-- SyncViewListDialog
+- DumbCookie
+- NavTargetLocation
 - Migration99
 - RecyclerView
 - NumberStepperView
 - ServerSyncRequest
-- ConverterTime
+- .onCreate
 - Type
 - play-not/java/pl/szczodrzynski/edziennik/network/SSLProviderInstaller.kt
+- .performAccessibilityAction
 - Migration102
-- MiniDrawerSliderView
-- LoginInfo
+- Migration58.kt
+- LoginInfo.kt
 - BehaviourFragment
-- HebeFilterType
-- SubscriptSizeSpan
+- Migration81.kt
+- Migration82
 - Migration15
 - Migration14
 - Migration33
 - Migration50
-- NavTargetLocation
-- Migration97
+- Migration96
+- Migration17
 - Migration53
-- Adapter
-- Migration37
-- Migration100
-- Migration87
-- WorkerUtils.kt
+- Migration97
+- LessonDialogActivity.kt
+- Events
+- WindowInsetsCompat
+- SubscriptSizeSpan
+- Status
 - Migration91
 - Migration76
 - Migration104
 - ReflectionExtensions.kt
-- LessonTopicsFragment
+- LinearSmoothScroller
 - Migration105
 - play/java/pl/szczodrzynski/edziennik/network/SSLProviderInstaller.kt
 - MessagesComposeChipTokenizer.kt
-- Migration21
 - SettingsCard
 - Migration79
 - Migration12
 - Migration13
 - Migration26
-- Events
+- Migration21
 - Migration95
 - Migration47
 - AnnouncementDetailsDialog
@@ -365,13 +364,13 @@
 - Migration98
 - Migration22
 - Migration29
-- BindingDialog
+- DialogExtensions.kt
 - Migration28
 - SuperscriptSizeSpan
 - Migration30
 - Migration31
-- Migration56
-- AdapterDataObserver
+- Migration37
+- Migration55
 - Migration34
 - Migration35
 - Migration36
@@ -385,40 +384,34 @@
 - Migration44
 - Migration45
 - SearchFilter
-- OnPageChangeListener
-- Observer
+- Migration56
+- BaseFragment
 - EdziennikCallback
 - HomeCardsDialog
 - Migration51
 - Migration52
 - Migration84
-- IDrawerProfile
-- Migration55
+- Drawable
+- Migration64
 - Migration16
-- Update
+- Migration67
+- Migration87
 - MessagesComposeChipTokenizer.kt
-- BottomSheetSeparatorItem
 - ActivityLifecycleCallbacks
 - FirebaseManager.kt
-- NotificationManager
-- .clear
+- AESCrypt
+- DateDropdown
 - ImprovedBulletSpan.kt
 - Migration66
-- Migration67
-- Status
-- NoteManager.kt
+- OwnerType
 - Migration70
 - Signing.kt
 - Migration73
-- Usos
+- EdziennikCallback
 - Migration75
-- DumbCookie
 - Migration63
 - Migration27
-- UnreadCounter.kt
-- Migration17
-- Migration81.kt
-- NotificationFilterDialog
+- SettingsSyncCard.kt
 - Migration83
 - Migration93
 - Migration85.kt
@@ -428,13 +421,9 @@
 - Migration89
 - Migration90
 - Migration68.kt
-- Migration58.kt
-- ShortcutManager
 - MainActivity
 - .onCreate
 - Migration74
-- AESCrypt
-- .onCreate
 - Migration65
 - Migration49
 - Migration32
@@ -443,138 +432,133 @@
 - Migration61
 - Migration80
 - release-firebase
-- Migration82
 - AttendanceCount.kt
-- Migration96
 - Migration24
 - Migration57
-- ConverterListLong.kt
-- DialogExtensions.kt
+- BaseDialog.kt
 - Migration71.kt
-- .handleSwipeUpToOpen
 - Migration19
 - Migration39
 - Migration48
 - Migration54
-- Callback
-- .title
+- SimpleDialog
 
 ## God Nodes (most connected - your core abstractions)
-1. `App` - 351 edges
-2. `MainActivity` - 191 edges
-3. `Bundle()` - 187 edges
-4. `ApiError` - 172 edges
+1. `App` - 352 edges
+2. `MainActivity` - 193 edges
+3. `Bundle()` - 189 edges
+4. `ApiError` - 177 edges
 5. `JsonObject()` - 170 edges
-6. `DataLibrus` - 149 edges
+6. `DataLibrus` - 151 edges
 7. `Profile` - 143 edges
-8. `AppDb` - 120 edges
+8. `AppDb` - 122 edges
 9. `SimpleDialog` - 116 edges
-10. `BaseDialog` - 107 edges
+10. `FeatureType` - 107 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `MainActivity` --references--> `NavBottomSheet`  [EXTRACTED]
   app/src/main/java/pl/szczodrzynski/edziennik/MainActivity.kt → navlib/src/main/java/pl/szczodrzynski/navlib/bottomsheet/NavBottomSheet.kt
 - `MainActivity` --references--> `NavView`  [EXTRACTED]
   app/src/main/java/pl/szczodrzynski/edziennik/MainActivity.kt → navlib/src/main/java/pl/szczodrzynski/navlib/NavView.kt
-- `UI` --calls--> `config()`  [INFERRED]
-  app/src/main/java/pl/szczodrzynski/edziennik/data/config/Config.kt → app/src/main/java/pl/szczodrzynski/edziennik/data/config/Delegate.kt
-- `Timetable` --calls--> `config()`  [INFERRED]
-  app/src/main/java/pl/szczodrzynski/edziennik/data/config/Config.kt → app/src/main/java/pl/szczodrzynski/edziennik/data/config/Delegate.kt
 - `Grades` --calls--> `config()`  [INFERRED]
-  app/src/main/java/pl/szczodrzynski/edziennik/data/config/Config.kt → app/src/main/java/pl/szczodrzynski/edziennik/data/config/Delegate.kt
+  app/src/main/java/pl/szczodrzynski/edziennik/data/config/ProfileConfig.kt → app/src/main/java/pl/szczodrzynski/edziennik/data/config/Delegate.kt
+- `Sync` --calls--> `config()`  [INFERRED]
+  app/src/main/java/pl/szczodrzynski/edziennik/data/config/ProfileConfig.kt → app/src/main/java/pl/szczodrzynski/edziennik/data/config/Delegate.kt
+- `Profile` --implements--> `IDrawerProfile`  [EXTRACTED]
+  app/src/main/java/pl/szczodrzynski/edziennik/data/db/entity/Profile.kt → navlib/src/main/java/pl/szczodrzynski/navlib/drawer/IDrawerProfile.kt
 
 ## Import Cycles
 - None detected.
 
-## Communities (454 total, 299 thin omitted)
+## Communities (439 total, 288 thin omitted)
 
 ### Community 0 - "DataLibrus"
+Cohesion: 0.04
+Nodes (55): LibrusApiAnnouncementMarkAsRead, LibrusApiAnnouncements, LibrusApiAttendances, LibrusApiAttendanceTypes, LibrusApiBehaviourGradeCategories, LibrusApiBehaviourGradeComments, LibrusApiBehaviourGrades, LibrusApiClasses (+47 more)
+
+### Community 1 - "NotificationType"
+Cohesion: 0.06
+Nodes (25): SzkolnyAppFirebase, PostNotifications, Notification, NotificationType, ANNOUNCEMENT, ATTENDANCE, AUTO_ARCHIVING, ERROR (+17 more)
+
+### Community 2 - "AttendanceAdapter"
 Cohesion: 0.03
-Nodes (69): LibrusApiAnnouncementMarkAsRead, LibrusApiAnnouncements, LibrusApiAttendances, LibrusApiAttendanceTypes, LibrusApiBehaviourGradeCategories, LibrusApiBehaviourGradeComments, LibrusApiBehaviourGrades, LibrusApiClasses (+61 more)
-
-### Community 1 - "Notification"
-Cohesion: 0.09
-Nodes (22): NotificationType, ANNOUNCEMENT, ATTENDANCE, AUTO_ARCHIVING, ERROR, EVENT, FEEDBACK_MESSAGE, GENERAL (+14 more)
-
-### Community 2 - "App"
-Cohesion: 0.07
-Nodes (14): App, NoteManager, concat(), join(), takeValue(), resolveString(), attachToastHint(), enableExpressiveCardShapeMorph() (+6 more)
+Nodes (23): AttendanceManager, TimetableManager, Attendance, AttendanceFull, startCoroutineTimer(), AttendanceAdapter, AttendanceDetailsDialog, AttendanceListFragment (+15 more)
 
 ### Community 3 - "LessonFull"
 Cohesion: 0.15
-Nodes (5): LessonFull, takePositive(), DayLessonSummary, summarizeDayLessons(), DayLessonSummaryTest
+Nodes (6): filterTimetableLessons(), LessonFull, takePositive(), DayLessonSummary, summarizeDayLessons(), DayLessonSummaryTest
 
 ### Community 4 - "Profile"
 Cohesion: 0.03
-Nodes (22): filterTimetableLessons(), RecipientListGetRequest, applyExpressiveShapeMorphToButtons(), HomeAnnouncementsCard, HomeArchiveCard, HomeAvailabilityCard, HomeDebugCard, HomeEventsCard (+14 more)
-
-### Community 5 - "ColorPickerCustomViews.kt"
-Cohesion: 0.12
-Nodes (3): ColorHueBar, ColorSatValView, SquareFrameLayout
+Nodes (21): RecipientListGetRequest, applyExpressiveShapeMorphToButtons(), setText(), FeedbackActivity, GradeView, HomeArchiveCard, HomeAvailabilityCard, HomeDebugCard (+13 more)
 
 ### Community 7 - "Intent"
-Cohesion: 0.11
-Nodes (3): ApiService, PendingTasksEvent, TaskCancelRequest
+Cohesion: 0.08
+Nodes (5): ApiService, PendingTasksEvent, ErrorReportTask, IApiTask, SzkolnyTask
 
 ### Community 8 - "ApiError"
 Cohesion: 0.02
-Nodes (32): DownloadAttachment, OneDriveDownloadAttachment, FileCallbackHandler, onFailure(), onSuccess(), JsonCallbackHandler, TextCallbackHandler, TextCallbackHandler (+24 more)
+Nodes (35): DownloadAttachment, OneDriveDownloadAttachment, FileCallbackHandler, onFailure(), onSuccess(), JsonCallbackHandler, JsonCallbackHandler, TextCallbackHandler (+27 more)
 
-### Community 9 - "LoginProgressFragment.kt"
-Cohesion: 0.08
-Nodes (8): UserActionCallback, UserActionManager, object@L161, object@L128, LoginProgressFragment, CaptchaCallbackInterface, CaptchaCallbackInterface, RecaptchaResult
+### Community 10 - "date"
+Cohesion: 0.03
+Nodes (57): getRecipientId(), MobidziennikApi2Main, MobidziennikApi, MobidziennikApiAttendance, MobidziennikApiDates, MobidziennikApiEvents, MobidziennikApiGradeCategories, MobidziennikApiHomework (+49 more)
 
-### Community 10 - "EventFull"
+### Community 12 - "UsosApi"
+Cohesion: 0.03
+Nodes (38): toLibrusExcuse(), UsosApiCourses, UsosApiEctsPoints, UsosApiExamReports, UsosApiExams, UsosApiTerms, UsosApiTimetable, UsosApiUser (+30 more)
+
+### Community 13 - "App"
 Cohesion: 0.04
-Nodes (38): EventGetRequest, LibrusSynergiaHomeworkGetAttachment, MobidziennikApi2Main, MobidziennikApi, MobidziennikApiDates, MobidziennikApiEvents, MobidziennikApiGradeCategories, MobidziennikApiGrades (+30 more)
-
-### Community 12 - "Response"
-Cohesion: 0.13
-Nodes (7): ResponseType, ARRAY, OBJECT, PLAIN, JsonArrayCallbackHandler, JsonCallbackHandler, TextCallbackHandler
-
-### Community 13 - "Bundle"
-Cohesion: 0.06
-Nodes (10): AnnouncementsReadRequest, EdziennikTask, ApiTaskErrorEvent, Bundle(), hideKeyboard(), GradesSimulatorToggle, LessonTopicsListFragment, ContributorsListFragment (+2 more)
+Nodes (21): App, LoggingManager, EdziennikTask, SurveyOpenRequest, ApiTaskErrorEvent, concat(), join(), ignore() (+13 more)
 
 ### Community 14 - "sync_always"
 Cohesion: 0.06
-Nodes (14): TemplateApiSample, TemplateApi, TemplateData, TemplateWeb, TemplateWebSample2, TemplateWebSample, DataTemplate, TemplateFirstLogin (+6 more)
+Nodes (13): TemplateApiSample, TemplateApi, TemplateData, TemplateWeb, TemplateWebSample2, TemplateWebSample, DataTemplate, TemplateFirstLogin (+5 more)
 
 ### Community 15 - "Animation"
-Cohesion: 0.13
+Cohesion: 0.11
 Nodes (7): Anim, Animation, Animation, Animation.AnimationListener, Animation.AnimationListener, Animation.AnimationListener, ResizeAnimation
 
 ### Community 16 - "_utils.py"
 Cohesion: 0.21
 Nodes (11): save_version(), sign(), build_version_code(), get_changelog(), get_commit_log(), get_project_dir(), read_gradle_version(), write_gradle_version() (+3 more)
 
-### Community 18 - "communitymaterial"
+### Community 17 - "Bundle"
+Cohesion: 0.07
+Nodes (7): Bundle(), LabPlaygroundFragment, LabProfileFragment, OnBackPressedCallback, BuildInvalidActivity, ProfileManagerFragment, TemplatePageFragment
+
+### Community 18 - "isVisible"
 Cohesion: 0.05
-Nodes (12): after(), resolveAttr(), resolveColor(), resolveDimenAttr(), resolveDrawable(), resolveStyleAttr(), toColorStateList(), toDrawable() (+4 more)
+Nodes (9): NoteManager, StudentDuty, setTintColor(), enableExpressiveCardShapeMorph(), bindDuty(), IconicsMaterialButton, BindableViewHolder, SubjectViewHolder (+1 more)
 
 ### Community 19 - "DataPodlasie"
-Cohesion: 0.07
-Nodes (16): PodlasieApiEvents, PodlasieApiFinalGrades, PodlasieApiGrades, PodlasieApiHomework, PodlasieApiLuckyNumber, PodlasieApiMain, PodlasieApiTeachers, PodlasieApiTimetable (+8 more)
+Cohesion: 0.08
+Nodes (15): PodlasieApiEvents, PodlasieApiGrades, PodlasieApiHomework, PodlasieApiLuckyNumber, PodlasieApiMain, PodlasieApiTeachers, PodlasieApiTimetable, PodlasieApi (+7 more)
 
-### Community 22 - "FeatureType"
-Cohesion: 0.03
-Nodes (62): SyncProfileRequest, UsosLogin, prepareFor(), Feature, ConverterEnums, FeatureType, AGENDA, ALWAYS_NEEDED (+54 more)
-
-### Community 23 - "Bundle"
+### Community 21 - "NavBottomSheet"
 Cohesion: 0.05
-Nodes (8): registerSafe(), unregisterSafe(), setupMainActivity(), BaseFragment, dispatchCanRefresh(), setupScrollListener(), applyPillTabBackground(), LabPlaygroundFragment
+Nodes (14): BottomSheetAdapter, BottomSheetSeparatorItem, ViewHolder, CornerPosition, FIRST, LAST, MIDDLE, SINGLE (+6 more)
 
-### Community 27 - "LoginChooserAdapter"
-Cohesion: 0.13
-Nodes (3): LoginChooserAdapter, ModeViewHolder, RegisterViewHolder
+### Community 22 - "BottomSheetPrimaryItem"
+Cohesion: 0.09
+Nodes (7): AttendanceFragment, BottomSheetGroup, ACTIONS, CONTEXTUAL, FOOTER, BottomSheetPrimaryItem, ViewHolder
 
-### Community 28 - "LessonTopic"
+### Community 23 - "MessageFull"
+Cohesion: 0.03
+Nodes (12): Mobidziennik, Podlasie, Usos, VulcanHebeMessagesChangeStatus, Vulcan, EventGetEvent, RegisterAvailabilityEvent, EdziennikInterface (+4 more)
+
+### Community 26 - "UserActionRequiredEvent"
 Cohesion: 0.12
-Nodes (6): LessonTopicDao, LessonTopic, groupLessonTopics(), Holder, LessonTopicAdapter, LessonTopicDay
+Nodes (9): UserActionCallback, UserActionManager, object@L161, object@L128, Type, OAUTH, RECAPTCHA, UserActionRequiredEvent (+1 more)
 
-### Community 29 - "Lesson"
-Cohesion: 0.10
-Nodes (9): LibrusExtraLesson, LibrusExtraTimetableSource, ONE_TO_ONE, OTHER_ACTIVITIES, parseLibrusExtraTimetable(), stageLibrusExtraTimetable(), Keepable, Lesson (+1 more)
+### Community 27 - "LibrusSynergiaStudentDuties.kt"
+Cohesion: 0.14
+Nodes (10): LibrusApiLessonTopics, load(), parseLibrusLessonTopics(), ref(), extractStudentDutyCsrf(), LibrusSynergiaStudentDuties, JsonCallbackHandler, onFailure() (+2 more)
+
+### Community 29 - "Grade"
+Cohesion: 0.09
+Nodes (10): fetchLessons(), LibrusApiPartialDescriptiveGrades, parseLibrusPartialGrades(), partialGradeId(), requiredPartialGradeLessons(), MobidziennikApiGrades, PodlasieApiFinalGrades, Grade (+2 more)
 
 ### Community 30 - "SettingsThemeCard.kt"
 Cohesion: 0.05
@@ -584,72 +568,76 @@ Nodes (9): AppLanguageDialog, DrawerMenuConfigDialog, MiniMenuConfigDialog, Sett
 Cohesion: 0.11
 Nodes (3): ServerSyncResponse, NoteDao, Note
 
-### Community 33 - "Teacher"
-Cohesion: 0.07
-Nodes (8): LibrusMessagesGetRecipientList, RecipientListGetEvent, Data, Teacher, crc32(), getStudentData(), getNameInitials(), joinNotNullStrings()
+### Community 32 - "ColorPickerDialog"
+Cohesion: 0.05
+Nodes (11): ColorFamily, ColorPickerDialog, ColorRow, Event, EventColorsAdapter, Quad, Special, ViewHolder (+3 more)
 
-### Community 34 - "AttendanceAdapter"
-Cohesion: 0.07
-Nodes (9): AttendanceAdapter, AttendanceEmpty, AttendanceViewHolder, DayRangeViewHolder, EmptyViewHolder, MonthViewHolder, SubjectViewHolder, TypeViewHolder (+1 more)
+### Community 33 - "Profile"
+Cohesion: 0.03
+Nodes (64): SzkolnyLibrusFirebase, SzkolnyMobidziennikFirebase, SzkolnyVulcanFirebase, Demo, SyncProfileRequest, ProfileArchiver, prepareFor(), FirstLoginFinishedEvent (+56 more)
 
-### Community 35 - "BottomSheetPrimaryItem"
-Cohesion: 0.06
-Nodes (8): AttendanceFragment, AttendanceConfigDialog, NotificationsListFragment, BottomSheetGroup, ACTIONS, CONTEXTUAL, FOOTER, BottomSheetPrimaryItem
+### Community 34 - "Message"
+Cohesion: 0.04
+Nodes (18): LibrusMessages, TextCallbackHandler, TextCallbackHandler, JsonCallbackHandler, FileCallbackHandler, LibrusPortal, LibrusMessagesGetAttachment, LibrusMessagesGetMessage (+10 more)
 
 ### Community 36 - "LoginSyncFragment.kt"
-Cohesion: 0.10
-Nodes (5): LoggingManager, SyncProfileListRequest, ApiTaskAllFinishedEvent, ignore(), LoginSyncFragment
+Cohesion: 0.06
+Nodes (9): SyncProfileListRequest, ApiTaskProgressEvent, ApiTaskStartedEvent, AppData, EventType, UIConfig, EventTypeDao, EventType (+1 more)
 
 ### Community 37 - "FeedbackMessage"
-Cohesion: 0.17
-Nodes (5): FeedbackMessageEvent, FeedbackMessageResponse, FeedbackMessageDao, FeedbackMessage, WithCount
+Cohesion: 0.07
+Nodes (9): FeedbackMessageEvent, FeedbackMessageResponse, FeedbackMessageDao, FeedbackMessage, WithCount, FeedbackChatAdapter, ReceivedViewHolder, SentViewHolder (+1 more)
 
 ### Community 38 - "Utils.java"
 Cohesion: 0.05
-Nodes (4): base64Decode(), base64Encode(), crc16(), sha256()
+Nodes (3): base64Decode(), base64Encode(), sha256()
+
+### Community 40 - "NetworkExtensions.kt"
+Cohesion: 0.12
+Nodes (4): Error, ErrorReportRequest, toErrorCode(), CrashActivity
 
 ### Community 41 - "AgendaNewFragment"
-Cohesion: 0.09
-Nodes (5): AgendaNewFragment, LinearSmoothScroller, LessonChangesEvent, MonthDayCell, TeacherAbsenceEvent
+Cohesion: 0.08
+Nodes (6): AgendaNewFragment, OnScrollListener, SimpleOnItemTouchListener, SimpleOnGestureListener, SimpleOnItemTouchListener, OnScrollListener
 
 ### Community 46 - "Utils"
 Cohesion: 0.06
 Nodes (3): Utils, VulcanQrEncryptionUtils, VulcanRequestEncryptionUtils
 
 ### Community 47 - "Config"
-Cohesion: 0.13
-Nodes (11): BaseMigration, Config, Grades, Sync, Timetable, UI, ConfigMigration11, ConfigMigration14 (+3 more)
+Cohesion: 0.14
+Nodes (15): BaseMigration, Config, Grades, Timetable, UI, config(), TypeToken, TypeToken (+7 more)
 
 ### Community 48 - "Intent"
 Cohesion: 0.07
 Nodes (6): FirebaseSendException, FirebaseService, Message, MyFirebaseService, Intent(), UpdateDownloaderService
 
+### Community 49 - "Observer"
+Cohesion: 0.10
+Nodes (4): EventGetRequest, Observer, StudentNumberDialog, EventDetailsBinder
+
 ### Community 50 - "Animation"
-Cohesion: 0.11
+Cohesion: 0.14
 Nodes (7): Anim, Animation, Animation, AnimationListener, AnimationListener, AnimationListener, ResizeAnimation
 
 ### Community 51 - "Time"
-Cohesion: 0.09
-Nodes (4): parseExtraLessonTime(), MobiLesson, compareTo(), Time
+Cohesion: 0.08
+Nodes (4): parseExtraLessonTime(), MobiLesson, ConverterTime, Time
 
 ### Community 52 - "ViewExtensions.kt"
-Cohesion: 0.08
-Nodes (13): addExpressiveTouchCallback(), appendView(), detachToastHint(), findParentById(), getTextPosition(), isViewAndChildrenEnabled(), removeFromParent(), RotatingDrawable (+5 more)
+Cohesion: 0.07
+Nodes (17): addExpressiveTouchCallback(), addOnPageSelectedListener(), OnPageChangeListener, appendView(), attachToastHint(), detachToastHint(), findParentById(), getTextPosition() (+9 more)
 
 ### Community 53 - "PagerFragment"
 Cohesion: 0.07
-Nodes (6): PagerFragment, FragmentStateAdapter, OnPageChangeCallback, LabFragment, HomeworkDate, TemplateFragment
+Nodes (8): applyPillRipple(), OnHierarchyChangeListener, PagerFragment, FragmentStateAdapter, OnPageChangeCallback, applyPillTabBackground(), applyPillTabIndicator(), LabFragment
 
-### Community 54 - "date"
-Cohesion: 0.02
-Nodes (43): toLibrusExcuse(), getRecipientId(), MobidziennikApiAttendance, UsosApiCourses, UsosApiEctsPoints, UsosApiExamReports, UsosApiExams, UsosApiTerms (+35 more)
-
-### Community 56 - "SzkolnyAppFirebase.kt"
-Cohesion: 0.13
-Nodes (3): SzkolnyAppFirebase, PostNotifications, Notification
+### Community 56 - "LoginEggsFragment.kt"
+Cohesion: 0.14
+Nodes (3): LoginEggsFragment, Any, WebViewClient
 
 ### Community 58 - "AppDb"
-Cohesion: 0.08
+Cohesion: 0.09
 Nodes (4): AppDb, ConverterDate, ConverterDateInt, ConverterJsonObject
 
 ### Community 61 - "SzkolnyApi"
@@ -660,41 +648,33 @@ Nodes (7): AppUserRequest, Device, EventShareRequest, FeedbackMessageRequest, No
 Cohesion: 0.10
 Nodes (16): AgendaListItem, AgendaNewAdapter, Counter, CounterType, LESSON_CHANGES, TEACHER_ABSENCE, CounterViewHolder, DayHeader (+8 more)
 
-### Community 64 - "VulcanWebMain"
-Cohesion: 0.10
-Nodes (7): VulcanWebMain, TextCallbackHandler, TextCallbackHandler, TextCallbackHandler, VulcanWebLuckyNumber, CufsCertificate, VulcanLoginWebMain
+### Community 64 - "Teacher"
+Cohesion: 0.11
+Nodes (4): LibrusMessagesGetRecipientList, RecipientListGetEvent, Teacher, getNameInitials()
 
 ### Community 65 - "build"
 Cohesion: 0.06
 Nodes (32): if, name, needs, secrets, uses, with, name, outputs (+24 more)
 
-### Community 67 - "PillTabIndicatorDrawable"
-Cohesion: 0.10
-Nodes (3): applyPillRipple(), applyPillTabIndicator(), PillTabIndicatorDrawable
-
-### Community 68 - "SzkolnyApi.kt"
-Cohesion: 0.11
-Nodes (4): ApiCacheInterceptor, SignatureInterceptor, md5(), bodyToString()
-
 ### Community 69 - "NoticeDao"
-Cohesion: 0.11
+Cohesion: 0.13
 Nodes (3): NoticeDao, Notice, NoticeFull
 
 ### Community 72 - "GradesManager.kt"
 Cohesion: 0.11
-Nodes (4): GradesManager, averageOrNull(), ifNotNull(), GradesAverages
+Nodes (4): GradesManager, ifNotNull(), GradesAverages, GradesStats
 
 ### Community 73 - "Adapter"
 Cohesion: 0.19
 Nodes (3): OnPageChangeCallback, OnScrollListener, RecyclerTabLayout
 
 ### Community 74 - "ProfileConfig"
-Cohesion: 0.11
-Nodes (18): config(), TypeToken, TypeToken, TypeToken, TypeToken, ProfileConfigMigration2, ProfileConfigMigration3, ProfileConfigMigration4 (+10 more)
+Cohesion: 0.12
+Nodes (12): ProfileConfigMigration2, ProfileConfigMigration4, ProfileConfigMigration5, ProfileConfigMigration6, Grades, ProfileConfig, Sync, UI (+4 more)
 
 ### Community 76 - "Utils.kt"
 Cohesion: 0.07
-Nodes (22): enableExpressiveChipShapeMorph(), enableExpressiveFabShapeMorph(), animateCardMorph(), applyCornerRadius(), applyImageCornerRadius(), ViewOutlineProvider, cancelExpressiveCardShapeMorph(), cancelExpressiveImageShapeMorph() (+14 more)
+Nodes (25): enableExpressiveChipShapeMorph(), enableExpressiveFabShapeMorph(), animateCardMorph(), applyCornerRadius(), applyImageCornerRadius(), ViewOutlineProvider, cancelExpressiveCardShapeMorph(), cancelExpressiveImageShapeMorph() (+17 more)
 
 ### Community 77 - "SettingsViewTypeManager.kt"
 Cohesion: 0.13
@@ -705,7 +685,7 @@ Cohesion: 0.06
 Nodes (7): TeacherAbsenceAdapter, ViewHolder, ConnectedButtonToggleGroup, AnimatorListenerAdapter, CornerSizes, BetterLink, OnMenuItemClickListener
 
 ### Community 82 - "StylingConfig"
-Cohesion: 0.13
+Cohesion: 0.14
 Nodes (10): HtmlMode, COMPATIBLE, MARKDOWN, ORIGINAL, SIMPLE, Style, StylingConfig, StylingConfigBase (+2 more)
 
 ### Community 83 - "WidgetCurrentLessonProvider.kt"
@@ -713,44 +693,40 @@ Cohesion: 0.22
 Nodes (4): pendingIntentFlag(), bellSyncDiffMillis(), todayLessons(), WidgetCurrentLessonProvider
 
 ### Community 84 - "LuckyNumberDao"
-Cohesion: 0.14
+Cohesion: 0.13
 Nodes (3): LuckyNumberDao, LuckyNumber, LuckyNumberFull
 
 ### Community 85 - "TeacherAbsenceDao"
 Cohesion: 0.17
 Nodes (3): TeacherAbsenceDao, TeacherAbsence, TeacherAbsenceFull
 
-### Community 86 - "GradesListFragment"
-Cohesion: 0.15
-Nodes (3): GradesListFragment, GradesSemester, SemesterViewHolder
+### Community 87 - "GraphicsExtensions.kt"
+Cohesion: 0.13
+Nodes (6): resolveColor(), resolveDimenAttr(), resolveDrawable(), resolveStyleAttr(), toColorStateList(), Register
 
-### Community 94 - "ErrorSnackbar"
+### Community 94 - "communitymaterial"
 Cohesion: 0.08
-Nodes (3): ErrorDetailsDialog, ErrorSnackbar, MainSnackbar
+Nodes (12): after(), hideKeyboard(), resolveAttr(), toDrawable(), copyToClipboard(), plural(), getSyncInterval(), enableExpressiveShapeMorph() (+4 more)
 
-### Community 96 - "AttendanceFull"
+### Community 95 - "DebugFragment.java"
 Cohesion: 0.11
-Nodes (8): Attendance, AttendanceType, AttendanceFull, AttendanceDayRange, AttendanceMonth, AttendanceSubject, AttendanceTypeGroup, ExpandableItemModel
+Nodes (3): filterOutArchived(), DebugFragment, SimpleObj
 
-### Community 98 - "Teacher"
-Cohesion: 0.02
-Nodes (31): SzkolnyLibrusFirebase, SzkolnyMobidziennikFirebase, SzkolnyVulcanFirebase, Demo, FirstLoginRequest, MobidziennikWebGetMessage, MobidziennikFirstLogin, ProfileArchiver (+23 more)
+### Community 96 - "LessonTopicDetailsDialog"
+Cohesion: 0.10
+Nodes (3): LessonTopicDetailsDialog, LessonTopicsFragment, LessonTopicsListFragment
+
+### Community 98 - "LoginChooserAdapter"
+Cohesion: 0.13
+Nodes (3): LoginChooserAdapter, ModeViewHolder, RegisterViewHolder
 
 ### Community 99 - "JsonObject"
 Cohesion: 0.03
-Nodes (29): fetchLessons(), LibrusApiPartialDescriptiveGrades, parseLibrusPartialGrades(), partialGradeId(), requiredPartialGradeLessons(), createLibrusExcusePayload(), VulcanHebeAddressbook2, VulcanHebeAddressbook (+21 more)
-
-### Community 102 - "BaseDialog.kt"
-Cohesion: 0.10
-Nodes (4): dismissWithAnimation(), restoreTitleSizeOnConfigurationChanges(), setupPredictiveBackAnimation(), OnBackAnimationCallback
+Nodes (35): HebeFilterType, BY_MESSAGEBOX, BY_PERIOD, BY_PERSON, BY_PUPIL, VulcanHebeAddressbook2, VulcanHebeAddressbook, VulcanHebeAttendance (+27 more)
 
 ### Community 103 - "WidgetLuckyNumberProvider.kt"
 Cohesion: 0.20
 Nodes (6): putExtras(), WidgetColors, WidgetLuckyNumberProvider, WidgetConfig, resolveWidgetTheme(), WidgetThemeColors
-
-### Community 105 - "DevModeDialog"
-Cohesion: 0.10
-Nodes (3): DevModeDialog, RestartDialog, LoginPrizeFragment
 
 ### Community 106 - "NavTarget"
 Cohesion: 0.05
@@ -765,16 +741,12 @@ Cohesion: 0.09
 Nodes (12): colorFromName(), toImageHolder(), getDrawable(), getHolder(), getSchoolYearConstrains(), hasFeature(), hasUIFeature(), isBeforeYear() (+4 more)
 
 ### Community 109 - "Subject"
-Cohesion: 0.15
+Cohesion: 0.13
 Nodes (3): SubjectDao, Subject, ItemGradesSubjectModel
 
-### Community 110 - "LoginEggsFragment.kt"
-Cohesion: 0.14
-Nodes (3): LoginEggsFragment, Any, WebViewClient
-
-### Community 111 - "EventColorsAdapter"
-Cohesion: 0.16
-Nodes (6): ColorRow, Event, EventColorsAdapter, Quad, Special, ViewHolder
+### Community 110 - "LoginChooserFragment.kt"
+Cohesion: 0.06
+Nodes (4): setupLoginActivity(), RegisterUnavailableDialog, LoginActivity, LoginChooserFragment
 
 ### Community 114 - "RecaptchaDialog"
 Cohesion: 0.10
@@ -792,41 +764,33 @@ Nodes (22): default, type, default, type, build-aab, build-apk, nightly, release
 Cohesion: 0.09
 Nodes (22): with, appId, body_path, clean, distribution, fetch-depth, file, files (+14 more)
 
-### Community 122 - "NavBottomBar"
-Cohesion: 0.10
-Nodes (6): ViewHolder, NavBottomBar, NavMenuBarBase, NavToolbar, colorAttr(), getColorFromAttr()
-
-### Community 125 - "MessageManager"
-Cohesion: 0.15
-Nodes (3): MessageManager, UIConfig, ItalicSpan
-
 ### Community 126 - "Override"
-Cohesion: 0.16
+Cohesion: 0.17
 Nodes (3): notEmptyOrNull(), SeekBar.OnSeekBarChangeListener, ListAdapter
 
-### Community 127 - ".setupMainEventsList"
-Cohesion: 0.11
-Nodes (6): AnimatorListenerAdapter, OnScrollListener, SimpleOnItemTouchListener, SimpleOnGestureListener, SimpleOnItemTouchListener, OnScrollListener
-
-### Community 132 - "GenerateBlockTimetableDialog.kt"
-Cohesion: 0.07
-Nodes (4): TimetableManager, toBundle(), startCoroutineTimer(), LoginFormFragment
+### Community 129 - "NetworkExtensions.kt"
+Cohesion: 0.14
+Nodes (3): SignatureInterceptor, SzkolnyApiException, bodyToString()
 
 ### Community 135 - "LabJsonAdapter"
-Cohesion: 0.08
-Nodes (7): LabJsonAdapter, LabProfileFragment, LabJsonElement, LabJsonObject, JsonElementViewHolder, JsonObjectViewHolder, JsonSubObjectViewHolder
+Cohesion: 0.07
+Nodes (8): LabJsonAdapter, LabJsonArray, LabJsonElement, LabJsonObject, JsonArrayViewHolder, JsonElementViewHolder, JsonObjectViewHolder, JsonSubObjectViewHolder
 
 ### Community 140 - "ArrayExtensions.kt"
 Cohesion: 0.09
-Nodes (7): MobidziennikApiTeams, filter(), ifNotEmpty(), keys(), toSparseArray(), values(), getById()
+Nodes (8): MobidziennikApiTeams, averageOrNull(), filter(), ifNotEmpty(), keys(), toSparseArray(), values(), getById()
 
 ### Community 143 - "GradesAdapter"
-Cohesion: 0.11
+Cohesion: 0.12
 Nodes (3): GradesAdapter, SimulatorSnapshot, SimulatorStatSnapshot
 
 ### Community 144 - "NoteListAdapter"
 Cohesion: 0.15
 Nodes (3): NoteCategoryViewHolder, NoteListAdapter, NoteViewHolder
+
+### Community 145 - "EmptyViewHolder"
+Cohesion: 0.21
+Nodes (3): SimulatorToggleViewHolder, GradesEmpty, EmptyViewHolder
 
 ### Community 146 - "ApiResponse"
 Cohesion: 0.27
@@ -836,49 +800,61 @@ Nodes (3): ApiResponse, Error, SzkolnyService
 Cohesion: 0.15
 Nodes (5): Browser, WebPushResponse, ViewHolder, WebPushBrowserAdapter, WebPushFragment
 
+### Community 148 - "OAuthLoginActivity.kt"
+Cohesion: 0.19
+Nodes (3): OAuthLoginActivity, WebViewClient, OAuthLoginResult
+
+### Community 149 - "ColorPickerCustomViews.kt"
+Cohesion: 0.17
+Nodes (3): ColorHueBar, ColorSatValView, getOutline()
+
+### Community 152 - "EdziennikNotification"
+Cohesion: 0.15
+Nodes (3): Channel, NotificationManager, EdziennikNotification
+
+### Community 155 - "App.kt"
+Cohesion: 0.08
+Nodes (3): Shortcut, ShortcutManager, applyPickerDialogStyle()
+
 ### Community 157 - "SearchTextWatcher"
 Cohesion: 0.15
 Nodes (3): SearchTextWatcher, onStateChanged(), SearchViewHolder
 
-### Community 158 - "SettingsSyncCard.kt"
-Cohesion: 0.12
-Nodes (3): SyncIntervalDialog, SettingsSyncCard, SettingsSyncFragment
+### Community 158 - "SurveyWebActivity.kt"
+Cohesion: 0.10
+Nodes (3): SurveySessionEvent, SurveyWebActivity, WebViewClient
 
 ### Community 161 - "EnumExtensions.kt"
 Cohesion: 0.10
 Nodes (18): Mode, CLASSIC, DAYNIGHT, FULL, Theme, BLUE, BROWN, DEFAULT (+10 more)
 
-### Community 163 - "FeedbackChatAdapter"
-Cohesion: 0.22
-Nodes (3): FeedbackChatAdapter, ReceivedViewHolder, SentViewHolder
-
 ### Community 165 - "env"
 Cohesion: 0.11
 Nodes (18): APK_FILE, APK_SERVER_NIGHTLY, APK_SERVER_RELEASE, DB_HOST, DB_NAME, DB_PASS, DB_USER, DOWNLOAD_URL (+10 more)
 
-### Community 167 - "JsonExtensions.kt"
-Cohesion: 0.14
-Nodes (13): get(), getChar(), getEnum(), getFloat(), getInt(), getLong(), getString(), mergeWith() (+5 more)
+### Community 167 - "LessonTopic"
+Cohesion: 0.12
+Nodes (6): LessonTopicDao, LessonTopic, groupLessonTopics(), Holder, LessonTopicAdapter, LessonTopicDay
 
 ### Community 168 - "BuildManager"
 Cohesion: 0.16
 Nodes (9): BuildManager, InvalidBuildReason, DEBUG, NO_COMMIT_HASH, NO_REMOTE_REPO, OFFICIAL_UNSIGNED, REMOTE_NO_COMMIT, UNSTAGED_CHANGES (+1 more)
 
 ### Community 170 - "SyncWorker.kt"
+Cohesion: 0.09
+Nodes (5): AppManagerDetectedEvent, SyncWorker, Any, WorkerUtils, formatDate()
+
+### Community 175 - "LoginMode"
 Cohesion: 0.17
-Nodes (3): SyncWorker, Any, formatDate()
+Nodes (11): LoginMode, DEMO, LIBRUS_EMAIL, LIBRUS_JST, LIBRUS_SYNERGIA, MOBIDZIENNIK_WEB, PODLASIE_API, USOS_OAUTH (+3 more)
 
-### Community 177 - "CornerPosition"
-Cohesion: 0.33
-Nodes (5): CornerPosition, FIRST, LAST, MIDDLE, SINGLE
+### Community 179 - "TimetableDayFragment.kt"
+Cohesion: 0.05
+Nodes (3): LessonChangesDialog, TeacherAbsenceDialog, SimulatorBorderView
 
-### Community 178 - ".onCreateViewHolder"
-Cohesion: 0.16
-Nodes (4): SimulatorToggleViewHolder, GradesUnknownSubject, SubjectViewHolder, UnknownSubjectViewHolder
-
-### Community 181 - "AgendaEventRenderer.kt"
-Cohesion: 0.11
-Nodes (3): EventManager, AgendaEvent, AgendaEventRenderer
+### Community 180 - "AnnouncementFull"
+Cohesion: 0.12
+Nodes (4): AnnouncementGetRequest, AnnouncementGetEvent, AnnouncementFull, HomeAnnouncementsCard
 
 ### Community 182 - "CheckableImageView"
 Cohesion: 0.23
@@ -888,41 +864,45 @@ Nodes (3): setOnSelectedListener(), CheckableImageView, OnCheckedChangeListener
 Cohesion: 0.20
 Nodes (9): getEnum(), getFloat(), getInt(), getIntOrNull(), getLong(), getString(), putEnum(), set() (+1 more)
 
+### Community 185 - "Update"
+Cohesion: 0.14
+Nodes (5): UpdateManager, UpdateStateEvent, Update, DownloadProgressReceiver, UpdateDownloaderService
+
 ### Community 186 - "RegisterAvailabilityStatus"
-Cohesion: 0.20
-Nodes (7): AvailabilityManager, Error, Type, API_ERROR, NO_API_ACCESS, NOT_AVAILABLE, RegisterAvailabilityStatus
+Cohesion: 0.18
+Nodes (8): AvailabilityManager, Error, Type, API_ERROR, NO_API_ACCESS, NOT_AVAILABLE, RegisterAvailabilityStatus, Sync
 
 ### Community 187 - "SettingsRegisterCard.kt"
-Cohesion: 0.08
-Nodes (6): AppSync, AgendaConfigDialog, RegistrationConfigDialog, TimetableConfigDialog, SettingsRegisterCard, SettingsRegisterFragment
+Cohesion: 0.07
+Nodes (5): AgendaConfigDialog, AttendanceConfigDialog, TimetableConfigDialog, SettingsRegisterCard, SettingsRegisterFragment
 
 ### Community 190 - "with"
 Cohesion: 0.12
 Nodes (15): name, secrets, uses, with, jobs, build, name, tags (+7 more)
 
-### Community 193 - "TimetableDayFragment.kt"
-Cohesion: 0.08
-Nodes (6): listOfNotEmpty(), asBoldSpannable(), asColoredSpannable(), asItalicSpannable(), asStrikethroughSpannable(), asUnderlineSpannable()
+### Community 191 - "WidgetNotificationsProvider.kt"
+Cohesion: 0.14
+Nodes (6): SzkolnyReceiver, SyncRequest, ServiceCloseRequest, TaskCancelRequest, pendingIntentMutable(), WidgetNotificationsProvider
 
-### Community 195 - "AgendaNewFragment.kt"
-Cohesion: 0.06
-Nodes (4): LessonChangesDialog, LessonChangesEventRenderer, TeacherAbsenceDialog, TeacherAbsenceEventRenderer
+### Community 195 - "LessonChangesEvent"
+Cohesion: 0.11
+Nodes (5): LessonChangesEvent, LessonChangesEventRenderer, MonthDayCell, TeacherAbsenceEvent, TeacherAbsenceEventRenderer
 
 ### Community 198 - "TextExtensions.kt"
 Cohesion: 0.09
-Nodes (14): appendSpan(), appendText(), asSpannable(), changeStringCase(), cleanDiacritics(), fromQueryString(), getShortName(), replaceSpan() (+6 more)
+Nodes (16): appendSpan(), appendText(), asItalicSpannable(), asSpannable(), asUnderlineSpannable(), changeStringCase(), cleanDiacritics(), fromQueryString() (+8 more)
 
-### Community 200 - "BetterLinkMovementMethod"
-Cohesion: 0.14
-Nodes (3): BetterLinkMovementMethod, OnLinkClickListener, OnLinkLongClickListener
-
-### Community 205 - "init"
-Cohesion: 0.23
-Nodes (5): attachExpressiveShapeMorph(), SimpleOnItemTouchListener, decideDrawerMode(), init(), SimpleOnItemTouchListener
+### Community 203 - "AttachmentsView"
+Cohesion: 0.20
+Nodes (3): AttachmentGetRequest, hmacSHA1(), AttachmentsView
 
 ### Community 206 - "steps"
 Cohesion: 0.13
 Nodes (14): runs-on, steps, jobs, build, name, permissions, contents, id (+6 more)
+
+### Community 207 - "LessonChangesAdapter"
+Cohesion: 0.20
+Nodes (3): listOfNotEmpty(), LessonChangesAdapter, ViewHolder
 
 ### Community 210 - "LessonRange"
 Cohesion: 0.23
@@ -937,48 +917,52 @@ Cohesion: 0.14
 Nodes (14): Color, BLACK, BLUE, BROWN, DARK_BLUE, GREEN, GREY, NONE (+6 more)
 
 ### Community 214 - "WeekDaysAdapter"
-Cohesion: 0.19
-Nodes (3): ViewHolder, WeekDayPill, WeekDaysAdapter
+Cohesion: 0.12
+Nodes (6): ViewHolder, WeekDayPill, WeekDaysAdapter, BellSyncLayout, LinearLayout, TimetablePagerLayout
+
+### Community 218 - "TextInputDropDown"
+Cohesion: 0.12
+Nodes (3): TeamDropdown, Item, TextInputDropDown
 
 ### Community 220 - "MessageFragment"
 Cohesion: 0.11
 Nodes (3): MessageGetRequest, MessagesConfigDialog, MessageFragment
 
+### Community 222 - "TemplateAdapter"
+Cohesion: 0.07
+Nodes (7): HomeworkDate, HomeworkListFragment, TemplateAdapter, ViewHolder, TemplateFragment, TemplateListFragment, TemplateListPageFragment
+
 ### Community 223 - "build"
 Cohesion: 0.14
 Nodes (13): name, secrets, uses, with, jobs, build, name, branches (+5 more)
 
-### Community 227 - ".buildDatabase"
-Cohesion: 0.16
-Nodes (3): Migration101, Migration23, Migration46
+### Community 229 - "LoginInfo"
+Cohesion: 0.26
+Nodes (10): BaseCredential, CaseMode, LOWER_CASE, UNCHANGED, UPPER_CASE, FormCheckbox, FormField, LoginInfo (+2 more)
 
-### Community 229 - "CrashActivity"
-Cohesion: 0.20
-Nodes (3): Error, ErrorReportRequest, CrashActivity
+### Community 234 - "ContributorsFragment"
+Cohesion: 0.22
+Nodes (3): ContributorsResponse, Item, ContributorsFragment
 
-### Community 233 - "QrScannerDialog"
-Cohesion: 0.11
-Nodes (5): BellSyncLayout, QrScannerDialog, LinearLayout, BarcodeCallback, TimetablePagerLayout
-
-### Community 236 - "MainActivity.kt"
-Cohesion: 0.07
-Nodes (3): OnBackPressedCallback, ServerMessageDialog, DrawerPrimaryItem
-
-### Community 239 - "ContributorsAdapter.kt"
+### Community 235 - "NotificationsAdapter"
 Cohesion: 0.12
-Nodes (5): ContributorsResponse, Item, ContributorsAdapter, ViewHolder, ContributorsFragment
+Nodes (3): NotificationsAdapter, ViewHolder, NotificationsListFragment
 
-### Community 240 - "ItemCornerPositions"
-Cohesion: 0.20
-Nodes (6): CornerPosition, FIRST, LAST, MIDDLE, SINGLE, ItemCornerPositions
+### Community 240 - "ChangelogDialog"
+Cohesion: 0.09
+Nodes (9): ChangelogDialog, SettingsAboutCard, CornerPosition, FIRST, LAST, MIDDLE, SINGLE, ItemCornerPositions (+1 more)
 
 ### Community 241 - "AgendaEventGroup"
 Cohesion: 0.23
 Nodes (3): Group, AgendaEventGroup, AgendaEventGroupRenderer
 
-### Community 246 - "color"
-Cohesion: 0.09
-Nodes (4): getOutline(), SimulatorBorderView, RecaptchaActivity, BuildInvalidActivity
+### Community 246 - "RecaptchaActivity.kt"
+Cohesion: 0.17
+Nodes (4): CaptchaCallbackInterface, RecaptchaActivity, CaptchaCallbackInterface, RecaptchaResult
+
+### Community 247 - "NavDrawer.kt"
+Cohesion: 0.06
+Nodes (12): attachExpressiveShapeMorph(), OnChildAttachStateChangeListener, SimpleOnItemTouchListener, decideDrawerMode(), fixedDrawerAvailable(), init(), DrawerListener, MiniDrawerSliderView (+4 more)
 
 ### Community 250 - "LoginSummaryAdapter"
 Cohesion: 0.20
@@ -988,25 +972,25 @@ Nodes (3): Item, LoginSummaryAdapter, ViewHolder
 Cohesion: 0.31
 Nodes (10): crowded(), death(), hot(), numerous(), please(), punishment(), scale(), stoprightnow() (+2 more)
 
+### Community 255 - "Lesson"
+Cohesion: 0.10
+Nodes (8): LibrusExtraLesson, LibrusExtraTimetableSource, ONE_TO_ONE, OTHER_ACTIVITIES, parseLibrusExtraTimetable(), stageLibrusExtraTimetable(), MobidziennikWebTimetable, Lesson
+
+### Community 256 - "TeachersAdapter"
+Cohesion: 0.14
+Nodes (3): TeachersAdapter, ViewHolder, TeachersListFragment
+
 ### Community 257 - "Icon"
 Cohesion: 0.23
 Nodes (6): Icon, nav_dots_vertical, nav_menu, nav_sort_ascending, nav_sort_descending, NavLibFont
 
 ### Community 259 - "WidgetConfigActivity"
-Cohesion: 0.10
+Cohesion: 0.11
 Nodes (3): PreviewRow, WidgetConfigActivity, ViewOutlineProvider
 
-### Community 260 - ".onCreate"
-Cohesion: 0.20
-Nodes (3): AppData, EventType, UIConfig
-
 ### Community 263 - "ProfileBackupManager"
-Cohesion: 0.20
+Cohesion: 0.33
 Nodes (3): ColumnSchema, ProfileBackupManager, TableSchema
-
-### Community 268 - "SzkolnyReceiver.kt"
-Cohesion: 0.17
-Nodes (5): OngoingLessonNotificationManager, SzkolnyReceiver, SyncRequest, ServiceCloseRequest, filterOutArchived()
 
 ### Community 269 - "MutableLazyImpl"
 Cohesion: 0.24
@@ -1017,116 +1001,100 @@ Cohesion: 0.14
 Nodes (9): find_icon_font(), find_text_fonts(), load_font(), main(), render_previews(), card(), icon(), rect() (+1 more)
 
 ### Community 278 - "CounterActivity.kt"
-Cohesion: 0.15
-Nodes (4): timeLeft(), timeTill(), CounterActivity, BigNightUtil
+Cohesion: 0.13
+Nodes (5): compareTo(), timeLeft(), timeTill(), CounterActivity, BigNightUtil
 
 ### Community 282 - "BetterHtml.kt"
-Cohesion: 0.17
-Nodes (3): getWordBounds(), UnderlineCustomSpan, blendColors()
+Cohesion: 0.14
+Nodes (4): getWordBounds(), ItalicSpan, UnderlineCustomSpan, blendColors()
 
-### Community 283 - "LoginActivity"
-Cohesion: 0.09
-Nodes (5): setupLoginActivity(), FeedbackActivity, LoginActivity, OnBackPressedCallback, LoginSummaryFragment
-
-### Community 285 - "AttachmentsView"
-Cohesion: 0.20
-Nodes (3): AttachmentGetRequest, hmacSHA1(), AttachmentsView
+### Community 300 - "NavTargetLocation"
+Cohesion: 0.25
+Nodes (7): NavTargetLocation, BOTTOM_SHEET, DRAWER, DRAWER_BOTTOM, DRAWER_MORE, NOWHERE, PROFILE_LIST
 
 ### Community 304 - "ServerSyncRequest"
 Cohesion: 0.40
 Nodes (3): Notification, ServerSyncRequest, User
 
+### Community 305 - ".onCreate"
+Cohesion: 0.07
+Nodes (4): ProfileListEmptyEvent, ServerMessageDialog, UpdateAvailableDialog, DrawerPrimaryItem
+
 ### Community 306 - "Type"
 Cohesion: 0.33
 Nodes (6): Type, BETA, DEV, NIGHTLY, RC, RELEASE
 
-### Community 310 - "MiniDrawerSliderView"
-Cohesion: 0.33
-Nodes (3): MiniDrawerSliderView, OnPostBindViewListener, setItems()
+### Community 311 - "LoginInfo.kt"
+Cohesion: 0.18
+Nodes (3): LoginLibrusQrDecoder, LoginQrDecoder, LoginVulcanQrDecoder
 
-### Community 311 - "LoginInfo"
-Cohesion: 0.10
-Nodes (14): BaseCredential, CaseMode, LOWER_CASE, UNCHANGED, UPPER_CASE, FormCheckbox, FormField, LoginInfo (+6 more)
-
-### Community 313 - "HebeFilterType"
-Cohesion: 0.33
-Nodes (5): HebeFilterType, BY_MESSAGEBOX, BY_PERIOD, BY_PERSON, BY_PUPIL
-
-### Community 319 - "NavTargetLocation"
-Cohesion: 0.25
-Nodes (7): NavTargetLocation, BOTTOM_SHEET, DRAWER, DRAWER_BOTTOM, DRAWER_MORE, NOWHERE, PROFILE_LIST
+### Community 327 - "Status"
+Cohesion: 0.40
+Nodes (5): Status, ACCEPT, REJECT, SEND, UNKNOWN
 
 ### Community 331 - "ReflectionExtensions.kt"
 Cohesion: 0.40
 Nodes (3): getDeclaredField(), invokeDeclaredMethod(), setDeclaredField()
 
 ### Community 337 - "SettingsCard"
-Cohesion: 0.14
-Nodes (3): ProfileConfigDialog, SettingsProfileCard, SettingsCard
+Cohesion: 0.09
+Nodes (4): ProfileRemoveDialog, ProfileConfigDialog, SettingsProfileCard, SettingsCard
 
 ### Community 350 - "android.widget.TextView"
-Cohesion: 0.17
-Nodes (4): LongPressTimer.OnTimerReachedListener, ClickableSpanWithText, LongPressTimer, OnTimerReachedListener
-
-### Community 354 - "BindingDialog"
-Cohesion: 0.04
-Nodes (12): StudentDuty, setTintColor(), onChange(), onClick(), bindDuty(), BindingDialog, IconicsMaterialButton, RecaptchaPromptDialog (+4 more)
-
-### Community 375 - "Observer"
-Cohesion: 0.06
-Nodes (7): Observer, EventDetailsBinder, HomeworkListFragment, TeachersListFragment, TemplateListFragment, TemplateListPageFragment, TemplatePageFragment
-
-### Community 377 - "HomeCardsDialog"
-Cohesion: 0.08
-Nodes (3): HomeConfigDialog, StudentNumberDialog, HomeCardsDialog
-
-### Community 384 - "Update"
 Cohesion: 0.09
-Nodes (6): UpdateManager, UpdateStateEvent, Update, UpdateProgressDialog, DownloadProgressReceiver, UpdateDownloaderService
+Nodes (7): BetterLinkMovementMethod, LongPressTimer.OnTimerReachedListener, ClickableSpanWithText, LongPressTimer, OnLinkClickListener, OnLinkLongClickListener, OnTimerReachedListener
 
-### Community 394 - "Status"
-Cohesion: 0.40
-Nodes (5): Status, ACCEPT, REJECT, SEND, UNKNOWN
+### Community 354 - "DialogExtensions.kt"
+Cohesion: 0.09
+Nodes (15): allowTallerHeight(), OnAttachStateChangeListener, OnPreDrawListener, createIconButton(), DialogArea, findActivity(), getDialogArea(), getScrollableOverflow() (+7 more)
 
-### Community 395 - "NoteManager.kt"
+### Community 375 - "BaseFragment"
+Cohesion: 0.07
+Nodes (6): registerSafe(), unregisterSafe(), setupMainActivity(), BaseFragment, dispatchCanRefresh(), ContributorsListFragment
+
+### Community 390 - "DateDropdown"
+Cohesion: 0.12
+Nodes (3): Item, DateDropdown, TeacherDropdown
+
+### Community 395 - "OwnerType"
 Cohesion: 0.13
 Nodes (12): OwnerType, ANNOUNCEMENT, ATTENDANCE, BEHAVIOR, DAY, EVENT, EVENT_SUBJECT, GRADE (+4 more)
 
+### Community 407 - "SettingsSyncCard.kt"
+Cohesion: 0.07
+Nodes (5): NotificationFilterDialog, QuietHoursConfigDialog, SyncIntervalDialog, SettingsSyncCard, SettingsSyncFragment
+
 ### Community 419 - "MainActivity"
 Cohesion: 0.05
-Nodes (5): ApiTaskProgressEvent, ApiTaskStartedEvent, ProfileListEmptyEvent, MainActivity, ProfileManagerFragment
+Nodes (4): ApiTaskAllFinishedEvent, ApiTaskFinishedEvent, MainActivity, UpdateProgressDialog
 
 ### Community 437 - "release-firebase"
 Cohesion: 0.67
 Nodes (3): release-firebase, default, type
 
-### Community 455 - "DialogExtensions.kt"
-Cohesion: 0.09
-Nodes (15): allowTallerHeight(), OnAttachStateChangeListener, OnPreDrawListener, createIconButton(), DialogArea, findActivity(), getDialogArea(), getScrollableOverflow() (+7 more)
-
-### Community 461 - ".handleSwipeUpToOpen"
-Cohesion: 0.20
-Nodes (3): OnGestureListener, onSlide(), onStateChanged()
+### Community 455 - "BaseDialog.kt"
+Cohesion: 0.10
+Nodes (4): dismissWithAnimation(), restoreTitleSizeOnConfigurationChanges(), setupPredictiveBackAnimation(), OnBackAnimationCallback
 
 ## Knowledge Gaps
-- **223 isolated node(s):** `NOT_AVAILABLE`, `API_ERROR`, `NO_API_ACCESS`, `NO_REMOTE_REPO`, `NO_COMMIT_HASH` (+218 more)
-  These have ≤1 connection - possible missing edges. (Counts symbols only; 1917 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **299 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **224 isolated node(s):** `NOT_AVAILABLE`, `API_ERROR`, `NO_API_ACCESS`, `NO_REMOTE_REPO`, `NO_COMMIT_HASH` (+219 more)
+  These have ≤1 connection - possible missing edges. (Counts symbols only; 1931 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **288 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `App` connect `App` to `DataLibrus`, `Profile`, `ApiError`, `LoginProgressFragment.kt`, `EventFull`, `Bundle`, `sync_always`, `communitymaterial`, `DataPodlasie`, `Bundle`, `LoginChooserAdapter`, `Teacher`, `AttendanceAdapter`, `LoginSyncFragment.kt`, `TimetableDao`, `Config`, `Intent`, `date`, `SzkolnyAppFirebase.kt`, `MiscExtensions.kt`, `AppDb`, `GradeDao`, `SzkolnyApi`, `EventDao`, `AgendaNewAdapter`, `VulcanWebMain`, `SzkolnyApi.kt`, `NoticeDao`, `GradesManager.kt`, `WidgetNotificationsProvider.kt`, `GradesConfigDialog.kt`, `StylingConfig`, `WidgetCurrentLessonProvider.kt`, `LuckyNumberDao`, `TeacherAbsenceDao`, `GradesListFragment`, `DumbCookieJar`, `MessageDao`, `WidgetTimetableProvider.kt`, `AgendaFragmentDefault`, `AttendanceFull`, `Noteable`, `Teacher`, `JsonObject`, `AttendanceDao`, `AnnouncementDao`, `BaseDialog.kt`, `WidgetLuckyNumberProvider.kt`, `DevModeDialog`, `ProfileExtensions.kt`, `LoginEggsFragment.kt`, `BaseConfig`, `StatsViewHolder.kt`, `WidgetNotificationsFactory.kt`, `MessageManager`, `GenerateBlockTimetableDialog.kt`, `GradeFull`, `LabJsonAdapter`, `LoginPlatformAdapter`, `MessagesComposeSuggestionAdapter.kt`, `UiManager.kt`, `NoteListAdapter`, `EmptyViewHolder`, `EdziennikNotification`, `LoginChooserFragment.kt`, `MessagesAdapter`, `App.kt`, `JsonExtensions.kt`, `BuildManager`, `PermissionManager.kt`, `SyncWorker.kt`, `.onCreateViewHolder`, `AgendaEventRenderer.kt`, `RegisterAvailabilityStatus`, `SettingsRegisterCard.kt`, `BaseSettingsFragment`, `ExcuseListAdapter`, `EventListAdapter`, `TimetableDayFragment.kt`, `AgendaNewFragment.kt`, `Notifications`, `AttendanceManager`, `WidgetNotificationsProvider.kt`, `LoginPlatformListFragment.kt`, `TemplateAdapter`, `NavDrawer.kt`, `LoginFinishFragment.kt`, `LoginSyncErrorFragment.kt`, `.onCreate`, `UpdateWorker.kt`, `SzkolnyReceiver.kt`, `MarkAllReadTask`, `JsonArrayViewHolder.kt`, `CounterActivity.kt`, `LessonDetailsDialog`, `LoginActivity`, `HomeCardsDialog.kt`, `WorkerUtils.kt`, `MessagesComposeChipTokenizer.kt`, `SettingsCard`, `BindingDialog`, `Update`, `FirebaseManager.kt`, `NotificationManager`, `Usos`, `ShortcutManager`, `MainActivity`?**
+- **Why does `App` connect `App` to `NotificationType`, `AttendanceAdapter`, `Profile`, `Intent`, `ApiError`, `LoginProgressFragment.kt`, `date`, `UsosApi`, `sync_always`, `isVisible`, `MessageFull`, `UserActionRequiredEvent`, `Profile`, `Message`, `.title`, `LoginSyncFragment.kt`, `TimetableDao`, `Config`, `Intent`, `Grade`, `LoginEggsFragment.kt`, `MiscExtensions.kt`, `AppDb`, `GradeDao`, `SzkolnyApi`, `EventDao`, `AgendaNewAdapter`, `SzkolnyApi.kt`, `NoticeDao`, `GradesManager.kt`, `WidgetNotificationsProvider.kt`, `GradesConfigDialog.kt`, `StylingConfig`, `WidgetCurrentLessonProvider.kt`, `LuckyNumberDao`, `TeacherAbsenceDao`, `GraphicsExtensions.kt`, `DumbCookieJar`, `MessageDao`, `WidgetTimetableProvider.kt`, `AgendaFragmentDefault`, `communitymaterial`, `Noteable`, `LoginChooserAdapter`, `JsonObject`, `AttendanceDao`, `AnnouncementDao`, `WidgetLuckyNumberProvider.kt`, `ProfileExtensions.kt`, `LoginChooserFragment.kt`, `BaseConfig`, `StatsViewHolder.kt`, `MessagesComposeFragment`, `WidgetNotificationsFactory.kt`, `MessageManager`, `NetworkExtensions.kt`, `LoginFormFragment`, `GradeFull`, `LabJsonAdapter`, `EventDetailsDialog`, `LoginPlatformAdapter`, `UiManager.kt`, `NoteListAdapter`, `EmptyViewHolder`, `EdziennikNotification`, `MessagesAdapter`, `App.kt`, `SurveyWebActivity.kt`, `EventManager`, `BuildManager`, `PermissionManager.kt`, `SyncWorker.kt`, `ExcuseListAdapter`, `EventListAdapter`, `UnknownSubjectViewHolder`, `TimetableDayFragment.kt`, `AnnouncementFull`, `AgendaEvent`, `Update`, `RegisterAvailabilityStatus`, `SettingsRegisterCard.kt`, `WidgetNotificationsProvider.kt`, `BaseSettingsFragment`, `LessonChangesEvent`, `Notifications`, `color`, `LoginSummaryFragment.kt`, `LoginPlatformListFragment.kt`, `TemplateAdapter`, `LoginPrizeFragment.kt`, `RegistrationConfigDialog`, `LoginSyncErrorFragment.kt`, `UpdateWorker.kt`, `HomeCardsDialog.kt`, `MarkAllReadTask`, `CounterActivity.kt`, `LoginFinishFragment.kt`, `SemesterViewHolder`, `LessonDialogActivity.kt`, `MessagesComposeChipTokenizer.kt`, `SettingsCard`, `BaseFragment`, `FirebaseManager.kt`, `MainActivity`, `BaseDialog.kt`?**
   _High betweenness centrality (0.187) - this node is a cross-community bridge._
 - **What connects `NOT_AVAILABLE`, `API_ERROR`, `NO_API_ACCESS` to the rest of the system?**
-  _223 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _224 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `DataLibrus` be split into smaller, more focused modules?**
-  _Cohesion score 0.028388278388278388 - nodes in this community are weakly interconnected._
-- **Why does `AppDb` connect `AppDb` to `EndpointTimer`, `TimetableManual`, `App`, `.onCreate`, `.clear`, `ProfileBackupManager`, `StudentDutyDao`, `AttendanceTypeDao`, `.select`, `Bundle`, `onconflictstrategy`, `communitymaterial`, `index`, `EventTypeDao`, `FeatureType`, `Team`, `App.kt`, `LessonTopic`, `Lesson`, `Classroom`, `NotificationDao`, `Teacher`, `Note`, `FeedbackMessage`, `TeacherAbsenceType`, `ConverterListString.kt`, `EventTypeDropdown`, `TimetableDao`, `LibrusExcuseDao`, `Config`, `GradeCategory`, `ConverterTime`, `date`, `androidx.room.Query`, `GradeDao`, `EventDao`, `ConverterListLong.kt`, `SubjectDropdown`, `TimetableDayFragment.kt`, `LogEntry`, `NoticeDao`, `LibrusExcuse`, `TeacherDao`, `LessonRange`, `LuckyNumberDao`, `TeacherAbsenceDao`, `MessageDao`, `TeamDropdown`, `TimeDropdown`, `AttendanceFull`, `Teacher`, `.buildDatabase`, `AttendanceDao`, `AnnouncementDao`, `NoticeType`, `BindingDialog`, `Subject`, `MessageRecipient`, `BaseConfig`?**
-  _High betweenness centrality (0.148) - this node is a cross-community bridge._
-- **Should `Notification` be split into smaller, more focused modules?**
-  _Cohesion score 0.08695652173913043 - nodes in this community are weakly interconnected._
-- **Why does `Profile` connect `Teacher` to `DataLibrus`, `App`, `NoteEditorDialog`, `.onCreate`, `Profile`, `ApiError`, `EventFull`, `SettingsUtil`, `ArrayExtensions.kt`, `Bundle`, `sync_always`, `Usos`, `MarkAllReadTask`, `communitymaterial`, `DataPodlasie`, `EventTypeDao`, `FeatureType`, `MainActivityRequestHandler.kt`, `App.kt`, `Teacher`, `MainActivity`, `ProfileDao`, `LoginSyncFragment.kt`, `date`, `SzkolnyAppFirebase.kt`, `RegisterAvailabilityStatus`, `SettingsRegisterCard.kt`, `AppDb`, `SzkolnyApi`, `AgendaNewFragment.kt`, `Notifications`, `ProfilesDialog`, `SettingsCard`, `AnnouncementDetailsDialog`, `EventManualDialog`, `BindingDialog`, `JsonObject`, `NavTarget`, `ProfileExtensions.kt`, `MainActivity.kt`, `HomeCardsDialog`, `LoginSummaryAdapter`, `IDrawerProfile`, `Override`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
-- **Should `App` be split into smaller, more focused modules?**
-  _Cohesion score 0.06606942889137737 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.036016696481812764 - nodes in this community are weakly interconnected._
+- **Why does `AppDb` connect `AppDb` to `EndpointTimer`, `onconflictstrategy`, `UpdateWorker.kt`, `ProfileBackupManager`, `ApiError`, `AttendanceType`, `StudentDutyDao`, `DateDropdown`, `App`, `LibrusExcuse`, `isVisible`, `ConverterListLong.kt`, `MessageFull`, `App.kt`, `TimetableManual`, `Grade`, `index`, `Note`, `Profile`, `NotificationDao`, `.buildDatabase`, `LoginSyncFragment.kt`, `FeedbackMessage`, `LessonTopic`, `TeacherAbsenceType`, `ConverterListString.kt`, `TimetableDao`, `EventTypeDropdown`, `Config`, `Time`, `androidx.room.Query`, `GradeDao`, `EventDao`, `Teacher`, `TimeDropdown`, `SubjectDropdown`, `LogEntry`, `NoticeDao`, `Classroom`, `GradeCategory`, `TeacherDao`, `LessonRange`, `LuckyNumberDao`, `TeacherAbsenceDao`, `MessageDao`, `TextInputDropDown`, `communitymaterial`, `LibrusExcuseDao`, `AttendanceDao`, `AnnouncementDao`, `NoticeType`, `Team`, `Subject`, `LibrusSurvey`, `ConverterEnums`, `BaseConfig`, `Lesson`?**
+  _High betweenness centrality (0.164) - this node is a cross-community bridge._
+- **Should `NotificationType` be split into smaller, more focused modules?**
+  _Cohesion score 0.05877551020408163 - nodes in this community are weakly interconnected._
+- **Why does `Bundle()` connect `Bundle` to `TeachersAdapter`, `AttendanceAdapter`, `ActivityLifecycleCallbacks`, `Profile`, `LoginFormFragment`, `ApiError`, `LoginProgressFragment.kt`, `date`, `UsosApi`, `App`, `isVisible`, `WebPushBrowserAdapter`, `OAuthLoginActivity.kt`, `BottomSheetPrimaryItem`, `CounterActivity.kt`, `EdziennikNotification`, `MessagesListFragment`, `UserActionRequiredEvent`, `App.kt`, `LoginFinishFragment.kt`, `SurveyWebActivity.kt`, `Profile`, `MainActivity`, `.title`, `FeedbackMessage`, `LoginSyncFragment.kt`, `.onCreate`, `NetworkExtensions.kt`, `AgendaNewFragment`, `ExcuseListAdapter`, `AgendaFragment`, `AnnouncementsFragment`, `HomeworkFragment`, `TimetableFragment`, `.onCreate`, `TimetableDayFragment.kt`, `.performAccessibilityAction`, `PagerFragment`, `BundleExtensions.kt`, `BehaviourFragment`, `LoginEggsFragment.kt`, `WidgetNotificationsProvider.kt`, `BaseSettingsFragment`, `LessonDialogActivity.kt`, `color`, `LoginSummaryFragment.kt`, `AttachmentsView`, `TimetableDayFragment`, `.onViewCreated`, `GradesListFragment`, `GraphicsExtensions.kt`, `LoginPlatformListFragment.kt`, `MessagesFragment`, `AppCropImageActivity`, `SettingsLicenseActivity.kt`, `communitymaterial`, `TemplateAdapter`, `LessonTopicDetailsDialog`, `WidgetLuckyNumberProvider.kt`, `LoginPrizeFragment.kt`, `NavTarget`, `NotificationsAdapter`, `ContributorsFragment`, `LoginChooserFragment.kt`, `ContributorsAdapter.kt`, `.runCatching`, `MessagesComposeFragment`, `RecaptchaActivity.kt`, `BaseFragment`, `LoginSyncErrorFragment.kt`, `NotesFragment`, `MessageManager`?**
+  _High betweenness centrality (0.062) - this node is a cross-community bridge._
+- **Should `AttendanceAdapter` be split into smaller, more focused modules?**
+  _Cohesion score 0.028948643410852713 - nodes in this community are weakly interconnected._

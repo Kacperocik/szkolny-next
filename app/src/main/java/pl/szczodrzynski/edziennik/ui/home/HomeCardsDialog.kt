@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
+import pl.szczodrzynski.edziennik.data.enums.LoginType
+import pl.szczodrzynski.edziennik.ui.home.HomeCard.Companion.CARD_SURVEYS
 import pl.szczodrzynski.edziennik.ui.base.dialog.BaseDialog
 import pl.szczodrzynski.edziennik.ui.home.HomeCard.Companion.CARD_ANNOUNCEMENTS
 import pl.szczodrzynski.edziennik.ui.home.HomeCard.Companion.CARD_EVENTS
@@ -25,27 +27,33 @@ class HomeCardsDialog(
     override fun getPositiveButtonText() = R.string.ok
     override fun getNegativeButtonText() = R.string.cancel
 
-    override fun getMultiChoiceItems(): Map<CharSequence, Any> = mapOf(
-        R.string.card_type_lucky_number to CARD_LUCKY_NUMBER,
-        R.string.card_type_timetable to CARD_TIMETABLE,
-        R.string.card_type_grades to CARD_GRADES,
-        R.string.card_type_events to CARD_EVENTS,
-        R.string.card_type_announcements to CARD_ANNOUNCEMENTS,
-        R.string.card_type_notes to CARD_NOTES,
-    ).mapKeys { (resId, _) -> activity.getString(resId) }
+    override fun getMultiChoiceItems(): Map<CharSequence, Any> = buildMap<Int, Any> {
+        if (app.profile.loginStoreType == LoginType.LIBRUS)
+            put(R.string.card_type_surveys, CARD_SURVEYS)
+        put(R.string.card_type_lucky_number, CARD_LUCKY_NUMBER)
+        put(R.string.card_type_timetable, CARD_TIMETABLE)
+        put(R.string.card_type_grades, CARD_GRADES)
+        put(R.string.card_type_events, CARD_EVENTS)
+        put(R.string.card_type_announcements, CARD_ANNOUNCEMENTS)
+        put(R.string.card_type_notes, CARD_NOTES)
+    }.mapKeys { (resId, _) -> activity.getString(resId) }
 
     override fun getDefaultSelectedItems() =
         app.profile.config.ui.homeCards
             .filter { it.profileId == App.profileId }
             .map { it.cardId }
-            .toSet()
+            .toSet() + if (app.profile.loginStoreType == LoginType.LIBRUS && app.profile.config.ui.homeSurveysEnabled)
+                setOf(CARD_SURVEYS) else emptySet()
 
     private var configChanged = false
 
     override suspend fun onPositiveClick(): Boolean {
+        val selection = getMultiSelection()
+        if (app.profile.loginStoreType == LoginType.LIBRUS)
+            app.profile.config.ui.homeSurveysEnabled = CARD_SURVEYS in selection
         val homeCards = app.profile.config.ui.homeCards.toMutableList()
         homeCards.removeAll { it.profileId == App.profileId }
-        homeCards += getMultiSelection().mapNotNull {
+        homeCards += selection.filter { it != CARD_SURVEYS }.mapNotNull {
             HomeCardModel(
                 profileId = App.profileId,
                 cardId = it as? Int ?: return@mapNotNull null

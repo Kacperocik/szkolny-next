@@ -124,6 +124,7 @@
     <string name="card_type_events">Kommende Ereignisse</string>
     <string name="card_type_grades">Neueste Noten</string>
     <string name="card_type_lucky_number">Glücksnummer</string>
+    <string name="card_type_surveys">Verfügbare Umfragen</string>
     <string name="card_type_timetable">Stundenplan</string>
     <string name="card_update_button">Herunterladen</string>
     <string name="card_update_text_format">Sie haben Version %s, während %s verfügbar ist</string>
@@ -1121,6 +1122,11 @@
     <string name="student_duty_period">%1$s – %2$s</string>
     <string name="student_duty_sync">Klassendienste werden geladen…</string>
     <string name="student_duty_title">Klassendienst</string>
+    <string name="survey_open_error">Die Umfrage konnte nicht geöffnet werden. Prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="survey_open_hint">Tippe auf eine Umfrage, um ihre Seite in Synergia zu öffnen.</string>
+    <string name="survey_published_format">Veröffentlicht am %1$s</string>
+    <string name="surveys_sync">Umfragen werden geladen…</string>
+    <string name="surveys_title">Umfragen</string>
     <string name="sync_action_authorizing">Autorisierung</string>
     <string name="sync_action_creating_notifications">Benachrichtigungen erstellen</string>
     <string name="sync_action_getting_account">Kontoinformationen herunterladen</string>

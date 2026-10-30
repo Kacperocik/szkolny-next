@@ -167,6 +167,24 @@ class Librus(val app: App, val profile: Profile?, val loginStore: LoginStore, va
         }
     }
 
+    fun openSurvey(requestId: String, forceRefresh: Boolean) {
+        if (forceRefresh) {
+            data.loginMethods.remove(LoginMethod.LIBRUS_SYNERGIA)
+            data.synergiaSessionIdExpiryTime = 0L
+        }
+        login(LoginMethod.LIBRUS_SYNERGIA) {
+            val session = data.synergiaSessionId
+            if (session.isNullOrBlank()) {
+                data.error(ApiError(TAG, ERROR_LOGIN_LIBRUS_SYNERGIA_NO_SESSION_ID))
+            } else {
+                org.greenrobot.eventbus.EventBus.getDefault().post(
+                    pl.szczodrzynski.edziennik.data.api.events.SurveySessionEvent(data.profileId, requestId, session)
+                )
+                completed()
+            }
+        }
+    }
+
     override fun firstLogin() { LibrusFirstLogin(data) { completed() } }
     override fun cancel() {
         Timber.d("Cancelled")
