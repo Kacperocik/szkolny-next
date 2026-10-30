@@ -21,7 +21,7 @@ import pl.szczodrzynski.edziennik.ext.setTintColor
 import pl.szczodrzynski.edziennik.ui.base.dialog.BindingDialog
 import pl.szczodrzynski.edziennik.ui.dialogs.settings.GradesConfigDialog
 import pl.szczodrzynski.edziennik.ui.notes.setupNotesButton
-import pl.szczodrzynski.edziennik.utils.BetterLink
+import pl.szczodrzynski.edziennik.ui.teachers.bindTeacher
 import pl.szczodrzynski.edziennik.utils.SimpleDividerItemDecoration
 import pl.szczodrzynski.edziennik.core.manager.NoteManager
 
@@ -77,13 +77,7 @@ class GradeDetailsDialog(
             GradesConfigDialog(activity, reloadOnDismiss = true).show()
         }
 
-        grade.teacherName?.let { name ->
-            BetterLink.attach(
-                b.teacherName,
-                teachers = mapOf(grade.teacherId to name),
-                onActionSelected = ::dismiss
-            )
-        }
+        b.teacherCard.bindTeacher(grade.teacherId, grade.teacherName, ::dismiss)
 
         val historyList = withContext(Dispatchers.Default) {
             app.db.gradeDao().getByParentIdNow(App.profileId, grade.id)

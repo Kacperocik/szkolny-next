@@ -11,15 +11,20 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import kotlinx.coroutines.*
 import pl.szczodrzynski.edziennik.*
+import pl.szczodrzynski.edziennik.data.db.entity.StudentDuty
 import pl.szczodrzynski.edziennik.databinding.DialogDayBinding
+import pl.szczodrzynski.edziennik.databinding.StudentDutyCardBinding
 import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ext.ifNotEmpty
 import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ext.setText
+import pl.szczodrzynski.edziennik.ui.agenda.duty.bindDuty
+import pl.szczodrzynski.edziennik.ui.agenda.duty.showStudentDutyDetails
 import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.LessonChangesDialog
 import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.LessonChangesEvent
 import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.LessonChangesEventRenderer
@@ -63,6 +68,14 @@ class DayDialog(
         }
     }
 
+    private var dutySource: LiveData<List<StudentDuty>>? = null
+
+    override suspend fun onDismiss() {
+        dutySource?.removeObservers(activity)
+        dutySource = null
+        super.onDismiss()
+    }
+
     private lateinit var adapter: EventListAdapter
 
     override suspend fun onNeutralClick(): Boolean {
@@ -75,6 +88,16 @@ class DayDialog(
     }
 
     override suspend fun onShow() {
+        dutySource = app.db.studentDutyDao().getStartingOn(profileId, date.stringY_m_d)
+        dutySource?.observe(activity) { duties ->
+            if (!dialog.isShowing) return@observe
+            b.studentDuties.removeAllViews()
+            duties.forEach { duty ->
+                val card = StudentDutyCardBinding.inflate(activity.layoutInflater, b.studentDuties, false)
+                card.bindDuty(duty, embedded = true) { showStudentDutyDetails(activity, duty) }
+                b.studentDuties.addView(card.root)
+            }
+        }
         b.dayDate.setText(
             R.string.dialog_day_date_format,
             Week.getFullDayName(date.weekDay),

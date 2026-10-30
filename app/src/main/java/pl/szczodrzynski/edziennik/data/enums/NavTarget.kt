@@ -26,6 +26,7 @@ import pl.szczodrzynski.edziennik.ui.feedback.FeedbackFragment
 import pl.szczodrzynski.edziennik.ui.grades.GradesListFragment
 import pl.szczodrzynski.edziennik.ui.home.HomeFragment
 import pl.szczodrzynski.edziennik.ui.homework.HomeworkFragment
+import pl.szczodrzynski.edziennik.ui.lessontopics.LessonTopicsFragment
 import pl.szczodrzynski.edziennik.ui.messages.compose.MessagesComposeFragment
 import pl.szczodrzynski.edziennik.ui.messages.list.MessagesFragment
 import pl.szczodrzynski.edziennik.ui.messages.single.MessageFragment
@@ -176,6 +177,16 @@ enum class NavTarget(
         nameRes = R.string.menu_notes,
         icon = CommunityMaterial.Icon3.cmd_text_box_multiple_outline,
     ),
+    LESSON_TOPICS(
+        id = 25,
+        fragmentClass = LessonTopicsFragment::class.java,
+        location = NavTargetLocation.DRAWER_MORE,
+        nameRes = R.string.menu_lesson_topics,
+        icon = CommunityMaterial.Icon.cmd_book_open_page_variant,
+        popTo = HOME,
+        featureType = FeatureType.LESSON_TOPICS,
+        isAvailable = { it.loginStoreType == LoginType.LIBRUS },
+    ),
     TEACHERS(
         id = 22,
         fragmentClass = TeachersListFragment::class.java,
@@ -316,6 +327,7 @@ enum class NavTarget(
             EXCUSES,
             ANNOUNCEMENTS,
             NOTES,
+            LESSON_TOPICS,
         )
 
         fun getDefaultConfig() = setOf(

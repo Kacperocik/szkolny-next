@@ -18,7 +18,7 @@ import pl.szczodrzynski.edziennik.databinding.AttendanceDetailsDialogBinding
 import pl.szczodrzynski.edziennik.ext.setTintColor
 import pl.szczodrzynski.edziennik.ui.base.dialog.BindingDialog
 import pl.szczodrzynski.edziennik.ui.notes.setupNotesButton
-import pl.szczodrzynski.edziennik.utils.BetterLink
+import pl.szczodrzynski.edziennik.ui.teachers.bindTeacher
 import pl.szczodrzynski.edziennik.core.manager.NoteManager
 import pl.szczodrzynski.edziennik.ext.enableExpressiveShapeMorph
 import pl.szczodrzynski.edziennik.ext.onClick
@@ -58,13 +58,7 @@ class AttendanceDetailsDialog(
 
         b.attendanceIsCounted.setText(if (attendance.isCounted) R.string.yes else R.string.no)
 
-        attendance.teacherName?.let { name ->
-            BetterLink.attach(
-                b.teacherName,
-                teachers = mapOf(attendance.teacherId to name),
-                onActionSelected = ::dismiss
-            )
-        }
+        b.teacherCard.bindTeacher(attendance.teacherId, attendance.teacherName, ::dismiss)
 
         setupExcuseButton()
         b.notesButton.isVisible = showNotes

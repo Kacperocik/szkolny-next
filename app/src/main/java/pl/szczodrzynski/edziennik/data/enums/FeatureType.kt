@@ -23,6 +23,8 @@ enum class FeatureType(
     EXCUSES(id = 10, isAlwaysNeeded = false, nameRes = R.string.menu_excuses),
     ANNOUNCEMENTS(id = 9, isAlwaysNeeded = false, nameRes = R.string.menu_announcements),
 
+    LESSON_TOPICS(id = 11, isAlwaysNeeded = false, nameRes = R.string.menu_lesson_topics),
+
     ALWAYS_NEEDED(id = 100, isAlwaysNeeded = true),
     STUDENT_INFO(id = 101, isAlwaysNeeded = true),
     STUDENT_NUMBER(id = 109, isAlwaysNeeded = true),

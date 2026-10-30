@@ -26,6 +26,7 @@ import kotlinx.coroutines.withContext
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
+import pl.szczodrzynski.edziennik.data.db.entity.StudentDuty
 import pl.szczodrzynski.edziennik.data.db.full.EventFull
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
 import pl.szczodrzynski.edziennik.data.enums.MetadataType
@@ -70,6 +71,7 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
     private var pullStartY = 0f
     private var pullTriggered = false
 
+    private var rawStudentDuties = emptyList<StudentDuty>()
     private val rawEvents = mutableListOf<EventFull>()
     private val rawLessonChanges = mutableListOf<LessonChangesEvent>()
     private val rawTeacherAbsences = mutableListOf<TeacherAbsenceEvent>()
@@ -572,6 +574,10 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
     }
 
     private fun loadData() {
+        app.db.studentDutyDao().getAll(app.profileId).observe(viewLifecycleOwner) { duties ->
+            rawStudentDuties = duties
+            updateData()
+        }
         app.db.eventDao().getAll(app.profileId).observe(viewLifecycleOwner) { eventList ->
             synchronized(rawEvents) {
                 rawEvents.clear()
@@ -694,6 +700,7 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
                         is AgendaListItem.Group -> item.group.date
                         is AgendaListItem.Counter -> item.date
                         is AgendaListItem.Empty -> item.date
+                        is AgendaListItem.Duty -> Date.fromY_m_d(item.duty.dateFrom)
                     }
                     if (date.stringY_m_d != selectedDate.stringY_m_d) {
                         selectedDate = date
@@ -757,6 +764,7 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
             if (app.profile.config.ui.agendaTeacherAbsence && app.profile.config.ui.agendaTeacherAbsenceDots && dayAbsences.isNotEmpty()) {
                 colors.add(app.eventManager.getTeacherAbsenceColor())
             }
+            if (rawStudentDuties.any { it.startsOn(d.stringY_m_d) }) colors.add(app.eventManager.getStudentDutyColor())
             dayEvents.forEach { colors.add(app.eventManager.getEventColor(it)) }
 
             if (app.profile.config.ui.agendaShowEmptyDays || colors.isNotEmpty() || d.stringY_m_d == selectedDate.stringY_m_d || d.stringY_m_d == Date.getToday().stringY_m_d) {
@@ -797,6 +805,7 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
                 val colors = mutableListOf<Int>()
                 if (app.profile.config.ui.agendaLessonChanges && app.profile.config.ui.agendaLessonChangesDots && dayChanges.isNotEmpty()) colors.add(app.eventManager.getLessonChangesColor())
                 if (app.profile.config.ui.agendaTeacherAbsence && app.profile.config.ui.agendaTeacherAbsenceDots && dayAbsences.isNotEmpty()) colors.add(app.eventManager.getTeacherAbsenceColor())
+                if (rawStudentDuties.any { it.startsOn(d.stringY_m_d) }) colors.add(app.eventManager.getStudentDutyColor())
                 dayEvents.forEach { colors.add(app.eventManager.getEventColor(it)) }
 
                 daysList.add(MonthDayCell(d, prevCal.get(Calendar.DAY_OF_MONTH).toString(), isCurrentMonth = false, isToday = (d.stringY_m_d == todayStr), eventColors = colors))
@@ -816,6 +825,7 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
             val colors = mutableListOf<Int>()
             if (app.profile.config.ui.agendaLessonChanges && app.profile.config.ui.agendaLessonChangesDots && dayChanges.isNotEmpty()) colors.add(app.eventManager.getLessonChangesColor())
             if (app.profile.config.ui.agendaTeacherAbsence && app.profile.config.ui.agendaTeacherAbsenceDots && dayAbsences.isNotEmpty()) colors.add(app.eventManager.getTeacherAbsenceColor())
+            if (rawStudentDuties.any { it.startsOn(d.stringY_m_d) }) colors.add(app.eventManager.getStudentDutyColor())
             dayEvents.forEach { colors.add(app.eventManager.getEventColor(it)) }
 
             val isToday = d.stringY_m_d == todayStr
@@ -836,6 +846,7 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
                 val colors = mutableListOf<Int>()
                 if (app.profile.config.ui.agendaLessonChanges && app.profile.config.ui.agendaLessonChangesDots && dayChanges.isNotEmpty()) colors.add(app.eventManager.getLessonChangesColor())
                 if (app.profile.config.ui.agendaTeacherAbsence && app.profile.config.ui.agendaTeacherAbsenceDots && dayAbsences.isNotEmpty()) colors.add(app.eventManager.getTeacherAbsenceColor())
+                if (rawStudentDuties.any { it.startsOn(d.stringY_m_d) }) colors.add(app.eventManager.getStudentDutyColor())
                 dayEvents.forEach { colors.add(app.eventManager.getEventColor(it)) }
 
                 daysList.add(MonthDayCell(d, nextCal.get(Calendar.DAY_OF_MONTH).toString(), isCurrentMonth = false, isToday = (d.stringY_m_d == todayStr), eventColors = colors))
@@ -860,6 +871,7 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
         val colors = mutableListOf<Int>()
         if (app.profile.config.ui.agendaLessonChanges && app.profile.config.ui.agendaLessonChangesDots && dayChanges.isNotEmpty()) colors.add(app.eventManager.getLessonChangesColor())
         if (app.profile.config.ui.agendaTeacherAbsence && app.profile.config.ui.agendaTeacherAbsenceDots && dayAbsences.isNotEmpty()) colors.add(app.eventManager.getTeacherAbsenceColor())
+        if (rawStudentDuties.any { it.startsOn(d.stringY_m_d) }) colors.add(app.eventManager.getStudentDutyColor())
         dayEvents.forEach { colors.add(app.eventManager.getEventColor(it)) }
         return colors
     }
@@ -947,7 +959,8 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
 
                 val dayAbsencesList = if (app.profile.config.ui.agendaTeacherAbsence) absences.filter { it.date.stringY_m_d == dateStr } else emptyList()
                 val dayAbsenceCount = dayAbsencesList.sumOf { it.count }
-                val hasContent = dayEvents.isNotEmpty() || dayChangesCount > 0 || dayAbsenceCount > 0
+                val dayDuties = rawStudentDuties.filter { it.startsOn(dateStr) }
+                val hasContent = dayEvents.isNotEmpty() || dayChangesCount > 0 || dayAbsenceCount > 0 || dayDuties.isNotEmpty()
 
                 if (hasContent || app.profile.config.ui.agendaShowEmptyDays) {
                     val cal = currDate.asCalendar
@@ -962,6 +975,8 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
                     if (dayAbsenceCount > 0) {
                         itemsList.add(AgendaListItem.Counter(AgendaListItem.CounterType.TEACHER_ABSENCE, dayAbsenceCount, currDate, false))
                     }
+
+                    dayDuties.forEach { itemsList.add(AgendaListItem.Duty(it)) }
 
                     if (dayEvents.isNotEmpty()) {
                         if (!app.profile.config.ui.agendaGroupByType) {
@@ -1069,6 +1084,7 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
                     is AgendaListItem.Group -> it.group.date
                     is AgendaListItem.Counter -> it.date
                     is AgendaListItem.Empty -> it.date
+                    is AgendaListItem.Duty -> Date.fromY_m_d(it.duty.dateFrom)
                 }
                 itemDate >= date
             }

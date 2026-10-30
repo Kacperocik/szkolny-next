@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
+import pl.szczodrzynski.edziennik.data.db.entity.StudentDuty
 import pl.szczodrzynski.edziennik.data.db.full.EventFull
 import pl.szczodrzynski.edziennik.ext.concat
 import pl.szczodrzynski.edziennik.ext.join
@@ -47,7 +48,11 @@ class EventManager(val app: App) : CoroutineScope {
     fun getTeacherAbsenceColor(profileId: Int = app.profile.id): Int =
         getSpecialColor(profileId, COLOR_KEY_TEACHER_ABSENCE, DEFAULT_TEACHER_ABSENCE_COLOR)
 
+    fun getStudentDutyColor(profileId: Int = app.profile.id): Int =
+        getSpecialColor(profileId, COLOR_KEY_STUDENT_DUTY, StudentDuty.COLOR)
+
     companion object {
+        const val COLOR_KEY_STUDENT_DUTY = "studentDuty"
         const val COLOR_KEY_LESSON_CHANGES = "lessonChanges"
         const val COLOR_KEY_TEACHER_ABSENCE = "teacherAbsence"
         val DEFAULT_LESSON_CHANGES_COLOR = 0xff78909c.toInt()

@@ -252,4 +252,10 @@
         <item quantity="many">%d minut</item>
         <item quantity="other">%d minut</item>
     </plurals>
+    <plurals name="lesson_topics_day_count">
+        <item quantity="one">%1$d temat</item>
+        <item quantity="few">%1$d tematy</item>
+        <item quantity="many">%1$d tematów</item>
+        <item quantity="other">%1$d tematów</item>
+    </plurals>
 </resources>

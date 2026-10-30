@@ -12,4 +12,10 @@
         <item quantity="one">%d Minute</item>
         <item quantity="other">%d Minuten</item>
     </plurals>
+    <plurals name="lesson_topics_day_count">
+        <item quantity="one">%1$d Thema</item>
+        <item quantity="few">%1$d Themen</item>
+        <item quantity="many">%1$d Themen</item>
+        <item quantity="other">%1$d Themen</item>
+    </plurals>
 </resources>

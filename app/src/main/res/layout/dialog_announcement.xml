@@ -14,48 +14,9 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/senderCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            app:cardBackgroundColor="?attr/colorSurfaceContainerHighest"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="0dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="12dp">
-
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/senderImage"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:contentDescription="@null"
-                    android:scaleType="centerCrop"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
-                    tools:src="@tools:sample/avatars" />
-
-                <TextView
-                    android:id="@+id/senderName"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="2"
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:textColor="?android:attr/textColorPrimary"
-                    tools:text="Jan Kowalski" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        <include
+            android:id="@+id/teacherCard"
+            layout="@layout/teacher_card" />
 
         <TextView
             android:id="@+id/dateRange"

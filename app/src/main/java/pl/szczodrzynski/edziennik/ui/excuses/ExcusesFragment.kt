@@ -41,10 +41,7 @@ class ExcusesFragment : BaseFragment<ExcusesFragmentBinding, MainActivity>(
             adapter.items = excuses
             adapter.notifyDataSetChanged()
         }
-        if (!app.profile.archived) refresh()
     }
-
-    private fun refresh() = EdziennikTask.syncProfile(profileId, setOf(FeatureType.EXCUSES)).enqueue(activity)
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onDownloadError(event: ApiTaskErrorEvent) {

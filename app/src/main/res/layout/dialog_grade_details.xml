@@ -142,14 +142,12 @@
                 android:textAppearance="?textAppearanceLabelMedium"
                 android:textColor="?attr/colorSecondary" />
 
-            <TextView
-                android:id="@+id/teacherName"
+            <include
+                android:id="@+id/teacherCard"
+                layout="@layout/teacher_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:text="@{grade.teacherName}"
-                android:textIsSelectable="true"
-                tools:text="Janósz Kowalski" />
+                android:layout_marginTop="4dp" />
 
             <TextView
                 android:layout_width="match_parent"

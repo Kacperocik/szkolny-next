@@ -11,6 +11,7 @@ import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.messages.Librus
 import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.synergia.LibrusSynergiaGetMessages
 import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.synergia.LibrusSynergiaHomework
 import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.synergia.LibrusSynergiaInfo
+import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.synergia.LibrusSynergiaStudentDuties
 import pl.szczodrzynski.edziennik.data.db.entity.Message
 import pl.szczodrzynski.edziennik.utils.Utils
 import timber.log.Timber
@@ -47,6 +48,10 @@ class LibrusData(val data: DataLibrus, val onSuccess: () -> Unit) {
             /**
              * API
              */
+            ENDPOINT_LIBRUS_API_REALIZATIONS, ENDPOINT_LIBRUS_API_PLANNED_LESSONS -> {
+                data.startProgress(R.string.menu_lesson_topics)
+                LibrusApiLessonTopics(data, lastSync, endpointId, onSuccess)
+            }
             ENDPOINT_LIBRUS_API_ME -> {
                 data.startProgress(R.string.edziennik_progress_endpoint_student_info)
                 LibrusApiMe(data, lastSync, onSuccess)
@@ -207,6 +212,10 @@ class LibrusData(val data: DataLibrus, val onSuccess: () -> Unit) {
             ENDPOINT_LIBRUS_SYNERGIA_HOMEWORK -> {
                 data.startProgress(R.string.edziennik_progress_endpoint_homework)
                 LibrusSynergiaHomework(data, lastSync, onSuccess)
+            }
+            ENDPOINT_LIBRUS_SYNERGIA_STUDENT_DUTIES -> {
+                data.startProgress(R.string.student_duty_sync)
+                LibrusSynergiaStudentDuties(data, onSuccess)
             }
             ENDPOINT_LIBRUS_SYNERGIA_INFO -> {
                 data.startProgress(R.string.edziennik_progress_endpoint_student_info)

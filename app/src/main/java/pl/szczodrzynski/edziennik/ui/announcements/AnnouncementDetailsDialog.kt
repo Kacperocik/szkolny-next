@@ -16,12 +16,9 @@ import pl.szczodrzynski.edziennik.data.db.full.AnnouncementFull
 import pl.szczodrzynski.edziennik.data.enums.LoginType
 import pl.szczodrzynski.edziennik.databinding.DialogAnnouncementBinding
 import pl.szczodrzynski.edziennik.ext.copyToClipboard
-import pl.szczodrzynski.edziennik.ext.enableExpressiveCardShapeMorph
 import pl.szczodrzynski.edziennik.ui.base.dialog.BindingDialog
-import pl.szczodrzynski.edziennik.ui.messages.MessagesUtils
 import pl.szczodrzynski.edziennik.ui.notes.setupNotesButton
-import pl.szczodrzynski.edziennik.utils.BetterLink
-import pl.szczodrzynski.navlib.enableExpressiveImageShapeMorph
+import pl.szczodrzynski.edziennik.ui.teachers.bindTeacher
 
 class AnnouncementDetailsDialog(
     activity: AppCompatActivity,
@@ -74,32 +71,7 @@ class AnnouncementDetailsDialog(
             }
         }
 
-        b.senderName.text = announcement.teacherName
-        b.senderImage.setImageBitmap(
-            MessagesUtils.getProfileImage(48, 24, 18, 12, 1, announcement.teacherName)
-        )
-        b.senderCard.enableExpressiveCardShapeMorph(null, 250L, 250L, 200L)
-        b.senderImage.enableExpressiveImageShapeMorph(10f, 250L, 250L, 200L)
-
-        val teacherName = announcement.teacherName ?: ""
-        b.senderCard.setOnClickListener { v ->
-            BetterLink.showTeacherMenu(
-                view = v,
-                teacherId = announcement.teacherId,
-                teacherName = teacherName,
-                onActionSelected = { dismiss() },
-            )
-        }
-        b.senderCard.setOnLongClickListener {
-            if (teacherName.isNotBlank()) {
-                it.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                teacherName.copyToClipboard(activity)
-                Toast.makeText(activity, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
-                true
-            } else {
-                false
-            }
-        }
+        b.teacherCard.bindTeacher(announcement.teacherId, announcement.teacherName, ::dismiss)
 
         val start = announcement.startDate?.formattedString ?: "-"
         val end = announcement.endDate?.let { " do ${it.formattedString}" } ?: ""

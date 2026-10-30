@@ -35,6 +35,9 @@ import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.data.db.full.EventFull
 import pl.szczodrzynski.edziennik.databinding.FragmentAgendaDefaultBinding
+import pl.szczodrzynski.edziennik.ui.agenda.duty.StudentDutyEvent
+import pl.szczodrzynski.edziennik.ui.agenda.duty.StudentDutyEventRenderer
+import pl.szczodrzynski.edziennik.ui.agenda.duty.showStudentDutyDetails
 import pl.szczodrzynski.edziennik.ui.agenda.event.AgendaEvent
 import pl.szczodrzynski.edziennik.ui.agenda.event.AgendaEventGroup
 import pl.szczodrzynski.edziennik.ui.agenda.event.AgendaEventGroupRenderer
@@ -140,6 +143,12 @@ class AgendaFragmentDefault(
                 addTeacherAbsence(events)
         }
 
+        app.db.studentDutyDao().getAll(app.profileId).observe(fragment) { duties ->
+            events.removeAll { it is StudentDutyEvent }
+            events.addAll(duties.map(::StudentDutyEvent))
+            if (isInitialized) updateView()
+        }
+
         app.db.eventDao().getAll(app.profileId).observe(fragment) {
             addEvents(events, it)
             if (isInitialized)
@@ -175,6 +184,7 @@ class AgendaFragmentDefault(
                     val date = Date.fromCalendar(event.instanceDay)
 
                     when (event) {
+                        is StudentDutyEvent -> showStudentDutyDetails(activity, event.duty)
                         is AgendaEvent -> EventDetailsDialog(activity, event.event).show()
                         is LessonChangesEvent -> LessonChangesDialog(
                             activity = activity,
@@ -225,7 +235,8 @@ class AgendaFragmentDefault(
             AgendaEventRenderer(app.eventManager, isCompactMode),
             AgendaEventGroupRenderer(),
             LessonChangesEventRenderer(),
-            TeacherAbsenceEventRenderer()
+            TeacherAbsenceEventRenderer(),
+            StudentDutyEventRenderer(activity)
         )
 
         val calendarView = b.agendaDefaultView.findViewById<View>(
@@ -397,6 +408,16 @@ class AgendaFragmentDefault(
     private fun updateView() {
         manager.events.clear()
         manager.loadEvents(events, BaseCalendarEvent())
+        val originalOrder = manager.events.withIndex().associate { it.value to it.index }
+        manager.events.sortWith(compareBy<CalendarEvent>(
+            { it.instanceDay.timeInMillis },
+            { when (it) {
+                is LessonChangesEvent, is TeacherAbsenceEvent -> 0
+                is StudentDutyEvent -> 1
+                else -> 2
+            } },
+            { originalOrder[it] ?: 0 },
+        ))
 
         adapter?.updateEvents(manager.events)
         scrollToSelectedDate(selectedDate.asCalendar)

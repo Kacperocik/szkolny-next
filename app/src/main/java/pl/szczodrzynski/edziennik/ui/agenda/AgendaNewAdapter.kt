@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -16,13 +17,17 @@ import com.google.android.material.color.MaterialColors
 import com.mikepenz.iconics.view.IconicsTextView
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
+import pl.szczodrzynski.edziennik.data.db.entity.StudentDuty
 import pl.szczodrzynski.edziennik.data.db.full.EventFull
 import pl.szczodrzynski.edziennik.databinding.AgendaCounterItemBinding
 import pl.szczodrzynski.edziennik.databinding.AgendaGroupItemBinding
+import pl.szczodrzynski.edziennik.databinding.StudentDutyCardBinding
 import pl.szczodrzynski.edziennik.ext.enableExpressiveCardShapeMorph
 import pl.szczodrzynski.edziennik.ext.join
 import pl.szczodrzynski.edziennik.ext.resolveAttr
 import pl.szczodrzynski.edziennik.ext.setTintColor
+import pl.szczodrzynski.edziennik.ui.agenda.duty.bindDuty
+import pl.szczodrzynski.edziennik.ui.agenda.duty.showStudentDutyDetails
 import pl.szczodrzynski.edziennik.ui.agenda.event.AgendaEventGroup
 import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.LessonChangesEvent
 import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.LessonChangesEventRenderer
@@ -36,6 +41,7 @@ sealed class AgendaListItem {
     data class Event(val event: EventFull) : AgendaListItem()
     data class Group(val group: AgendaEventGroup) : AgendaListItem()
     data class Counter(val type: CounterType, val count: Int, val date: Date, val showBadge: Boolean) : AgendaListItem()
+    data class Duty(val duty: StudentDuty) : AgendaListItem()
     data class Empty(val date: Date) : AgendaListItem()
 
     enum class CounterType {
@@ -58,6 +64,7 @@ class AgendaNewAdapter(
         private const val TYPE_COUNTER = 2
         private const val TYPE_EMPTY = 3
         private const val TYPE_GROUP = 4
+        private const val TYPE_DUTY = 5
     }
 
     val items = mutableListOf<AgendaListItem>()
@@ -72,6 +79,7 @@ class AgendaNewAdapter(
         return items.indexOfFirst {
             (it is AgendaListItem.DayHeader && it.date.stringY_m_d == date.stringY_m_d) ||
             (it is AgendaListItem.Event && it.event.date.stringY_m_d == date.stringY_m_d) ||
+            (it is AgendaListItem.Duty && it.duty.dateFrom == date.stringY_m_d) ||
             (it is AgendaListItem.Group && it.group.date.stringY_m_d == date.stringY_m_d) ||
             (it is AgendaListItem.Counter && it.date.stringY_m_d == date.stringY_m_d)
         }
@@ -83,6 +91,7 @@ class AgendaNewAdapter(
         is AgendaListItem.Group -> TYPE_GROUP
         is AgendaListItem.Counter -> TYPE_COUNTER
         is AgendaListItem.Empty -> TYPE_EMPTY
+        is AgendaListItem.Duty -> TYPE_DUTY
     }
 
     override fun getItemCount(): Int = items.size
@@ -90,6 +99,7 @@ class AgendaNewAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
+            TYPE_DUTY -> DutyViewHolder(StudentDutyCardBinding.inflate(inflater, parent, false))
             TYPE_HEADER -> HeaderViewHolder(inflater.inflate(R.layout.row_agenda_new_day_header, parent, false))
             TYPE_EVENT -> EventViewHolder(inflater.inflate(R.layout.row_agenda_new_event, parent, false))
             TYPE_GROUP -> GroupViewHolder(inflater.inflate(R.layout.row_agenda_new_group, parent, false))
@@ -100,11 +110,18 @@ class AgendaNewAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (val item = items[position]) {
+            is AgendaListItem.Duty -> (holder as DutyViewHolder).bind(item)
             is AgendaListItem.DayHeader -> (holder as HeaderViewHolder).bind(item)
             is AgendaListItem.Event -> (holder as EventViewHolder).bind(item)
             is AgendaListItem.Group -> (holder as GroupViewHolder).bind(item)
             is AgendaListItem.Counter -> (holder as CounterViewHolder).bind(item)
             is AgendaListItem.Empty -> (holder as EmptyViewHolder).bind(item)
+        }
+    }
+
+    inner class DutyViewHolder(private val binding: StudentDutyCardBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: AgendaListItem.Duty) {
+            binding.bindDuty(item.duty) { showStudentDutyDetails(context as AppCompatActivity, item.duty) }
         }
     }
 

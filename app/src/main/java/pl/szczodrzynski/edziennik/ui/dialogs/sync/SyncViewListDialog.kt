@@ -27,7 +27,12 @@ class SyncViewListDialog(
     override fun getNegativeButtonText() = R.string.cancel
 
     @Suppress("USELESS_CAST")
-    override fun getMultiChoiceItems() = FeatureType.values()
+    override fun getMultiChoiceItems() = (NavTarget.entries.mapNotNull { it.featureType }
+        .flatMap { feature ->
+            if (feature == FeatureType.MESSAGES_INBOX)
+                listOf(FeatureType.MESSAGES_INBOX, FeatureType.MESSAGES_SENT)
+            else listOf(feature)
+        } + FeatureType.entries).distinct()
         .filter { it.nameRes != null && app.profile.hasFeature(it) }
         .associateBy { it.nameRes!!.resolveString(activity) as CharSequence }
 

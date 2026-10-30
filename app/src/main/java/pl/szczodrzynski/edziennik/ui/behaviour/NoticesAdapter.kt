@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.MaterialColors
@@ -64,6 +65,7 @@ class NoticesAdapter//getting the context and product list with constructor
             holder.noticesItemTeacherName.text = notice.teacherName
         }
         holder.noticesItemAddedDate.text = Date.fromMillis(notice.addedDate).formattedString
+        holder.noticesItemTeacherName.isVisible = !notice.teacherName.isNullOrBlank()
 
         if (notice.type == Notice.TYPE_POSITIVE) {
             holder.noticesItemType.setImageDrawable(

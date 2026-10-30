@@ -13,15 +13,19 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.core.manager.NoteManager
 import pl.szczodrzynski.edziennik.data.db.entity.Lesson
+import pl.szczodrzynski.edziennik.data.db.entity.LessonTopic
 import pl.szczodrzynski.edziennik.data.db.full.AttendanceFull
 import pl.szczodrzynski.edziennik.data.db.full.LessonFull
 import pl.szczodrzynski.edziennik.databinding.DialogLessonDetailsBinding
+import pl.szczodrzynski.edziennik.databinding.LessonTopicEmbeddedBinding
 import pl.szczodrzynski.edziennik.ext.dp
+import pl.szczodrzynski.edziennik.ext.enableExpressiveCardShapeMorph
 import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ext.setText
 import pl.szczodrzynski.edziennik.ext.toDrawable
@@ -30,6 +34,7 @@ import pl.szczodrzynski.edziennik.ui.base.dialog.BindingDialog
 import pl.szczodrzynski.edziennik.ui.event.EventDetailsDialog
 import pl.szczodrzynski.edziennik.ui.event.EventListAdapter
 import pl.szczodrzynski.edziennik.ui.event.EventManualDialog
+import pl.szczodrzynski.edziennik.ui.lessontopics.LessonTopicDetailsDialog
 import pl.szczodrzynski.edziennik.ui.notes.setupNotesButton
 import pl.szczodrzynski.edziennik.utils.BetterLink
 import pl.szczodrzynski.edziennik.utils.SimpleDividerItemDecoration
@@ -41,6 +46,7 @@ class LessonDetailsDialog(
     private val lesson: LessonFull,
     private val attendance: AttendanceFull? = null,
     private val showNotes: Boolean = true,
+    private val showTopics: Boolean = true,
 ) : BindingDialog<DialogLessonDetailsBinding>(activity) {
 
     override fun getTitleRes(): Int? = null
@@ -58,6 +64,14 @@ class LessonDetailsDialog(
         b.lessonTimeContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             marginEnd = if (isVisible) 32.dp else 0
         }
+    }
+
+    private var topicsLiveData: LiveData<List<LessonTopic>>? = null
+
+    override suspend fun onDismiss() {
+        topicsLiveData?.removeObservers(activity)
+        topicsLiveData = null
+        super.onDismiss()
     }
 
     private lateinit var adapter: EventListAdapter
@@ -162,8 +176,30 @@ class LessonDetailsDialog(
             b.teamName = lesson.teamName
         }
 
-        b.attendanceDivider.isVisible = attendance != null
-        b.attendanceLayout.isVisible = attendance != null
+        b.lessonTopics.isVisible = false
+        if (showTopics) {
+            topicsLiveData = app.db.lessonTopicDao().getForDate(lesson.profileId, lessonDate.stringY_m_d)
+            topicsLiveData?.observe(activity) { topics ->
+                if (!dialog.isShowing) return@observe
+                val matching = topics.filter { it.matches(lesson) }
+                b.lessonTopics.removeAllViews()
+                b.lessonTopics.isVisible = matching.isNotEmpty()
+                matching.forEach { topic ->
+                    val row = LessonTopicEmbeddedBinding.inflate(
+                        activity.layoutInflater, b.lessonTopics, false,
+                    )
+                    row.heading.setText(if (topic.planned) R.string.lesson_topics_planned_label else R.string.lesson_topics_realized_label)
+                    row.topic.text = topic.topic.ifBlank { activity.getString(R.string.lesson_topics_no_topic) }
+                    row.root.enableExpressiveCardShapeMorph()
+                    row.root.setOnClickListener {
+                        LessonTopicDetailsDialog(activity, topic).show()
+                    }
+                    b.lessonTopics.addView(row.root)
+                }
+            }
+        }
+
+        b.attendanceCard.isVisible = attendance != null
         if (attendance != null) {
             b.attendanceView.setAttendance(attendance, app.attendanceManager, bigView = true)
             b.attendanceType.text = attendance.typeName
@@ -173,7 +209,8 @@ class LessonDetailsDialog(
                 b.attendanceIcon.setImageDrawable(icon.toDrawable(color))
                 true
             }
-            b.attendanceDetails.onClick {
+            b.attendanceCard.enableExpressiveCardShapeMorph()
+            b.attendanceCard.onClick {
                 AttendanceDetailsDialog(
                     activity = activity,
                     attendance = attendance,

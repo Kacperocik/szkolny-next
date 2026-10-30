@@ -34,6 +34,7 @@ import pl.szczodrzynski.edziennik.databinding.DialogEventDetailsBinding
 import pl.szczodrzynski.edziennik.ext.*
 import pl.szczodrzynski.edziennik.ui.base.dialog.SimpleDialog
 import pl.szczodrzynski.edziennik.ui.notes.setupNotesButton
+import pl.szczodrzynski.edziennik.ui.teachers.bindTeacher
 import pl.szczodrzynski.edziennik.ui.timetable.TimetableFragment
 import pl.szczodrzynski.edziennik.utils.BetterLink
 import pl.szczodrzynski.edziennik.utils.models.Date
@@ -246,13 +247,7 @@ class EventDetailsBinder(
 
         BetterLink.attach(b.topic, onActionSelected = { onClose?.invoke() })
 
-        event.teacherName?.let { name ->
-            BetterLink.attach(
-                b.teacherName,
-                teachers = mapOf(event.teacherId to name),
-                onActionSelected = { onClose?.invoke() }
-            )
-        }
+        b.teacherCard.bindTeacher(event.teacherId, event.teacherName) { onClose?.invoke() }
 
         if (!event.addedManually && (!event.isDownloaded || event.isHomework && event.homeworkBody == null)) {
             b.bodyTitle.isVisible = true

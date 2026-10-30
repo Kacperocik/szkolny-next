@@ -46,19 +46,18 @@ class EventColorsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val b = holder.b
         val isLast = position == itemCount - 1
-        // first group (special rows) always occupies positions 0..1,
-        // event types start a second group at position 2
+        val groupStart = position == 0 || items[position - 1]::class != items[position]::class
+        val groupEnd = isLast || items[position + 1]::class != items[position]::class
         val shapeOverlay = when {
-            position == 0 -> R.style.ShapeAppearance_Material3_Corner_GroupTop
-            position == 1 -> R.style.ShapeAppearance_Material3_Corner_GroupBottom
-            position == 2 -> R.style.ShapeAppearance_Material3_Corner_GroupTop
-            isLast -> R.style.ShapeAppearance_Material3_Corner_GroupBottom
+            groupStart && groupEnd -> R.style.ShapeAppearance_Material3_Corner_GroupSingle
+            groupStart -> R.style.ShapeAppearance_Material3_Corner_GroupTop
+            groupEnd -> R.style.ShapeAppearance_Material3_Corner_GroupBottom
             else -> R.style.ShapeAppearance_Material3_Corner_GroupMiddle
         }
         b.root.shapeAppearanceModel = ShapeAppearanceModel.builder(activity, shapeOverlay, 0).build()
         b.root.enableExpressiveCardShapeMorph()
         (b.root.layoutParams as? ViewGroup.MarginLayoutParams)?.let {
-            it.bottomMargin = if (position == 1) 12.dp else 3.dp
+            it.bottomMargin = if (groupEnd && !isLast) 12.dp else 3.dp
             b.root.layoutParams = it
         }
 

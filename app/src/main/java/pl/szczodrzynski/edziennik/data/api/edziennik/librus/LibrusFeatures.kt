@@ -52,7 +52,10 @@ const val ENDPOINT_LIBRUS_API_TEACHER_FREE_DAYS                        = 1110
 const val ENDPOINT_LIBRUS_API_SCHOOL_FREE_DAYS                         = 1120
 const val ENDPOINT_LIBRUS_API_CLASS_FREE_DAYS                          = 1130
 const val ENDPOINT_LIBRUS_API_JUSTIFICATIONS = 1140
+const val ENDPOINT_LIBRUS_API_REALIZATIONS                             = 1150
+const val ENDPOINT_LIBRUS_API_PLANNED_LESSONS                          = 1151
 const val ENDPOINT_LIBRUS_SYNERGIA_INFO                                = 2010
+const val ENDPOINT_LIBRUS_SYNERGIA_STUDENT_DUTIES                       = 2015
 const val ENDPOINT_LIBRUS_SYNERGIA_GRADES                              = 2020
 const val ENDPOINT_LIBRUS_SYNERGIA_HOMEWORK                            = 2030
 const val ENDPOINT_LIBRUS_SYNERGIA_MESSAGES_RECEIVED                   = 2040
@@ -62,7 +65,6 @@ const val ENDPOINT_LIBRUS_MESSAGES_SENT                                = 3020
 const val ENDPOINT_LIBRUS_MESSAGES_TRASH                               = 3030
 
 val LibrusFeatures = listOf(
-
         Feature(LoginType.LIBRUS, FeatureType.ALWAYS_NEEDED, listOf(
                 ENDPOINT_LIBRUS_API_LESSONS to LoginMethod.LIBRUS_API
         )),
@@ -145,14 +147,24 @@ val LibrusFeatures = listOf(
                 ENDPOINT_LIBRUS_API_ATTENDANCES to LoginMethod.LIBRUS_API
         )),
         /**
-         * Announcements - using API.
+         * Absence justifications - using API for parent accounts.
          */
         Feature(LoginType.LIBRUS, FeatureType.EXCUSES, listOf(
             ENDPOINT_LIBRUS_API_JUSTIFICATIONS to LoginMethod.LIBRUS_API
         )).withShouldSync { it.profile?.isParent == true },
+        /**
+         * Announcements - using API.
+         */
         Feature(LoginType.LIBRUS, FeatureType.ANNOUNCEMENTS, listOf(
                 ENDPOINT_LIBRUS_API_ANNOUNCEMENTS to LoginMethod.LIBRUS_API
         )),
+        /**
+         * Completed and planned lesson topics - using API.
+         */
+        Feature(LoginType.LIBRUS, FeatureType.LESSON_TOPICS, listOf(
+            ENDPOINT_LIBRUS_API_REALIZATIONS to LoginMethod.LIBRUS_API,
+            ENDPOINT_LIBRUS_API_PLANNED_LESSONS to LoginMethod.LIBRUS_API,
+        )).withManualRefreshEndpoints(ENDPOINT_LIBRUS_API_REALIZATIONS, ENDPOINT_LIBRUS_API_PLANNED_LESSONS),
 
 
 
@@ -256,4 +268,11 @@ val LibrusFeatures = listOf(
         Feature(LoginType.LIBRUS, FeatureType.MESSAGES_SENT, listOf(
                 ENDPOINT_LIBRUS_MESSAGES_SENT to LoginMethod.LIBRUS_MESSAGES
         ))
-)
+).let { features ->
+    val agenda = features.single { it.featureType == FeatureType.AGENDA }
+    // Keep the API-only variant for accounts that cannot use a Synergia session.
+    features + Feature(LoginType.LIBRUS, FeatureType.AGENDA,
+        agenda.endpoints + (ENDPOINT_LIBRUS_SYNERGIA_STUDENT_DUTIES to LoginMethod.LIBRUS_SYNERGIA))
+        .withPriority(agenda.priority - 1)
+        .withManualRefreshEndpoints(ENDPOINT_LIBRUS_SYNERGIA_STUDENT_DUTIES)
+}
