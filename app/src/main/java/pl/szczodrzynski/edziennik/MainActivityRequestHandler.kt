@@ -6,6 +6,7 @@ package pl.szczodrzynski.edziennik
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
@@ -108,8 +109,17 @@ class MainActivityRequestHandler(val hostActivity: MainActivity) {
     }
 
     private fun saveFile(uri: Uri, name: String): String {
-        val (filename, _) = getFileInfo(uri)
-        val extension = filename.substringAfterLast('.')
+        val (filename, mimeType) = getFileInfo(uri)
+        val mime = mimeType ?: hostActivity.contentResolver.getType(uri)
+        val extension = when {
+            filename.contains('.') -> filename.substringAfterLast('.')
+            mime?.endsWith("/png") == true -> "png"
+            mime?.endsWith("/webp") == true -> "webp"
+            mime?.endsWith("/gif") == true -> "gif"
+            mime?.endsWith("/jpeg") == true || mime?.endsWith("/jpg") == true -> "jpg"
+            else -> "png"
+        }
+        hostActivity.filesDir.listFiles { _, fName -> fName.startsWith("$name.") && fName != "$name.$extension" }?.forEach { it.delete() }
         val file = File(hostActivity.filesDir, "$name.$extension")
         activity.contentResolver.openInputStream(uri)?.use { input ->
             FileOutputStream(file).use { output ->
@@ -158,6 +168,7 @@ class MainActivityRequestHandler(val hostActivity: MainActivity) {
                         toolbarColor = Utils.getAttr(hostActivity, R.attr.colorSurface)
                         toolbarTitleColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
                         toolbarBackButtonColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                        outputCompressFormat = Bitmap.CompressFormat.PNG
                     }
                     val intent = createCropIntent(uri, options)
                     hostActivity.startActivityForResult(intent, REQUEST_CROP_HEADER_BACKGROUND)
@@ -181,6 +192,7 @@ class MainActivityRequestHandler(val hostActivity: MainActivity) {
                         toolbarColor = Utils.getAttr(hostActivity, R.attr.colorSurface)
                         toolbarTitleColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
                         toolbarBackButtonColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                        outputCompressFormat = Bitmap.CompressFormat.PNG
                     }
                     val intent = createCropIntent(uri, options)
                     hostActivity.startActivityForResult(intent, REQUEST_CROP_APP_BACKGROUND)
@@ -208,6 +220,7 @@ class MainActivityRequestHandler(val hostActivity: MainActivity) {
                         toolbarColor = Utils.getAttr(hostActivity, R.attr.colorSurface)
                         toolbarTitleColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
                         toolbarBackButtonColor = Utils.getAttr(hostActivity, R.attr.colorOnSurface)
+                        outputCompressFormat = Bitmap.CompressFormat.PNG
                     }
                     val intent = createCropIntent(uri, options)
                     hostActivity.startActivityForResult(intent, REQUEST_CROP_PROFILE_IMAGE)

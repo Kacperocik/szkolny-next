@@ -819,9 +819,23 @@ class NavDrawer(
         accountHeader.accountSwitcherArrow.visibility = View.GONE
     }
 
+    private fun sampleUnderlyingColor(): Int {
+        return try {
+            getColorFromAttr(accountHeader.context, com.google.android.material.R.attr.colorSurface)
+        } catch (_: Exception) {
+            getColorFromAttr(accountHeader.context, android.R.attr.colorBackground)
+        }
+    }
+
     private fun headerBackgroundKey(): Int {
         val background = accountHeader.accountHeaderBackground
-        return System.identityHashCode(background.drawable) xor
+        val surfaceColor = try {
+            sampleUnderlyingColor()
+        } catch (_: Exception) {
+            0
+        }
+        return surfaceColor xor
+            System.identityHashCode(background.drawable) xor
             (background.width * 31) xor
             background.height xor
             (accountHeader.currentProfileName.width * 17)
@@ -835,11 +849,15 @@ class NavDrawer(
             return 0.0
         }
 
+        val surfaceColor = sampleUnderlyingColor()
+        val defaultLuminance = ColorUtils.calculateLuminance(surfaceColor)
+
         return try {
             val sampleWidth = 48
             val sampleHeight = (height.toFloat() / width * sampleWidth).toInt().coerceAtLeast(1)
             val bitmap = Bitmap.createBitmap(sampleWidth, sampleHeight, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
+            canvas.drawColor(surfaceColor)
             canvas.scale(sampleWidth / width.toFloat(), sampleHeight / height.toFloat())
             background.draw(canvas)
 
@@ -875,15 +893,14 @@ class NavDrawer(
             for (y in regionTop until regionBottom) {
                 for (x in regionLeft until regionRight) {
                     val color = bitmap.getPixel(x, y)
-                    if (Color.alpha(color) < 16) continue
                     total += ColorUtils.calculateLuminance(color)
                     count++
                 }
             }
             bitmap.recycle()
-            if (count == 0) 0.0 else total / count
+            if (count == 0) defaultLuminance else total / count
         } catch (_: Exception) {
-            0.0
+            defaultLuminance
         }
     }
 

@@ -1,17 +1,17 @@
 # Graph Report - szkolny2  (2026-10-31)
 
 ## Corpus Check
-- 909 files · ~272,624 words
+- 909 files · ~272,725 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 21 file(s) not represented in the graph (top: .pro 8, (none) 6, .properties 3)
 
 ## Summary
-- 9147 nodes · 23762 edges · 470 communities (160 shown, 310 thin omitted)
+- 9147 nodes · 23763 edges · 470 communities (160 shown, 310 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 914 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `964ef958`
+- Built from commit: `ae0e8722`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -1154,7 +1154,7 @@ Nodes (3): ColorRow, Event, Special
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `App` connect `App` to `AttendanceAdapter`, `Profile`, `DataLibrus`, `AttendanceFull`, `Intent`, `ApiError`, `LoginProgressFragment.kt`, `UsosApi`, `LoginMethod`, `Grade`, `GradesManager`, `MetadataType`, `UserActionRequiredEvent`, `Update`, `MainActivity`, `TimetableDao`, `Config`, `Intent`, `EventFull`, `TimetableDayFragment.kt`, `LabJsonAdapter`, `LoginEggsFragment.kt`, `AppDb`, `GradeDao`, `SzkolnyApi`, `EventDao`, `AgendaNewAdapter`, `SzkolnyApi.kt`, `NoticeDao`, `IApiTask`, `GradesConfigDialog.kt`, `LoginFormFragment`, `StylingConfig`, `WidgetCurrentLessonProvider.kt`, `LuckyNumberDao`, `TeacherAbsenceDao`, `ProfileExtensions.kt`, `DumbCookieJar`, `MessageDao`, `WidgetTimetableProvider.kt`, `AgendaFragmentDefault`, `LoginChooserAdapter`, `JsonObject`, `AttendanceDao`, `AnnouncementDao`, `WidgetLuckyNumberProvider.kt`, `EventListAdapter`, `WidgetNotificationsFactory.kt`, `MessageManager`, `NetworkExtensions.kt`, `MarkAllReadTask`, `Bundle`, `RegistrationConfigDialog`, `MessagesComposeChipCreator.kt`, `UiManager.kt`, `NoteListAdapter`, `GradeDetailsDialog`, `EdziennikNotification`, `MessagesAdapter`, `App.kt`, `ExpandableItemModel`, `ProfileDao`, `LoginPrizeFragment.kt`, `BuildManager`, `PermissionManager.kt`, `SyncWorker.kt`, `ExcuseListAdapter`, `date`, `AgendaEvent`, `GenerateBlockTimetableDialog`, `RegisterAvailabilityStatus`, `SettingsRegisterCard.kt`, `Teacher`, `BindableViewHolder`, `BaseSettingsFragment`, `r`, `Notifications`, `LoginChooserFragment.kt`, `LoginSummaryFragment.kt`, `context`, `communitymaterial`, `TemplateAdapter`, `SzkolnyAppFirebase.kt`, `.onCreate`, `Demo`, `BaseConfig`, `LoginPlatformAdapter`, `LoginSyncErrorFragment.kt`, `.onCreateViewHolder`, `UpdateWorker.kt`, `Message`, `HomeAnnouncementsCard`, `LoginPlatformListFragment.kt`, `startCoroutineTimer`, `LoginFinishFragment.kt`, `MessagesComposeChipTokenizer.kt`, `DialogExtensions.kt`, `BaseFragment`, `HomeCardsDialog.kt`, `ActivityLifecycleCallbacks`, `FirebaseManager.kt`, `grades/viewholder/EmptyViewHolder.kt`, `Usos`, `StatsViewHolder`, `SemesterViewHolder`, `NotificationManager`, `SettingsCard`, `.onBind`?**
-  _High betweenness centrality (0.187) - this node is a cross-community bridge._
+  _High betweenness centrality (0.188) - this node is a cross-community bridge._
 - **What connects `NOT_AVAILABLE`, `API_ERROR`, `NO_API_ACCESS` to the rest of the system?**
   _224 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Message` be split into smaller, more focused modules?**
@@ -1164,6 +1164,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `NotificationType` be split into smaller, more focused modules?**
   _Cohesion score 0.08 - nodes in this community are weakly interconnected._
 - **Why does `Bundle()` connect `Bundle` to `NetworkExtensions.kt`, `ActivityLifecycleCallbacks`, `Profile`, `Intent`, `ApiError`, `LoginProgressFragment.kt`, `UsosApi`, `MessagesComposeChipCreator.kt`, `LoginMethod`, `LoginPlatformListFragment.kt`, `HomeworkListFragment`, `ContributorsAdapter`, `AttendanceSummaryFragment`, `WebPushBrowserAdapter`, `CardItemTouchHelperCallback.kt`, `startCoroutineTimer`, `HomeworkFragment`, `EdziennikNotification`, `MessagesListFragment`, `UserActionRequiredEvent`, `App.kt`, `ExcuseDetailsDialog`, `LoginFinishFragment.kt`, `SurveyWebActivity`, `NavTarget`, `MainActivity`, `AttachmentsView`, `.title`, `LoginPrizeFragment.kt`, `NetworkExtensions.kt`, `AgendaNewFragment`, `.onCreate`, `FeedbackFragment`, `AgendaFragment`, `AnnouncementsFragment`, `BottomSheetPrimaryItem`, `GradesListFragment`, `SettingsLicenseActivity.kt`, `TimetableDayFragment.kt`, `date`, `BehaviourFragment`, `PagerFragment`, `ContributorsFragment`, `BundleExtensions.kt`, `LoginEggsFragment.kt`, `Teacher`, `BaseSettingsFragment`, `LabProfileFragment.kt`, `r`, `LoginChooserFragment.kt`, `AppCropImageActivity.kt`, `LoginSummaryFragment.kt`, `TimetableDayFragment`, `.onCreate`, `LoginFormFragment`, `MessagesFragment`, `communitymaterial`, `MainActivity.kt`, `TemplateAdapter`, `LessonTopicsListFragment`, `AttendanceDetailsDialog`, `DialogExtensions.kt`, `TimetableFragment`, `App`, `.runCatching`, `OAuthLoginActivity.kt`, `RecaptchaActivity.kt`, `BaseFragment`, `MessagesComposeFragment`, `LoginSyncErrorFragment.kt`, `NotesFragment`, `MessageManager`?**
-  _High betweenness centrality (0.069) - this node is a cross-community bridge._
+  _High betweenness centrality (0.070) - this node is a cross-community bridge._
 - **Should `AttendanceAdapter` be split into smaller, more focused modules?**
   _Cohesion score 0.10837438423645321 - nodes in this community are weakly interconnected._
