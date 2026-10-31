@@ -790,6 +790,7 @@
     <string name="messages_download_error">Błąd pobierania wiadomości</string>
     <string name="messages_draft_title">Wersja robocza</string>
     <string name="messages_no_data">Nie masz żadnych wiadomości.</string>
+    <string name="messages_refresh_recipients">Odśwież listę odbiorców</string>
     <string name="messages_recipient_list_download_error">Błąd pobierania listy odbiorców</string>
     <string name="messages_recipients_list_read_format"><![CDATA[<li>&nbsp;%s, przeczytano: %s, %s</li>]]></string>
     <string name="messages_recipients_list_read_unknown_date_format"><![CDATA[<li>&nbsp;%s, przeczytano: tak</li>]]></string>
@@ -1262,6 +1263,10 @@
     <string name="teacher_other">Inni</string>
     <string name="teacher_parent">Rodzic</string>
     <string name="teacher_parents_council">Rada rodziców</string>
+    <string name="teacher_counsellor">Pedagog</string>
+    <string name="teacher_special_counsellor">Pedagog specjalny</string>
+    <string name="teacher_psychologist">Psycholog</string>
+    <string name="teacher_career_advisor">Doradca zawodowy</string>
     <string name="teacher_pedagogue">Pedagog / Psycholog</string>
     <string name="teacher_principal">Dyrektor</string>
     <string name="teacher_school_admin">Szkolny Administrator</string>

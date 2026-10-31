@@ -748,6 +748,7 @@
     <string name="messages_download_error">Fehler beim Herunterladen von Nachrichten</string>
     <string name="messages_draft_title">Entwurf</string>
     <string name="messages_no_data">Sie haben keine Nachrichten</string>
+    <string name="messages_refresh_recipients">Empfängerliste aktualisieren</string>
     <string name="messages_recipient_list_download_error">Fehler beim herunterladen der Empfängerliste</string>
     <string name="messages_recipients_list_read_format"><![CDATA[<li>&amp;nbsp;%s, lies: %s, %s</li>]]></string>
     <string name="messages_recipients_list_read_unknown_date_format"><![CDATA[<li>&amp;nbsp;%s, lies: ja</li>]]></string>
@@ -1236,6 +1237,10 @@
     <string name="teacher_other">Andere</string>
     <string name="teacher_parent">Elternteil</string>
     <string name="teacher_parents_council">Elternrat</string>
+    <string name="teacher_counsellor">Schulpädagoge</string>
+    <string name="teacher_special_counsellor">Sonderpädagoge</string>
+    <string name="teacher_psychologist">Psychologe</string>
+    <string name="teacher_career_advisor">Berufsberater</string>
     <string name="teacher_pedagogue">Pädagoge / Psychologe</string>
     <string name="teacher_principal">Schulleiter</string>
     <string name="teacher_school_admin">Schulverwalter</string>
@@ -1713,4 +1718,5 @@
     <string name="settings_sync_mark_read_messages_subtext">Die Aktion „Alles als gelesen markieren“ umfasst auch Nachrichten und Mitteilungen in Librus und aktualisiert ihren Status im E-Klassenbuch.</string>
     <string name="main_menu_mark_as_read_partial">Einige Einträge konnten nicht als gelesen markiert werden. Bitte erneut versuchen.</string>
     <string name="main_menu_mark_as_read_cancelled">Das Markieren als gelesen wurde unterbrochen.</string>
+    <string name="error_11_reason">Der Versand konnte nicht bestätigt werden. Prüfe vor einem erneuten Versuch den Gesendet-Ordner im Schulportal.</string>
 </resources>

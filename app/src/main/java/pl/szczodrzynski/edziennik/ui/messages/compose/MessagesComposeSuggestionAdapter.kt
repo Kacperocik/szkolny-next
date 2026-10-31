@@ -30,23 +30,32 @@ class MessagesComposeSuggestionAdapter(
     private val comparator by lazy { Comparator { o1: Teacher, o2: Teacher -> o1.recipientWeight - o2.recipientWeight } }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val listItem = convertView ?: LayoutInflater.from(context).inflate(R.layout.teacher_item, parent, false)
+        val listItem = convertView ?: LayoutInflater.from(context).inflate(R.layout.messages_recipient_suggestion, parent, false)
+        // Selection belongs to the dropdown, not its individual rows.
+        listItem.isClickable = false
+        listItem.isFocusable = false
+        (listItem as? ViewGroup)?.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
 
         val teacher = teacherList[position]
         val name = listItem.findViewById<TextView>(R.id.name)
         val type = listItem.findViewById<TextView>(R.id.type)
         val image = listItem.findViewById<ImageView>(R.id.image)
+        val categoryArrow = listItem.findViewById<View>(R.id.categoryArrow)
+        val isCategory = teacher.id in -24L..0L
+        image.visibility = if (isCategory) View.GONE else View.VISIBLE
+        categoryArrow.visibility = if (isCategory) View.VISIBLE else View.GONE
 
-        if (teacher.image == null)
+        if (!isCategory && teacher.image == null)
             teacher.image = getProfileImage(48, 24, 16, 12, 1, teacher.fullName)
 
-        if (teacher.id in -24L..0L) {
+        if (isCategory) {
             name.text = Teacher.typeName(context, (teacher.id * -1).toInt())
-            type.setText(R.string.teachers_browse_category)
+            type.visibility = View.GONE
             image.setImageBitmap(null)
         } else {
             name.text = teacher.recipientDisplayName ?: teacher.fullName
             type.text = teacher.getTypeText(context)
+            type.visibility = if (type.text.isNullOrBlank()) View.GONE else View.VISIBLE
             image.setImageBitmap(teacher.image)
         }
         return listItem

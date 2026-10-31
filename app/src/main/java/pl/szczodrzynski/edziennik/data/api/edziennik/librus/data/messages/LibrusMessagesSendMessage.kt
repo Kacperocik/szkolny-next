@@ -5,6 +5,8 @@
 package pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.messages
 
 import org.greenrobot.eventbus.EventBus
+import pl.szczodrzynski.edziennik.data.api.ERROR_MESSAGE_SEND_UNCONFIRMED
+import pl.szczodrzynski.edziennik.data.api.models.ApiError
 import pl.szczodrzynski.edziennik.data.api.edziennik.librus.DataLibrus
 import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.LibrusMessages
 import pl.szczodrzynski.edziennik.data.api.events.MessageSentEvent
@@ -41,8 +43,7 @@ class LibrusMessagesSendMessage(override val data: DataLibrus,
             val id = response.getLong("data")
 
             if (response.getString("status") != "ok" || id == null) {
-                // val message = response.getString("message")
-                // TODO error
+                data.error(ApiError(TAG, ERROR_MESSAGE_SEND_UNCONFIRMED))
                 return@messagesGetJson
             }
 

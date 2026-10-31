@@ -30,8 +30,12 @@ open class Teacher {
 
         // not teachers
         const val TYPE_SPECIALIST = 7 // 128
+        const val TYPE_CAREER_ADVISOR = 8 // 256
+        const val TYPE_SPECIAL_COUNSELLOR = 9 // 512
         const val TYPE_SUPER_ADMIN = 10 // 1024
+        const val TYPE_PSYCHOLOGIST = 11 // 2048
         const val TYPE_STUDENT = 12 // 4096
+        const val TYPE_COUNSELLOR = 13 // 8192
         const val TYPE_PARENT = 14 // 16384
         const val TYPE_PARENTS_COUNCIL = 15 // 32768
         const val TYPE_SCHOOL_PARENTS_COUNCIL = 16 // 65536
@@ -43,6 +47,10 @@ open class Teacher {
                 TYPE_TEACHER,
                 TYPE_EDUCATOR,
                 TYPE_PEDAGOGUE,
+                TYPE_COUNSELLOR,
+                TYPE_SPECIAL_COUNSELLOR,
+                TYPE_PSYCHOLOGIST,
+                TYPE_CAREER_ADVISOR,
                 TYPE_LIBRARIAN,
                 TYPE_SECRETARIAT,
                 TYPE_PRINCIPAL,
@@ -64,6 +72,10 @@ open class Teacher {
                 TYPE_PARENTS_COUNCIL -> c.getString(R.string.teacher_parents_council) + suffix
                 TYPE_SCHOOL_PARENTS_COUNCIL -> c.getString(R.string.teacher_school_parents_council)
                 TYPE_PEDAGOGUE -> c.getString(R.string.teacher_pedagogue)
+                TYPE_COUNSELLOR -> c.getString(R.string.teacher_counsellor)
+                TYPE_SPECIAL_COUNSELLOR -> c.getString(R.string.teacher_special_counsellor)
+                TYPE_PSYCHOLOGIST -> c.getString(R.string.teacher_psychologist)
+                TYPE_CAREER_ADVISOR -> c.getString(R.string.teacher_career_advisor)
                 TYPE_LIBRARIAN -> c.getString(R.string.teacher_librarian)
                 TYPE_SCHOOL_ADMIN -> c.getString(R.string.teacher_school_admin)
                 TYPE_SUPER_ADMIN -> c.getString(R.string.teacher_super_admin)

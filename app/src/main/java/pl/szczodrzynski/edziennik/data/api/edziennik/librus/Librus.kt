@@ -14,8 +14,7 @@ import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.LibrusData
 import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.api.LibrusApiAnnouncementMarkAsRead
 import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.messages.LibrusMessagesGetAttachment
 import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.messages.LibrusMessagesGetMessage
-import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.messages.LibrusMessagesGetRecipientList
-import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.messages.LibrusMessagesSendMessage
+import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.messages.LibrusWebMessages
 import pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.synergia.*
 import pl.szczodrzynski.edziennik.data.api.edziennik.librus.firstlogin.LibrusFirstLogin
 import pl.szczodrzynski.edziennik.data.api.edziennik.librus.login.LibrusLogin
@@ -102,8 +101,8 @@ class Librus(val app: App, val profile: Profile?, val loginStore: LoginStore, va
     }
 
     override fun sendMessage(recipients: Set<Teacher>, subject: String, text: String) {
-        login(LoginMethod.LIBRUS_MESSAGES) {
-            LibrusMessagesSendMessage(data, recipients, subject, text) {
+        login(LoginMethod.LIBRUS_SYNERGIA) {
+            LibrusWebMessages(data).send(recipients, subject, text) {
                 completed()
             }
         }
@@ -145,8 +144,8 @@ class Librus(val app: App, val profile: Profile?, val loginStore: LoginStore, va
     }
 
     override fun getRecipientList() {
-        login(LoginMethod.LIBRUS_MESSAGES) {
-            LibrusMessagesGetRecipientList(data) {
+        login(LoginMethod.LIBRUS_SYNERGIA) {
+            LibrusWebMessages(data).recipients {
                 completed()
             }
         }

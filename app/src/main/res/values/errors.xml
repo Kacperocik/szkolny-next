@@ -6,6 +6,7 @@
 <resources>
     <string name="error_1" translatable="false">ERROR_APP_CRASH</string>
     <string name="error_10" translatable="false">ERROR_MESSAGE_NOT_SENT</string>
+    <string name="error_11" translatable="false">ERROR_MESSAGE_SEND_UNCONFIRMED</string>
 
     <string name="error_50" translatable="false">ERROR_REQUEST_FAILURE</string>
     <string name="error_51" translatable="false">ERROR_REQUEST_HTTP_400</string>
@@ -199,6 +200,7 @@
 
     <string name="error_1_reason">Aplikacja przestała działać</string>
     <string name="error_10_reason">Nie udało się wysłać wiadomości: nowa wiadomość nie została odnaleziona na liście wiadomości wysłanych</string>
+    <string name="error_11_reason">Nie udało się potwierdzić wysłania wiadomości. Przed ponowieniem sprawdź folder wysłanych wiadomości w dzienniku.</string>
 
     <string name="error_50_reason">Błąd odpowiedzi serwera. Dziennik może być przeciążony lub mieć przerwę techniczną.</string>
     <string name="error_51_reason">Błąd serwera: nieprawidłowe zapytanie. Dziennik może być przeciążony lub mieć przerwę techniczną.</string>

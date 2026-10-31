@@ -7,7 +7,6 @@ package pl.szczodrzynski.edziennik.ui.messages.compose
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import android.widget.AutoCompleteTextView
 import android.widget.ScrollView
 import android.widget.Toast
 import androidx.core.view.isVisible
@@ -70,6 +69,13 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
                 activity.bottomSheet.close()
                 saveDraft()
             },
+        BottomSheetPrimaryItem(true)
+            .withTitle(R.string.messages_refresh_recipients)
+            .withIcon(CommunityMaterial.Icon3.cmd_refresh)
+            .withOnClickListener {
+                activity.bottomSheet.close()
+                EdziennikTask.recipientListGet(App.profileId).enqueue(activity)
+            },
         BottomSheetSeparatorItem(true),
         BottomSheetPrimaryItem(true)
             .withTitle(R.string.menu_messages_config)
@@ -96,16 +102,9 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
     private var changedBody = false
     private var discardDraftItem: BottomSheetPrimaryItem? = null
     private var draftMessageId: Long? = null
+    private var recipientsInitialized = false
 
     override suspend fun onViewReady(savedInstanceState: Bundle?) {
-        b.breakpoints.visibility = if (App.devMode) View.VISIBLE else View.GONE
-        b.breakpoints.setOnClickListener {
-            b.breakpoints.isEnabled = true
-            @SuppressLint("SetTextI18n")
-            b.breakpoints.text = "Breakpoints!"
-            // do your job
-        }
-
         discardDraftItem = BottomSheetPrimaryItem(true)
             .withTitle(R.string.messages_compose_discard_draft)
             .withIcon(CommunityMaterial.Icon3.cmd_text_box_remove_outline)
@@ -114,8 +113,8 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
                 discardDraftDialog()
             }
 
-        getRecipientList()
         createView()
+        getRecipientList()
     }
 
     private fun getMessageBody(): String {
@@ -126,16 +125,20 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
     }
 
     private suspend fun getRecipientList() {
-        if (app.data.messagesConfig.syncRecipientList && System.currentTimeMillis() - app.profile.lastReceiversSync > 1 * DAY * 1000) {
-            activity.snackbar("Pobieranie listy odbiorców...")
-            EdziennikTask.recipientListGet(App.profileId).enqueue(activity)
-        }
-        else {
-            val list = withContext(Dispatchers.IO) {
-                app.db.teacherDao().getAllNow(App.profileId).filter { it.loginId != null }
+        val list = withContext(Dispatchers.IO) {
+            app.db.teacherDao().getAllNow(App.profileId).filter {
+                if (app.profile.loginStoreType == LoginType.LIBRUS)
+                    it.loginId?.startsWith("web:") == true
+                else it.loginId != null
             }
-            updateRecipientList(list)
         }
+        if (list.isNotEmpty()) updateRecipientList(list)
+        val expired = System.currentTimeMillis() - app.profile.lastReceiversSync > DAY * 1000
+        if ((app.data.messagesConfig.syncRecipientList && expired) ||
+            (list.isEmpty() && app.profile.loginStoreType == LoginType.LIBRUS)) {
+            activity.snackbar(getString(R.string.edziennik_progress_endpoint_addressbook))
+            EdziennikTask.recipientListGet(App.profileId).enqueue(activity)
+        } else if (list.isEmpty()) updateRecipientList(list)
     }
 
     private fun createView() {
@@ -181,19 +184,21 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
             b.recipients.setSelection(b.recipients.text.length)
         }
 
-        b.recipients.addTextChangedListener( beforeTextChanged = { _, _, _, _ ->
+        b.recipients.addTextChangedListener(beforeTextChanged = { _, _, _, _ ->
             b.recipients.ignoreThreshold = false
         })
-        b.recipients.onDismissListener = AutoCompleteTextView.OnDismissListener {
-            b.recipients.ignoreThreshold = false
+        b.recipients.popupBoundsView = b.root
+        val recipientArrow = b.recipientsLayout.findViewById<View>(
+            com.google.android.material.R.id.text_input_end_icon,
+        )
+        b.recipients.onPopupVisibilityChanged = { open ->
+            recipientArrow.animate()
+                .rotation(if (open) 180f else 0f)
+                .setDuration(150L)
+                .start()
         }
         b.recipientsLayout.setEndIconOnClickListener {
-            b.recipients.error = null
-            b.recipients.ignoreThreshold = true
-            b.recipients.showDropDown()
-            val adapter = b.recipients.adapter ?: return@setEndIconOnClickListener
-            if (adapter is MessagesComposeSuggestionAdapter)
-                adapter.filter.filter(null)
+            b.recipients.toggleDropDown()
         }
 
         b.recipientsLayout.isEnabled = false
@@ -307,7 +312,7 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
         withContext(Dispatchers.Default) {
             teachers.clear()
             teachers.addAll(list.sortedBy { it.fullName })
-            Teacher.types.mapTo(teachers) {
+            Teacher.types.filter { type -> list.any { it.isType(type) } }.mapTo(teachers) {
                 Teacher(-1, -it.toLong(), Teacher.typeName(activity, it), "")
             }
             /*teachers.forEach {
@@ -322,6 +327,8 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
         val adapter = MessagesComposeSuggestionAdapter(activity, teachers)
         b.recipients.setAdapter(adapter)
 
+        if (recipientsInitialized) return@launch
+        recipientsInitialized = true
         val message = manager.fillWithBundle(uiConfig, arguments)
         if (message != null && message.isDraft) {
             draftMessageId = message.id
@@ -405,7 +412,7 @@ class MessagesComposeFragment : BaseFragment<MessagesComposeFragmentBinding, Mai
                     .enqueue(activity)
             }
             negative(R.string.cancel)
-        }
+        }.show()
     }
 
     override fun onResume() {

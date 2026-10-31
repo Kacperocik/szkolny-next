@@ -165,6 +165,16 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
         EventBus.getDefault().unregisterSafe(this)
     }
 
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden && isAdded && view != null && isActivityReady && parentFragment == null) {
+            // Navigation clears shared controls even when the destination view is retained.
+            (activity as? MainActivity)?.let(::setupMainActivity)
+            dispatchCanRefresh()
+            appBarAnimator?.dispatchLiftOnScroll()
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         isViewReady = false

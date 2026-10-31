@@ -730,6 +730,7 @@
     <string name="messages_download_error">Message downloading error</string>
     <string name="messages_draft_title">Draft</string>
     <string name="messages_no_data">You don\'t have any messages</string>
+    <string name="messages_refresh_recipients">Refresh recipients</string>
     <string name="messages_recipient_list_download_error">Error getting the recipient list</string>
     <string name="messages_recipients_list_read_format"><![CDATA[<li>&nbsp;%s, read: %s, %s</li>]]></string>
     <string name="messages_recipients_list_read_unknown_date_format"><![CDATA[<li>&nbsp;%s, read: yes</li>]]></string>
@@ -1184,6 +1185,10 @@
     <string name="teacher_other">Other</string>
     <string name="teacher_parent">Parent</string>
     <string name="teacher_parents_council">Parents\' council</string>
+    <string name="teacher_counsellor">School counsellor</string>
+    <string name="teacher_special_counsellor">Special education counsellor</string>
+    <string name="teacher_psychologist">Psychologist</string>
+    <string name="teacher_career_advisor">Career advisor</string>
     <string name="teacher_pedagogue">Pedagogue / Psychologist</string>
     <string name="teacher_principal">Principal</string>
     <string name="teacher_school_admin">School Administrator</string>
@@ -1731,4 +1736,5 @@
     <string name="excuses_details_lesson_number_format">lesson %1$d</string>
     <string name="excuses_status_unknown">Unknown status</string>
     <string name="excuses_status_unknown_hint">Librus returned an unrecognized excuse status.</string>
+    <string name="error_11_reason">Message sending could not be confirmed. Check the sent folder in the school register before trying again.</string>
 </resources>
