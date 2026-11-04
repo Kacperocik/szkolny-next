@@ -23,6 +23,10 @@
             type="boolean" />
 
         <variable
+            name="descriptive"
+            type="boolean" />
+
+        <variable
             name="addedDate"
             type="String" />
 
@@ -153,7 +157,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/dialog_grade_details_category"
+                android:text="@{descriptive ? @string/dialog_grade_details_area : @string/dialog_grade_details_category}"
                 android:textAppearance="?textAppearanceLabelMedium"
                 android:textColor="?attr/colorSecondary" />
 
@@ -161,7 +165,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
-                android:text="@{Utils.ns(@string/dialog_grade_details_no_category, grade.category)}"
+                android:text="@{Utils.ns(descriptive ? @string/dialog_grade_details_no_area : @string/dialog_grade_details_no_category, grade.category)}"
                 android:textIsSelectable="true"
                 tools:text="@string/dialog_grade_details_no_category" />
 
@@ -213,8 +217,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
                 android:isVisible="@{commentVisible}"
+                android:text="@{comment}"
                 android:textIsSelectable="true"
-                tools:text="Uczeń jest idiotą i nie umie robić nic w excelu. Niestety nie zdał tej klasy więc ta ocena i tak mu nic nie da, więc a cotam, dam mu jedynkę kolejną.. XDD" />
+                tools:text="Przykładowy komentarz nauczyciela." />
 
             <TextView
                 android:layout_width="match_parent"

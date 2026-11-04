@@ -172,14 +172,20 @@ class Notifications(val app: App, val notifications: MutableList<Notification>, 
                     gradeName,
                     grade.subjectLongName
             )
+            val isDescriptive = grade.type == Grade.TYPE_DESCRIPTIVE || grade.type == Grade.TYPE_DESCRIPTIVE_TEXT
             val textLong = app.getString(
                     R.string.notification_grade_long_format,
                     gradeName,
-                    grade.weight.toString(),
+                    if (isDescriptive) "" else app.getString(R.string.notification_grade_weight_format, grade.weight.toString()),
                     grade.subjectLongName ?: "-",
                     grade.category ?: "-",
                     grade.description ?: "-",
-                    grade.teacherName ?: "-"
+                    grade.teacherName ?: "-",
+                    app.getString(if (isDescriptive)
+                        R.string.dialog_grade_details_area else R.string.dialog_grade_details_category),
+                    grade.comment?.takeIf { it.isNotBlank() }?.let {
+                        app.getString(R.string.notification_grade_comment_format, it)
+                    }.orEmpty()
             )
             notifications += Notification(
                     id = Notification.buildId(grade.profileId, NotificationType.GRADE, grade.id),

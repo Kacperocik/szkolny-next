@@ -241,6 +241,7 @@
     <string name="dialog_event_manual_type_choose">Wybierz rodzaj</string>
     <string name="dialog_grade_details_added_date">Data dodania</string>
     <string name="dialog_grade_details_category">Kategoria</string>
+    <string name="dialog_grade_details_area">Obszar</string>
     <string name="dialog_grade_details_class_average">Średnia klasowa</string>
     <string name="dialog_grade_details_class_average_format" translatable="false">%#.2f</string>
     <string name="dialog_grade_details_comment">Komentarz</string>
@@ -250,6 +251,7 @@
     <string name="dialog_grade_details_id">ID oceny</string>
     <string name="dialog_grade_details_improved">Ocena została poprawiona</string>
     <string name="dialog_grade_details_no_category">(brak kategorii)</string>
+    <string name="dialog_grade_details_no_area">(brak obszaru)</string>
     <string name="dialog_grade_details_no_description">(brak opisu)</string>
     <string name="dialog_grade_details_semester_format">semestr %d</string>
     <string name="dialog_grade_details_teacher">Nauczyciel</string>
@@ -1590,7 +1592,9 @@
     <string name="notification_lesson_change_long_format">Rodzaj: %s\nData: %s (%s)\nLekcja: %s\nNauczyciel: %s</string>
     <string name="notification_event_long_format">Rodzaj: %s\nPrzedmiot: %s\nTermin: %s (%s), %s\nTreść: %s</string>
     <string name="notification_shared_event_long_format">Dodane przez: %s\nRodzaj: %s\nPrzedmiot: %s\nTermin: %s (%s), %s\nTreść: %s</string>
-    <string name="notification_grade_long_format">Ocena: %s (waga %s)\nPrzedmiot: %s\nKategoria: %s\nOpis: %s\nNauczyciel: %s</string>
+    <string name="notification_grade_long_format">Ocena: %1$s%2$s\nPrzedmiot: %3$s\n%7$s: %4$s\nOpis: %5$s%8$s\nNauczyciel: %6$s</string>
+    <string name="notification_grade_weight_format">\u0020(waga %1$s)</string>
+    <string name="notification_grade_comment_format">\nKomentarz: %1$s</string>
     <string name="notification_notice_long_format">Rodzaj: %s\nNauczyciel: %s\nTreść: %s</string>
     <string name="notification_attendance_long_format">Rodzaj: %s\nTermin: %s, %s\nNr lekcji: %s\nPrzedmiot: %s\nNauczyciel: %s\nTemat lekcji: %s</string>
     <string name="contributors_subtext_format" translatable="false">\@%s - %s</string>

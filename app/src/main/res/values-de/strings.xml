@@ -223,6 +223,7 @@
     <string name="dialog_event_manual_type_choose">Wählen Sie einen Typ</string>
     <string name="dialog_grade_details_added_date">Datum hinzugefügt</string>
     <string name="dialog_grade_details_category">Kategorie</string>
+    <string name="dialog_grade_details_area">Bereich</string>
     <string name="dialog_grade_details_class_average">Klassendurchschnitt</string>
     <string name="dialog_grade_details_comment">Kommentar</string>
     <string name="dialog_grade_details_description">Beschreibung</string>
@@ -230,6 +231,7 @@
     <string name="dialog_grade_details_id">Note ID</string>
     <string name="dialog_grade_details_improved">Die Note wurde verbessert</string>
     <string name="dialog_grade_details_no_category">(keine Kategorie)</string>
+    <string name="dialog_grade_details_no_area">(kein Bereich)</string>
     <string name="dialog_grade_details_no_description">(keine Beschreibung)</string>
     <string name="dialog_grade_details_semester_format">semester %d</string>
     <string name="dialog_grade_details_teacher">Lehrer</string>
@@ -1558,7 +1560,9 @@
     <string name="notification_lesson_change_long_format">Art: %s\nDatum: %s (%s)\nLektion: %s\nLehrer: %s</string>
     <string name="notification_event_long_format">Art: %s\nFach: %s\nTermin: %s (%s), %s\nInhalt: %s</string>
     <string name="notification_shared_event_long_format">Hinzugefügt von: %s\nArt: %s\nFach: %s\nTermin: %s (%s), %s\nInhalt: %s</string>
-    <string name="notification_grade_long_format">Note: %s (Gewicht %s)\nFach: %s\nKategorie: %s\nBeschreibung: %s\nLehrer: %s</string>
+    <string name="notification_grade_long_format">Note: %1$s%2$s\nFach: %3$s\n%7$s: %4$s\nBeschreibung: %5$s%8$s\nLehrer: %6$s</string>
+    <string name="notification_grade_weight_format">\u0020(Gewicht %1$s)</string>
+    <string name="notification_grade_comment_format">\nKommentar: %1$s</string>
     <string name="notification_notice_long_format">Art: %s\nLehrer: %s\nInhalt: %s</string>
     <string name="notification_attendance_long_format">Art: %s\nTermin: %s, %s\nLektionsnr.: %s\nFach: %s\nLehrer: %s\nLektionsthema: %s</string>
     <string name="contributors_headline">Der einfachste Weg, Ihr E-Klassenbuch zu nutzen.</string>

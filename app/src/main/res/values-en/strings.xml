@@ -206,6 +206,7 @@
     <string name="dialog_event_manual_type_choose">Choose a type</string>
     <string name="dialog_grade_details_added_date">Added date</string>
     <string name="dialog_grade_details_category">Category</string>
+    <string name="dialog_grade_details_area">Area</string>
     <string name="dialog_grade_details_class_average">Class average</string>
     <string name="dialog_grade_details_comment">Comment</string>
     <string name="dialog_grade_details_description">Description</string>
@@ -213,6 +214,7 @@
     <string name="dialog_grade_details_id">Grade ID</string>
     <string name="dialog_grade_details_improved">The grade is improved by another one</string>
     <string name="dialog_grade_details_no_category">(no category)</string>
+    <string name="dialog_grade_details_no_area">(no area)</string>
     <string name="dialog_grade_details_no_description">(no description)</string>
     <string name="dialog_grade_details_semester_format">semester %d</string>
     <string name="dialog_grade_details_teacher">Teacher</string>
@@ -1617,7 +1619,9 @@
     <string name="notification_lesson_change_long_format">Type: %s\nDate: %s (%s)\nLesson: %s\nTeacher: %s</string>
     <string name="notification_event_long_format">Type: %s\nSubject: %s\nDate: %s (%s), %s\nContent: %s</string>
     <string name="notification_shared_event_long_format">Added by: %s\nType: %s\nSubject: %s\nDate: %s (%s), %s\nContent: %s</string>
-    <string name="notification_grade_long_format">Grade: %s (weight %s)\nSubject: %s\nCategory: %s\nDescription: %s\nTeacher: %s</string>
+    <string name="notification_grade_long_format">Grade: %1$s%2$s\nSubject: %3$s\n%7$s: %4$s\nDescription: %5$s%8$s\nTeacher: %6$s</string>
+    <string name="notification_grade_weight_format">\u0020(weight %1$s)</string>
+    <string name="notification_grade_comment_format">\nComment: %1$s</string>
     <string name="notification_notice_long_format">Type: %s\nTeacher: %s\nContent: %s</string>
     <string name="notification_attendance_long_format">Type: %s\nDate: %s, %s\nLesson no.: %s\nSubject: %s\nTeacher: %s\nLesson topic: %s</string>
     <string name="registration_config_note_sharing_title">Share notes</string>

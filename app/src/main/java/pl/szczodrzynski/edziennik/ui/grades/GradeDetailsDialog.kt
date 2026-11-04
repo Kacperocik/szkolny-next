@@ -10,6 +10,8 @@ import kotlinx.coroutines.withContext
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.core.manager.GradesManager.Companion.SHAPE_MODE_CIRCLE
+import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_DESCRIPTIVE
+import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_DESCRIPTIVE_TEXT
 import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_SEMESTER1_PROPOSED
 import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_SEMESTER2_PROPOSED
 import pl.szczodrzynski.edziennik.data.db.entity.Grade.Companion.TYPE_YEAR_PROPOSED
@@ -43,8 +45,10 @@ class GradeDetailsDialog(
 
         val gradeColor = manager.getGradeColor(b.root.context, grade)
         b.grade = grade
+        b.descriptive = grade.type == TYPE_DESCRIPTIVE || grade.type == TYPE_DESCRIPTIVE_TEXT
         b.weightText = manager.getWeightString(app, grade)
-        b.commentVisible = false
+        b.comment = grade.comment
+        b.commentVisible = !grade.comment.isNullOrBlank()
         b.devMode = App.devMode
         val isCircle = manager.shapeMode == SHAPE_MODE_CIRCLE
         val isProposed = grade.type == TYPE_SEMESTER1_PROPOSED ||
