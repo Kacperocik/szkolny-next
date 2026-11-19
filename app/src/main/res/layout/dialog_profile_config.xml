@@ -101,6 +101,14 @@
                 android:text="@string/profile_config_sync_enabled" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/informationButton"
+                style="?materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/profile_information_title" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/logoutButton"
                 style="?materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"

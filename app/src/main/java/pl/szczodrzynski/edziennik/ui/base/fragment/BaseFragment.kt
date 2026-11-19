@@ -53,7 +53,7 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
             field = value
             if (isResumed) {
                 dispatchCanRefresh()
-                appBarAnimator?.dispatchLiftOnScroll()
+                appBarAnimator?.dispatchLiftOnScroll(isScrolled)
             }
         }
 
@@ -117,7 +117,7 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
         }
         initializeView()
         dispatchCanRefresh()
-        appBarAnimator?.dispatchLiftOnScroll()
+        appBarAnimator?.dispatchLiftOnScroll(isScrolled)
     }
 
     private fun initializeActivity() {
@@ -171,7 +171,7 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
             // Navigation clears shared controls even when the destination view is retained.
             (activity as? MainActivity)?.let(::setupMainActivity)
             dispatchCanRefresh()
-            appBarAnimator?.dispatchLiftOnScroll()
+            appBarAnimator?.dispatchLiftOnScroll(isScrolled)
         }
     }
 
@@ -238,6 +238,9 @@ abstract class BaseFragment<B : ViewBinding, A : AppCompatActivity>(
      * swipe-to-refresh will not be enabled unless the view is scrolled.
      */
     open fun getSyncParams(): Pair<FeatureType?, JsonObject?>? = null
+
+    open fun hasCustomRefresh() = false
+    open suspend fun refresh() {}
 
     /**
      * Called to retrieve any extra bottom sheet items that should be displayed.

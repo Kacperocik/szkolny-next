@@ -696,6 +696,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                   __/ |
                  |__*/
     private suspend fun syncCurrentFeature() {
+        val custom = supportFragmentManager.fragments
+            .filterIsInstance<pl.szczodrzynski.edziennik.ui.base.fragment.BaseFragment<*, *>>()
+            .firstOrNull { it.isResumed && !it.isHidden && it.hasCustomRefresh() }
+        if (custom != null) {
+            custom.refresh()
+            return
+        }
         if (app.profile.archived) {
             SimpleDialog<Unit>(this) {
                 title(R.string.profile_archived_title)

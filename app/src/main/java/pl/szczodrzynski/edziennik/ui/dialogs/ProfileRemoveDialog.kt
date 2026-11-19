@@ -40,6 +40,7 @@ class ProfileRemoveDialog(
     override suspend fun onPositiveClick(): Boolean {
         withContext(Dispatchers.Default) {
             val profileObject = app.db.profileDao().getByIdNow(profileId) ?: return@withContext
+            android.util.AtomicFile(java.io.File(app.filesDir, "profile-information-$profileId.json")).delete()
             app.db.announcementDao().clear(profileId)
             app.db.attendanceDao().clear(profileId)
             app.db.attendanceTypeDao().clear(profileId)

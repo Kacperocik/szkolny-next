@@ -128,7 +128,7 @@ internal fun BaseFragment<*, *>.dispatchCanRefresh() {
         app.config.sync.pullToRefresh &&
             !canRefreshDisabled &&
             !isScrolled &&
-            getSyncParams() != null
+            (hasCustomRefresh() || getSyncParams() != null)
 }
 
 internal class AppBarColorAnimator(
@@ -164,11 +164,6 @@ internal class AppBarColorAnimator(
         )
         animator.addUpdateListener(this)
         animator.start()
-    }
-
-    context(BaseFragment<*, *>)
-    fun dispatchLiftOnScroll() {
-        dispatchLiftOnScroll(isScrolled)
     }
 
     override fun onAnimationUpdate(animation: ValueAnimator) {

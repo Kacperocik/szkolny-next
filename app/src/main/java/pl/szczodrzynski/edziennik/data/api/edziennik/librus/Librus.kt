@@ -100,6 +100,18 @@ class Librus(val app: App, val profile: Profile?, val loginStore: LoginStore, va
         }
     }
 
+    fun getProfileInformation(onResult: (JsonObject) -> Unit) {
+        login(LoginMethod.LIBRUS_API) {
+            pl.szczodrzynski.edziennik.data.api.edziennik.librus.data.api.LibrusApiProfileInformation(data) {
+                if (!data.cancelled) {
+                    if (app.db.profileDao().getByIdNow(profile?.id ?: -1) != null)
+                        app.db.loginStoreDao().add(loginStore)
+                    onResult(it)
+                }
+            }
+        }
+    }
+
     override fun sendMessage(recipients: Set<Teacher>, subject: String, text: String) {
         login(LoginMethod.LIBRUS_SYNERGIA) {
             LibrusWebMessages(data).send(recipients, subject, text) {

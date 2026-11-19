@@ -306,6 +306,13 @@ enum class NavTarget(
         titleRes = R.string.menu_settings,
         popTo = SETTINGS,
     ),
+    PROFILE_INFORMATION(
+        id = 126,
+        fragmentClass = pl.szczodrzynski.edziennik.ui.profileinfo.ProfileInformationFragment::class.java,
+        nameRes = R.string.profile_information_title,
+        popTo = SETTINGS,
+        isAvailable = { it.loginStoreType == pl.szczodrzynski.edziennik.data.enums.LoginType.LIBRUS },
+    ),
     SETTINGS_ABOUT(
         id = 108,
         fragmentClass = SettingsAboutFragment::class.java,

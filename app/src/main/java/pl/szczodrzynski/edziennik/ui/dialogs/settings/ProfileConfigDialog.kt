@@ -76,6 +76,16 @@ class ProfileConfigDialog(
             }
         }
 
+        b.informationButton.visibility = if (profile.loginStoreType == pl.szczodrzynski.edziennik.data.enums.LoginType.LIBRUS)
+            android.view.View.VISIBLE else android.view.View.GONE
+        b.informationButton.icon = CommunityMaterial.Icon2.cmd_information_outline.toDrawable(activity)
+        b.informationButton.enableExpressiveShapeMorph()
+        b.informationButton.onClick {
+            dismiss()
+            (activity as MainActivity).navigate(profile = profile,
+                navTarget = pl.szczodrzynski.edziennik.data.enums.NavTarget.PROFILE_INFORMATION)
+        }
+
         b.logoutButton.icon = CommunityMaterial.Icon.cmd_account_arrow_left_outline.toDrawable(
             activity,
             colorRes = R.color.md_red_500,
