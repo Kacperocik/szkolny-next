@@ -760,8 +760,10 @@ public class Utils {
     public static void initializeStorageDir(Context context) {
         if (storageDir != null)
             return;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             storageDir = context.getExternalFilesDir(null);
+            if (storageDir == null)
+                storageDir = new File(context.getFilesDir(), "attachments");
         } else {
             storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             storageDir = new File(storageDir, "Szkolny.eu");

@@ -10,6 +10,7 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
 import org.greenrobot.eventbus.EventBus
 import pl.szczodrzynski.edziennik.App
+import pl.szczodrzynski.edziennik.core.work.SyncWorker
 import pl.szczodrzynski.edziennik.data.api.ApiService
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import timber.log.Timber
@@ -34,11 +35,9 @@ abstract class IApiTask(open val profileId: Int) {
     }
 
     companion object {
-        fun enqueueAll(context: Context, tasks: List<IApiTask>) {
+        fun enqueueAll(context: Context, tasks: List<IApiTask>, fromPush: Boolean = false) {
             if (tasks.isEmpty())
                 return
-            ApiService.addPendingTasks(tasks)
-            EventBus.getDefault().postSticky(ApiService.PendingTasksEvent)
             try {
                 Intent(context, ApiService::class.java).let {
                     if (SDK_INT >= O)
@@ -46,9 +45,15 @@ abstract class IApiTask(open val profileId: Int) {
                     else
                         context.startService(it)
                 }
+            } catch (e: IllegalStateException) {
+                if (fromPush && SyncWorker.enqueuePushSync(context, tasks))
+                    return
+                Timber.e(e, "Failed to start ApiService foreground service")
             } catch (e: Exception) {
                 Timber.e(e, "Failed to start ApiService foreground service")
             }
+            ApiService.addPendingTasks(tasks)
+            EventBus.getDefault().postSticky(ApiService.PendingTasksEvent)
         }
     }
 }

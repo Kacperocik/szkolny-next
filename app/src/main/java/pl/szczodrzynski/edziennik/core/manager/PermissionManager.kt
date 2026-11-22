@@ -120,13 +120,13 @@ class PermissionManager(val app: App) : CoroutineScope {
         @StringRes permissionMessage: Int,
         isRequired: Boolean = true,
         onSuccess: suspend CoroutineScope.() -> Unit
-    ) = requestPermission(
-        activity,
-        permissionMessage,
-        isRequired,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        onSuccess
-    )
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            launch(block = onSuccess)
+            return
+        }
+        requestPermission(activity, permissionMessage, isRequired, Manifest.permission.WRITE_EXTERNAL_STORAGE, onSuccess)
+    }
 
     fun requestCameraPermission(
         activity: AppCompatActivity,

@@ -254,14 +254,18 @@ class LibrusLoginPortal(val data: DataLibrus, val onSuccess: () -> Unit) {
                     data.error(TAG, ERROR_RESPONSE_EMPTY, response)
                     return
                 }
-                val error = if (response?.code() == 200) null else
-                    json.getString("hint") ?: json.getString("error")
-                error?.let { code ->
-                    when (code) {
+                if (response?.code() != HTTP_OK) {
+                    val oauthError = json.getString("error")
+                    val error = oauthError.takeIf { it == "invalid_grant" } ?: json.getString("hint") ?: oauthError
+                    when (error) {
                         "Authorization code has expired" -> ERROR_LOGIN_LIBRUS_PORTAL_CODE_EXPIRED
                         "Authorization code has been revoked" -> ERROR_LOGIN_LIBRUS_PORTAL_CODE_REVOKED
                         "Cannot decrypt the refresh token" -> ERROR_LOGIN_LIBRUS_PORTAL_REFRESH_INVALID
                         "Token has been revoked" -> ERROR_LOGIN_LIBRUS_PORTAL_REFRESH_REVOKED
+                        "The refresh token is invalid." -> ERROR_LOGIN_LIBRUS_PORTAL_REFRESH_INVALID
+                        "invalid_grant", "Token has expired" ->
+                            if (refreshToken != null) ERROR_LOGIN_LIBRUS_PORTAL_REFRESH_INVALID
+                            else ERROR_LOGIN_LIBRUS_PORTAL_CODE_EXPIRED
                         "Check the `client_id` parameter" -> ERROR_LOGIN_LIBRUS_PORTAL_NO_CLIENT_ID
                         "Check the `code` parameter" -> ERROR_LOGIN_LIBRUS_PORTAL_NO_CODE
                         "Check the `refresh_token` parameter" -> ERROR_LOGIN_LIBRUS_PORTAL_NO_REFRESH
@@ -310,6 +314,7 @@ class LibrusLoginPortal(val data: DataLibrus, val onSuccess: () -> Unit) {
                 .userAgent(LIBRUS_USER_AGENT)
                 .addParams(params)
                 .post()
+                .allowErrorCode(HTTP_BAD_REQUEST)
                 .allowErrorCode(HTTP_UNAUTHORIZED)
                 .callback(callback)
                 .build()

@@ -6,9 +6,11 @@ import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +29,7 @@ import pl.szczodrzynski.edziennik.data.api.task.SzkolnyTask
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
 import pl.szczodrzynski.edziennik.ext.toApiError
+import pl.szczodrzynski.edziennik.ext.toJsonObject
 import pl.szczodrzynski.edziennik.ui.widgets.WidgetUpdater
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -36,7 +39,34 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
     companion object {
         private const val LEGACY_TAG = "SyncWorker"
         private const val WORK_NAME = "PeriodicSchoolSync"
+        private const val PUSH_PROFILE_IDS = "pushProfileIds"
+        private const val PUSH_FEATURE_IDS = "pushFeatureIds"
+        private const val PUSH_ENDPOINTS = "pushEndpoints"
+        private const val PUSH_ARGUMENTS = "pushArguments"
         private const val MAX_RETRIES = 2
+
+        internal fun enqueuePushSync(context: Context, tasks: List<IApiTask>): Boolean {
+            val profileRequests = tasks.map { task ->
+                val request = (task as? EdziennikTask)?.request as? EdziennikTask.SyncProfileRequest
+                    ?: return false
+                request to task.profileId
+            }
+            val workManager = WorkManager.getInstance(context)
+            for ((request, profileIds) in profileRequests.groupBy({ it.first }, { it.second })) {
+                val work = OneTimeWorkRequestBuilder<SyncWorker>()
+                    .setInputData(workDataOf(
+                        PUSH_PROFILE_IDS to profileIds.distinct().toIntArray(),
+                        PUSH_FEATURE_IDS to request.featureTypes?.map { it.id }?.toIntArray(),
+                        PUSH_ENDPOINTS to request.onlyEndpoints?.toIntArray(),
+                        PUSH_ARGUMENTS to request.arguments?.toString(),
+                    ))
+                    .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 2, TimeUnit.MINUTES)
+                    .build()
+                workManager.enqueue(work)
+            }
+            return true
+        }
 
         fun scheduleNext(app: App) {
             WorkManager.getInstance(app).cancelAllWorkByTag(LEGACY_TAG)
@@ -68,24 +98,22 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val app = applicationContext as App
-        if (WORK_NAME !in tags || !app.config.sync.enabled) return@withContext Result.success()
+        val pushProfileIds = inputData.getIntArray(PUSH_PROFILE_IDS)?.toSet()
+        val periodic = pushProfileIds == null
+        if (periodic && (WORK_NAME !in tags || !app.config.sync.enabled)) return@withContext Result.success()
         if (withTimeoutOrNull(30_000) { app.syncReady.await() } == null) return@withContext retryOrFail()
-        if (!app.config.sync.enabled) return@withContext Result.success()
+        if (periodic && !app.config.sync.enabled) return@withContext Result.success()
 
         if (!ApiService.executionLock.tryLock()) return@withContext retryOrFail()
 
         try {
+            val tasks = getSyncTasks(app, pushProfileIds)
+            if (!periodic && tasks.isEmpty()) return@withContext Result.success()
+
             val outcomes = mutableListOf<Outcome>()
             val profiles = mutableListOf<Profile>()
             val completed = withTimeoutOrNull(TimeUnit.MINUTES.toMillis(7)) {
-                for (profile in app.db.profileDao().profilesForSyncNow) {
-                    val selected = app.config[profile.id].sync.automaticSyncFeatures
-                        ?.intersect(profile.loginStoreType.features)
-                    if (selected?.isEmpty() == true) continue
-
-                    // Including the required features keeps a single selection on the normal endpoint timers.
-                    val features = selected?.plus(FeatureType.getNecessary())
-                    val task = EdziennikTask.syncProfile(profile.id, features)
+                for (task in tasks) {
                     outcomes += runTask(app, task) { callback ->
                         task.profile?.let(profiles::add)
                         task.run(app, callback)
@@ -110,6 +138,29 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
             }
         } finally {
             ApiService.executionLock.unlock()
+        }
+    }
+
+    private fun getSyncTasks(app: App, pushProfileIds: Set<Int>?): List<EdziennikTask> {
+        val profiles = app.db.profileDao().profilesForSyncNow
+        if (pushProfileIds != null) {
+            val features = inputData.getIntArray(PUSH_FEATURE_IDS)?.let { ids ->
+                FeatureType.entries.filter { it.id in ids }.toSet()
+            }
+            val endpoints = inputData.getIntArray(PUSH_ENDPOINTS)?.toSet()
+            val arguments = inputData.getString(PUSH_ARGUMENTS)?.toJsonObject()
+            return profiles.filter { it.id in pushProfileIds }.map {
+                EdziennikTask.syncProfile(it.id, features, endpoints, arguments)
+            }
+        }
+
+        return profiles.mapNotNull { profile ->
+            val selected = app.config[profile.id].sync.automaticSyncFeatures
+                ?.intersect(profile.loginStoreType.features)
+            if (selected?.isEmpty() == true) return@mapNotNull null
+
+            // Including the required features keeps a single selection on the normal endpoint timers.
+            EdziennikTask.syncProfile(profile.id, selected?.plus(FeatureType.getNecessary()))
         }
     }
 

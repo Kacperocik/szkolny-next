@@ -5,7 +5,6 @@
 package pl.szczodrzynski.edziennik.ui.base.views
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
 import androidx.appcompat.app.AppCompatActivity
@@ -51,10 +50,6 @@ class AttachmentsView @JvmOverloads constructor(
         val attachmentSizes = arguments.getLongArray("attachmentSizes")
 
         val adapter = AttachmentAdapter(context, onAttachmentClick = { item ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                downloadAttachment(item)
-                return@AttachmentAdapter
-            }
             app.permissionManager.requestStoragePermission(activity, R.string.permissions_attachment) {
                 downloadAttachment(item)
             }
@@ -62,10 +57,6 @@ class AttachmentsView @JvmOverloads constructor(
             val popupMenu = PopupMenu(chip.context, chip)
             popupMenu.menu.add(0, 1, 0, R.string.messages_attachment_download_again)
             popupMenu.setOnMenuItemClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    downloadAttachment(item)
-                    return@setOnMenuItemClickListener true
-                }
                 app.permissionManager.requestStoragePermission(activity, R.string.permissions_attachment) {
                     downloadAttachment(item, forceDownload = true)
                 }

@@ -89,6 +89,6 @@ class SzkolnyLibrusFirebase(val app: App, val profiles: List<Profile>, val messa
         }.map {
             EdziennikTask.syncProfile(it.id, setOf(FeatureType.ALWAYS_NEEDED), onlyEndpoints = endpoints)
         }
-        IApiTask.enqueueAll(app, tasks)
+        IApiTask.enqueueAll(app, tasks, fromPush = true)
     }}
 }

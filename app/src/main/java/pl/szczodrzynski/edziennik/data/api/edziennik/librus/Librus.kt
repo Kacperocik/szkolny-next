@@ -42,6 +42,7 @@ class Librus(val app: App, val profile: Profile?, val loginStore: LoginStore, va
     val internalErrorList = mutableListOf<Int>()
     val data: DataLibrus
     private var afterLogin: (() -> Unit)? = null
+    private var portalLoginRetried = false
 
     init {
         data = DataLibrus(app, profile, loginStore).apply {
@@ -80,6 +81,21 @@ class Librus(val app: App, val profile: Profile?, val loginStore: LoginStore, va
         LibrusLogin(data) {
             data()
         }
+    }
+
+    private fun retryPortalLogin(error: ApiError, clearRefreshToken: Boolean = false) {
+        if (portalLoginRetried) {
+            callback.onError(error)
+            return
+        }
+        portalLoginRetried = true
+        if (clearRefreshToken)
+            data.portalRefreshToken = null
+        data.portalTokenExpiryTime = 0
+        data.loginMethods.remove(LoginMethod.LIBRUS_PORTAL)
+        data.targetLoginMethods.remove(LoginMethod.LIBRUS_PORTAL)
+        data.targetLoginMethods.add(0, LoginMethod.LIBRUS_PORTAL)
+        login()
     }
 
     private fun data() {
@@ -216,12 +232,7 @@ class Librus(val app: App, val profile: Profile?, val loginStore: LoginStore, va
                 }
                 internalErrorList.add(apiError.errorCode)
                 when (apiError.errorCode) {
-                    ERROR_LIBRUS_PORTAL_ACCESS_DENIED -> {
-                        data.loginMethods.remove(LoginMethod.LIBRUS_PORTAL)
-                        data.prepareFor(LoginMethod.LIBRUS_PORTAL)
-                        data.portalTokenExpiryTime = 0
-                        login()
-                    }
+                    ERROR_LIBRUS_PORTAL_ACCESS_DENIED -> retryPortalLogin(apiError)
                     ERROR_LIBRUS_API_ACCESS_DENIED,
                     ERROR_LIBRUS_API_TOKEN_EXPIRED -> {
                         data.loginMethods.remove(LoginMethod.LIBRUS_API)
@@ -245,15 +256,10 @@ class Librus(val app: App, val profile: Profile?, val loginStore: LoginStore, va
                     ERROR_LOGIN_LIBRUS_PORTAL_CSRF_MISSING,
                     ERROR_LOGIN_LIBRUS_PORTAL_CSRF_EXPIRED,
                     ERROR_LOGIN_LIBRUS_PORTAL_CODE_REVOKED,
-                    ERROR_LOGIN_LIBRUS_PORTAL_CODE_EXPIRED -> {
-                        login()
-                    }
+                    ERROR_LOGIN_LIBRUS_PORTAL_CODE_EXPIRED -> retryPortalLogin(apiError)
                     ERROR_LOGIN_LIBRUS_PORTAL_NO_REFRESH,
                     ERROR_LOGIN_LIBRUS_PORTAL_REFRESH_REVOKED,
-                    ERROR_LOGIN_LIBRUS_PORTAL_REFRESH_INVALID -> {
-                        data.portalRefreshToken = null
-                        login()
-                    }
+                    ERROR_LOGIN_LIBRUS_PORTAL_REFRESH_INVALID -> retryPortalLogin(apiError, clearRefreshToken = true)
                     ERROR_LOGIN_LIBRUS_SYNERGIA_TOKEN_INVALID,
                     ERROR_LOGIN_LIBRUS_SYNERGIA_NO_TOKEN,
                     ERROR_LOGIN_LIBRUS_SYNERGIA_NO_SESSION_ID -> {

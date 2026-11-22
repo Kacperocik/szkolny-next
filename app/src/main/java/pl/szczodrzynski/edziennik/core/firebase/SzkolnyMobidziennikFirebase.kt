@@ -63,6 +63,6 @@ class SzkolnyMobidziennikFirebase(val app: App, val profiles: List<Profile>, val
         }.map {
             EdziennikTask.syncProfile(it.id, setOf(featureType))
         }
-        IApiTask.enqueueAll(app, tasks)
+        IApiTask.enqueueAll(app, tasks, fromPush = true)
     }}
 }
