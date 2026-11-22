@@ -10,6 +10,7 @@ import im.wangchao.mhttp.callback.FileCallbackHandler
 import im.wangchao.mhttp.callback.TextCallbackHandler
 import pl.szczodrzynski.edziennik.data.api.*
 import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.DataMobidziennik
+import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.login.isMobidziennikLoginPage
 import pl.szczodrzynski.edziennik.data.api.models.ApiError
 import timber.log.Timber
 import java.io.File
@@ -62,7 +63,7 @@ open class MobidziennikWeb(open val data: DataMobidziennik, open val lastSync: L
             data.error(TAG, ERROR_MOBIDZIENNIK_WEB_NO_SESSION_VALUE)
             return
         }
-        if (data.webServerId == null) {
+        if (!data.usesLoginForm && data.webServerId == null) {
             data.error(TAG, ERROR_MOBIDZIENNIK_WEB_NO_SERVER_ID)
             return
         }
@@ -75,7 +76,8 @@ open class MobidziennikWeb(open val data: DataMobidziennik, open val lastSync: L
                     return
                 }
                 if (text == "Nie jestes zalogowany"
-                        || text.contains("przypomnij_haslo_email")) {
+                        || text.contains("przypomnij_haslo_email")
+                        || data.usesLoginForm && isMobidziennikLoginPage(text)) {
                     data.error(ApiError(TAG, ERROR_MOBIDZIENNIK_WEB_ACCESS_DENIED)
                             .withResponse(response))
                     return
@@ -105,7 +107,7 @@ open class MobidziennikWeb(open val data: DataMobidziennik, open val lastSync: L
         }
 
         data.app.cookieJar.set("${data.loginServerName}.mobidziennik.pl", data.webSessionKey, data.webSessionValue)
-        data.app.cookieJar.set("${data.loginServerName}.mobidziennik.pl", "SERVERID", data.webServerId)
+        data.webServerId?.let { data.app.cookieJar.set("${data.loginServerName}.mobidziennik.pl", "SERVERID", it) }
 
         Request.builder()
                 .url(url)
@@ -138,7 +140,7 @@ open class MobidziennikWeb(open val data: DataMobidziennik, open val lastSync: L
             data.error(TAG, ERROR_MOBIDZIENNIK_WEB_NO_SESSION_VALUE)
             return
         }
-        if (data.webServerId == null) {
+        if (!data.usesLoginForm && data.webServerId == null) {
             data.error(TAG, ERROR_MOBIDZIENNIK_WEB_NO_SERVER_ID)
             return
         }
@@ -177,7 +179,7 @@ open class MobidziennikWeb(open val data: DataMobidziennik, open val lastSync: L
         }
 
         data.app.cookieJar.set("${data.loginServerName}.mobidziennik.pl", data.webSessionKey, data.webSessionValue)
-        data.app.cookieJar.set("${data.loginServerName}.mobidziennik.pl", "SERVERID", data.webServerId)
+        data.webServerId?.let { data.app.cookieJar.set("${data.loginServerName}.mobidziennik.pl", "SERVERID", it) }
 
         Request.builder()
                 .url(url)

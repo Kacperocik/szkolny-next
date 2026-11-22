@@ -1455,6 +1455,9 @@
     <string name="login_mode_vulcan_web_hint">Zaloguj danymi, które podajesz na stronie e-dziennika VULCAN®</string>
     <string name="login_type_mobidziennik" translatable="false">MobiDziennik</string>
     <string name="login_mode_mobidziennik_web">Zaloguj nazwą serwera, loginem i hasłem</string>
+    <string name="login_mode_mobidziennik_form">Zaloguj formularzem strony dziennika</string>
+    <string name="login_mode_mobidziennik_form_hint">Pobiera dane ze strony MobiDziennika</string>
+    <string name="login_mode_mobidziennik_form_guide">Podaj adres serwera, login i hasło używane na stronie MobiDziennika.</string>
     <string name="login_mode_mobidziennik_web_hint">Podaj dane, których używasz na stronie e-dziennika</string>
     <string name="login_platform_list_title">W jaki sposób się logujesz do dziennika?</string>
     <string name="login_platform_list_subtitle">Wybierz, który obrazek odpowiada temu, który widzisz podczas logowania na stronie internetowej swojego dziennika.\n\nJeżeli Twoja szkoła nie korzysta z żadnej z tych platform miejskich, wybierz pierwszą opcję.</string>

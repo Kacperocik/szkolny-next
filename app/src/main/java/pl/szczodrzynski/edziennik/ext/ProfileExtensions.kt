@@ -17,6 +17,7 @@ import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.config.AppData
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
+import pl.szczodrzynski.edziennik.data.enums.LoginMode
 import pl.szczodrzynski.edziennik.data.enums.LoginType
 import pl.szczodrzynski.edziennik.utils.ProfileImageHolder
 import pl.szczodrzynski.edziennik.utils.models.Date
@@ -64,7 +65,10 @@ fun Profile.getSchoolYearConstrains(): CalendarConstraints {
         .build()
 }
 
-fun Profile.hasFeature(featureType: FeatureType) = featureType in this.loginStoreType.features
+fun Profile.hasFeature(featureType: FeatureType): Boolean =
+    featureType in loginStoreType.features ||
+        (featureType == FeatureType.ANNOUNCEMENTS && loginStoreType == LoginType.MOBIDZIENNIK &&
+            !archived && App.db.loginStoreDao().getByIdNow(loginStoreId)?.mode == LoginMode.MOBIDZIENNIK_FORM)
 fun Profile.hasUIFeature(featureType: FeatureType) =
     featureType.isUIAlwaysAvailable ||
         hasFeature(featureType) ||

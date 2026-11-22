@@ -48,7 +48,10 @@ class MobidziennikLogin(val data: DataMobidziennik, val onSuccess: () -> Unit) {
         when (loginMethod) {
             LoginMethod.MOBIDZIENNIK_WEB -> {
                 data.startProgress(R.string.edziennik_progress_login_mobidziennik_web)
-                MobidziennikLoginWeb(data) { onSuccess(loginMethod) }
+                if (data.usesLoginForm)
+                    MobidziennikLoginForm(data) { onSuccess(loginMethod) }
+                else
+                    MobidziennikLoginWeb(data) { onSuccess(loginMethod) }
             }
             LoginMethod.MOBIDZIENNIK_API2 -> {
                 data.startProgress(R.string.edziennik_progress_login_mobidziennik_api2)

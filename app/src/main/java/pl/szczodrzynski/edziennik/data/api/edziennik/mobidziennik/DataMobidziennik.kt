@@ -10,6 +10,7 @@ import pl.szczodrzynski.edziennik.data.api.models.Data
 import pl.szczodrzynski.edziennik.data.db.entity.LoginStore
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.data.enums.LoginMethod
+import pl.szczodrzynski.edziennik.data.enums.LoginMode
 import pl.szczodrzynski.edziennik.ext.currentTimeUnix
 import pl.szczodrzynski.edziennik.ext.getStudentData
 import pl.szczodrzynski.edziennik.ext.isNotNullNorEmpty
@@ -19,10 +20,12 @@ import pl.szczodrzynski.edziennik.utils.models.Time
 
 class DataMobidziennik(app: App, profile: Profile?, loginStore: LoginStore) : Data(app, profile, loginStore) {
 
+    val usesLoginForm = loginStore.mode == LoginMode.MOBIDZIENNIK_FORM
+
     fun isWebLoginValid() = webSessionIdExpiryTime-30 > currentTimeUnix()
             && webSessionValue.isNotNullNorEmpty()
             && webSessionKey.isNotNullNorEmpty()
-            && webServerId.isNotNullNorEmpty()
+            && (usesLoginForm || webServerId.isNotNullNorEmpty())
 
     fun isApi2LoginValid() = loginEmail.isNotNullNorEmpty()
             && loginId.isNotNullNorEmpty()

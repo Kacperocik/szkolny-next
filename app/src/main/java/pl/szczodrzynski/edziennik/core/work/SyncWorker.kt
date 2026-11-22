@@ -28,6 +28,7 @@ import pl.szczodrzynski.edziennik.data.api.task.IApiTask
 import pl.szczodrzynski.edziennik.data.api.task.SzkolnyTask
 import pl.szczodrzynski.edziennik.data.db.entity.Profile
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
+import pl.szczodrzynski.edziennik.ext.hasFeature
 import pl.szczodrzynski.edziennik.ext.toApiError
 import pl.szczodrzynski.edziennik.ext.toJsonObject
 import pl.szczodrzynski.edziennik.ui.widgets.WidgetUpdater
@@ -156,7 +157,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
 
         return profiles.mapNotNull { profile ->
             val selected = app.config[profile.id].sync.automaticSyncFeatures
-                ?.intersect(profile.loginStoreType.features)
+                ?.filterTo(mutableSetOf(), profile::hasFeature)
             if (selected?.isEmpty() == true) return@mapNotNull null
 
             // Including the required features keeps a single selection on the normal endpoint timers.

@@ -1445,6 +1445,9 @@
     <string name="login_mode_vulcan_web">E-Mail/Benutzername und Passwort verwenden</string>
     <string name="login_mode_vulcan_web_hint">Melden Sie sich mit den Daten der VULCAN®-Website an</string>
     <string name="login_mode_mobidziennik_web">Servername, Benutzername und Passwort eingeben</string>
+    <string name="login_mode_mobidziennik_form">Mit dem Webformular anmelden</string>
+    <string name="login_mode_mobidziennik_form_hint">Ruft Daten von der MobiDziennik-Website ab</string>
+    <string name="login_mode_mobidziennik_form_guide">Geben Sie die Serveradresse, den Benutzernamen und das Passwort ein, die Sie auf der MobiDziennik-Website verwenden.</string>
     <string name="login_mode_mobidziennik_web_hint">Geben Sie die Anmeldedaten der E-Klassenbuch-Website ein</string>
     <string name="login_platform_list_title">Wie melden Sie sich beim E-Klassenbuch an?</string>
     <string name="login_platform_list_subtitle">Wählen Sie das Bild, das der Anmeldung auf der Website entspricht.\n\nFalls Ihre Schule keine städtische Plattform nutzt, wählen Sie die erste Option.</string>

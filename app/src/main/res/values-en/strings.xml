@@ -1489,6 +1489,9 @@
     <string name="login_mode_librus_email">Log in using e-mail</string>
     <string name="attendance_details_id">Attendance ID</string>
     <string name="login_mode_mobidziennik_web">Log in with the server name, login and password</string>
+    <string name="login_mode_mobidziennik_form">Log in using the register website form</string>
+    <string name="login_mode_mobidziennik_form_hint">Downloads data from the MobiDziennik website</string>
+    <string name="login_mode_mobidziennik_form_guide">Enter the server address, username and password you use on the MobiDziennik website.</string>
     <string name="login_mode_vulcan_web_hint">Log in with the data that you provide on VULCAN® e-register website</string>
     <string name="login_mode_mobidziennik_web_hint">Provide data, that you use on e-register website</string>
     <string name="attendance_details_type_id">Base type ID</string>

@@ -10,6 +10,12 @@ import pl.szczodrzynski.edziennik.data.api.*
 import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.data.MobidziennikData
 import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.data.web.*
 import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.firstlogin.MobidziennikFirstLogin
+import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.html.MobidziennikHtmlFeatures
+import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.html.MobidziennikHtmlFirstLogin
+import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.html.MobidziennikHtmlGetHomework
+import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.html.MobidziennikHtmlGetMessage
+import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.html.MobidziennikHtmlGetRecipientList
+import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.html.MobidziennikHtmlSendMessage
 import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.login.MobidziennikLogin
 import pl.szczodrzynski.edziennik.data.api.events.UserActionRequiredEvent
 import pl.szczodrzynski.edziennik.data.api.interfaces.EdziennikCallback
@@ -58,7 +64,8 @@ class Mobidziennik(val app: App, val profile: Profile?, val loginStore: LoginSto
                                           |__*/
     override fun sync(featureTypes: Set<FeatureType>?, onlyEndpoints: Set<Int>?, arguments: JsonObject?) {
         data.arguments = arguments
-        data.prepare(MobidziennikFeatures, featureTypes, onlyEndpoints)
+        val features = if (data.usesLoginForm) MobidziennikHtmlFeatures else MobidziennikFeatures
+        data.prepare(features, featureTypes, onlyEndpoints)
         login()
     }
 
@@ -88,17 +95,19 @@ class Mobidziennik(val app: App, val profile: Profile?, val loginStore: LoginSto
 
     override fun getMessage(message: MessageFull) {
         login(LoginMethod.MOBIDZIENNIK_WEB) {
-            MobidziennikWebGetMessage(data, message) {
-                completed()
-            }
+            if (data.usesLoginForm)
+                MobidziennikHtmlGetMessage(data, message, ::completed)
+            else
+                MobidziennikWebGetMessage(data, message, ::completed)
         }
     }
 
     override fun sendMessage(recipients: Set<Teacher>, subject: String, text: String) {
         login(LoginMethod.MOBIDZIENNIK_WEB) {
-            MobidziennikWebSendMessage(data, recipients, subject, text) {
-                completed()
-            }
+            if (data.usesLoginForm)
+                MobidziennikHtmlSendMessage(data, recipients, subject, text, ::completed)
+            else
+                MobidziennikWebSendMessage(data, recipients, subject, text, ::completed)
         }
     }
 
@@ -115,15 +124,21 @@ class Mobidziennik(val app: App, val profile: Profile?, val loginStore: LoginSto
 
     override fun getRecipientList() {
         login(LoginMethod.MOBIDZIENNIK_WEB) {
-            MobidziennikWebGetRecipientList(data) {
-                completed()
-            }
+            if (data.usesLoginForm)
+                MobidziennikHtmlGetRecipientList(data, ::completed)
+            else
+                MobidziennikWebGetRecipientList(data, ::completed)
         }
     }
 
     override fun getEvent(eventFull: EventFull) {
         login(LoginMethod.MOBIDZIENNIK_WEB) {
-            if (eventFull.isHomework) {
+            if (data.usesLoginForm) {
+                if (eventFull.isHomework)
+                    MobidziennikHtmlGetHomework(data, eventFull, ::completed)
+                else
+                    completed()
+            } else if (eventFull.isHomework) {
                 MobidziennikWebGetHomework(data, eventFull) {
                     completed()
                 }
@@ -136,7 +151,12 @@ class Mobidziennik(val app: App, val profile: Profile?, val loginStore: LoginSto
         }
     }
 
-    override fun firstLogin() { MobidziennikFirstLogin(data) { completed() } }
+    override fun firstLogin() {
+        if (data.usesLoginForm)
+            MobidziennikHtmlFirstLogin(data, ::completed)
+        else
+            MobidziennikFirstLogin(data, ::completed)
+    }
     override fun cancel() {
         Timber.d("Cancelled")
         data.cancel()
