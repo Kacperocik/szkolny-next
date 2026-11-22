@@ -13,6 +13,7 @@ import pl.szczodrzynski.edziennik.data.db.entity.Message.Companion.TYPE_RECEIVED
 import pl.szczodrzynski.edziennik.data.db.entity.Message.Companion.TYPE_SENT
 import pl.szczodrzynski.edziennik.data.db.entity.MessageRecipient
 import pl.szczodrzynski.edziennik.data.db.entity.Metadata
+import pl.szczodrzynski.edziennik.data.enums.FeatureType
 import pl.szczodrzynski.edziennik.data.enums.MetadataType
 import pl.szczodrzynski.edziennik.ext.DAY
 import pl.szczodrzynski.edziennik.ext.fixName
@@ -55,6 +56,8 @@ class MobidziennikWebMessagesAll(override val data: DataMobidziennik,
                 var type = TYPE_RECEIVED
                 if (typeEl?.outerHtml()?.contains("mail_send.png") == true)
                     type = TYPE_SENT
+                val feature = if (type == TYPE_SENT) FeatureType.MESSAGES_SENT else FeatureType.MESSAGES_INBOX
+                if (!data.shouldSyncFeature(feature)) return@forEach
 
                 val senderEl = item.select("td:eq(3) div").first()
                 var senderId: Long? = null

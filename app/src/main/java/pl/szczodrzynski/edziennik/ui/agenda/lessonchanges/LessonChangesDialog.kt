@@ -45,5 +45,6 @@ class LessonChangesDialog(
 
         b.lessonChangeView.adapter = adapter
         b.lessonChangeView.layoutManager = LinearLayoutManager(activity)
+        app.timetableManager.markAsSeen(lessonChanges)
     }
 }

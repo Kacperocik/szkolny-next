@@ -11,30 +11,28 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.distinctUntilChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.ShapeAppearanceModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.full.AttendanceFull
+import pl.szczodrzynski.edziennik.data.enums.MetadataType
 import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ext.enableExpressiveCardShapeMorph
-import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
 import pl.szczodrzynski.edziennik.ui.attendance.models.*
 import pl.szczodrzynski.edziennik.ui.attendance.viewholder.*
 import pl.szczodrzynski.edziennik.ui.grades.models.ExpandableItemModel
 import pl.szczodrzynski.edziennik.ui.grades.viewholder.BindableViewHolder
-import kotlin.coroutines.CoroutineContext
 
 class AttendanceAdapter(
         val activity: AppCompatActivity,
         val type: Int,
         val showNotes: Boolean = true,
         var onAttendanceClick: ((item: AttendanceFull) -> Unit)? = null
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
         private const val TAG = "AttendanceAdapter"
         private const val ITEM_TYPE_ATTENDANCE = 0
@@ -50,11 +48,38 @@ class AttendanceAdapter(
     private val app = activity.applicationContext as App
     // optional: place the manager here
 
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
-
+    private var seenIds = emptySet<Long>()
     var items = mutableListOf<Any>()
+        set(value) {
+            field = value
+            applySeenIds()
+        }
+
+    fun observeSeen(owner: LifecycleOwner, profileId: Int) {
+        app.db.metadataDao().getSeenIds(profileId, MetadataType.ATTENDANCE)
+            .distinctUntilChanged().observe(owner) { ids ->
+                seenIds = ids.toHashSet()
+                if (applySeenIds()) notifyDataSetChanged()
+            }
+    }
+
+    private fun applySeenIds(): Boolean {
+        var changed = false
+        fun update(entry: AttendanceFull) {
+            if (entry.id in seenIds && (!entry.seen || entry.showAsUnseen == true)) {
+                entry.seen = true
+                entry.showAsUnseen = false
+                changed = true
+            }
+        }
+        for (item in items) {
+            when (item) {
+                is AttendanceFull -> update(item)
+                is ExpandableItemModel<*> -> item.items.filterIsInstance<AttendanceFull>().forEach(::update)
+            }
+        }
+        return changed
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -190,14 +215,6 @@ class AttendanceAdapter(
             holder.itemView.setOnClickListener(onClickListener)
         else
             holder.itemView.setOnClickListener(null)
-    }
-
-    fun notifyItemChanged(model: Any) {
-        startCoroutineTimer(1000L, 0L) {
-            val index = items.indexOf(model)
-            if (index != -1)
-                notifyItemChanged(index)
-        }
     }
 
     private fun bindGroupShape(view: View, item: Any, position: Int) {

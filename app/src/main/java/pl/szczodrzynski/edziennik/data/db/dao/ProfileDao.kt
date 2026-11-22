@@ -41,7 +41,7 @@ interface ProfileDao {
     fun getIdsByLoginStoreIdNow(loginStoreId: Int): List<Int>
 
     @get:Query("SELECT * FROM profiles WHERE syncEnabled = 1 AND archived = 0 AND profileId >= 0 ORDER BY profileId")
-    val profilesForFirebaseNow: List<Profile>
+    val profilesForSyncNow: List<Profile>
 
     @get:Query("SELECT profileId FROM profiles WHERE syncEnabled = 1 AND archived = 0 AND profileId >= 0 ORDER BY profileId")
     val idsForSyncNow: List<Int>

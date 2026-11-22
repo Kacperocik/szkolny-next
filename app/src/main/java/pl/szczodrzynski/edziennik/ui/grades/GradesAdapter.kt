@@ -99,6 +99,32 @@ class GradesAdapter(
 
     var items = mutableListOf<Any>()
 
+    fun applySeenGrades(seenIds: Set<Long>) {
+        var changed = false
+        fun update(grade: GradeFull?) {
+            if (grade == null || grade.id !in seenIds || (grade.seen && !grade.showAsUnseen)) return
+            if (!grade.seen && manager.hideImproved && grade.isImproved && grade in items)
+                removeItem(grade)
+            grade.seen = true
+            grade.showAsUnseen = false
+            changed = true
+        }
+
+        for (subject in items.filterIsInstance<GradesSubject>()) {
+            update(subject.proposedGrade)
+            update(subject.finalGrade)
+            subject.hasUnseen = subject.proposedGrade?.seen == false || subject.finalGrade?.seen == false
+            for (semester in subject.semesters) {
+                update(semester.proposedGrade)
+                update(semester.finalGrade)
+                semester.grades.forEach(::update)
+                semester.hasUnseen = semester.proposedGrade?.seen == false ||
+                    semester.finalGrade?.seen == false || semester.grades.any { !it.seen }
+            }
+        }
+        if (changed) notifyDataSetChanged()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {

@@ -15,8 +15,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 import androidx.core.content.ContextCompat
+import androidx.core.os.BundleCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,6 +45,7 @@ import pl.szczodrzynski.edziennik.data.db.full.EventFull
 import pl.szczodrzynski.edziennik.data.db.full.LessonFull
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
 import pl.szczodrzynski.edziennik.data.enums.MetadataType
+import pl.szczodrzynski.edziennik.data.enums.NavTarget
 import pl.szczodrzynski.edziennik.databinding.FragmentTimetableV2Binding
 import pl.szczodrzynski.edziennik.databinding.TimetableLessonBinding
 import pl.szczodrzynski.edziennik.ext.Bundle
@@ -66,7 +69,7 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
 ) {
     companion object {
         private const val TAG = "TimetableFragment"
-        const val ACTION_SCROLL_TO_DATE = "pl.szczodrzynski.edziennik.timetable.SCROLL_TO_DATE"
+        private const val ARG_LESSON_TARGET = "lessonTarget"
         const val ACTION_RELOAD_PAGES = "pl.szczodrzynski.edziennik.timetable.RELOAD_PAGES"
         const val DEFAULT_START_HOUR = 6
         const val DEFAULT_END_HOUR = 19
@@ -88,6 +91,34 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
         private const val PREWARM_LESSON_VIEWS_COUNT = 20
         private const val MAX_LESSON_POOL_SIZE = 48
         private const val MAX_HOUR_LABEL_POOL_SIZE = 96
+
+        internal fun openDay(
+            activity: AppCompatActivity,
+            profileId: Int,
+            date: Date,
+            lessonTarget: TimetableLessonTarget? = null,
+        ) {
+            if (activity is MainActivity && activity.navTarget == NavTarget.TIMETABLE && profileId == App.profileId) {
+                val timetable = activity.supportFragmentManager.findFragmentById(R.id.fragment) as? TimetableFragment
+                if (timetable?.goToDate(date, lessonTarget) == true)
+                    return
+            }
+
+            val args = Bundle(
+                "timetableDate" to date.stringY_m_d,
+                "downloadTimetableIfMissing" to true,
+                ARG_LESSON_TARGET to lessonTarget,
+            )
+            if (activity is MainActivity) {
+                activity.navigate(profileId = profileId, navTarget = NavTarget.TIMETABLE, args = args)
+            } else {
+                activity.startActivity(Intent(activity, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    putExtras(args)
+                    putExtras(Bundle("fragmentId" to NavTarget.TIMETABLE, "profileId" to profileId))
+                })
+            }
+        }
     }
 
     data class DayData(
@@ -103,15 +134,7 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
             .withIcon(CommunityMaterial.Icon.cmd_calendar_sync_outline)
             .withOnClickListener {
                 activity.bottomSheet.close()
-                val date = pageSelection ?: Date.getToday()
-                val weekStart = date.weekStart.stringY_m_d
-                EdziennikTask.syncProfile(
-                    profileId = App.profileId,
-                    featureTypes = setOf(FeatureType.TIMETABLE),
-                    arguments = JsonObject(
-                        "weekStart" to weekStart
-                    )
-                ).enqueue(activity)
+                downloadWeek(pageSelection ?: Date.getToday())
             },
         BottomSheetPrimaryItem(true)
             .withTitle(R.string.timetable_select_day)
@@ -125,10 +148,7 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
                     .build()
                     .apply {
                         addOnPositiveButtonClickListener { millis ->
-                            val dateSelected = Date.fromMillisUtc(millis)
-                            val index = items.indexOfFirst { it == dateSelected }
-                            if (index != -1)
-                                b.viewPager.setCurrentItem(index, true)
+                            goToDate(Date.fromMillisUtc(millis), downloadIfMissing = false)
                         }
                     }
                     .show(activity.supportFragmentManager, TAG)
@@ -185,23 +205,61 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
         )
     }
 
-    override fun getPageTitle(position: Int): String =
-        pageTitles.getOrElse(position) {
-            val date = items[position]
-            var pageTitle = Week.getFullDayName(date.weekDay)
-            if (date > weekEnd || date < weekStart) {
-                pageTitle += ", ${date.stringDm}"
-            }
-            pageTitle
-        }
+    override fun getPageTitle(position: Int): String = pageTitles[position]
 
     private var startHour = DEFAULT_START_HOUR
     private var endHour = DEFAULT_END_HOUR
     private val today by lazy { Date.getToday() }
     private val weekStart by lazy { today.weekStart }
     private val weekEnd by lazy { weekStart.clone().stepForward(0, 0, 6) }
+    private var schoolDates = emptyList<Date>()
     private val items = mutableListOf<Date>()
     private val pageTitles = mutableListOf<String>()
+    private var showWeekends = true
+    private var revealedWeekend: Date? = null
+
+    private fun updateDayList() {
+        items.clear()
+        pageTitles.clear()
+        for (date in schoolDates) {
+            if (showWeekends || date.weekDay < Week.SATURDAY || date == revealedWeekend) {
+                items += date
+                val day = Week.getFullDayName(date.weekDay)
+                pageTitles += if (date in weekStart..weekEnd) day else "$day, ${date.stringDm}"
+            }
+        }
+    }
+
+    private fun positionAtOrAfter(date: Date): Int =
+        items.indexOfFirst { it >= date }.takeIf { it >= 0 } ?: items.lastIndex
+
+    private fun rebuildDayPages(selectedDate: Date) {
+        updateDayList()
+        val position = positionAtOrAfter(selectedDate)
+        reloadDayPages(position)
+        if (position >= 0) {
+            savedPageSelection = position
+            b.viewPager.setCurrentItem(position, false)
+            scrollPagerTo(position)
+            launch { onPageSelected(position) }
+        }
+    }
+
+    private fun closeRevealedWeekend() {
+        val weekend = revealedWeekend ?: return
+        if (pagerScrollState != ViewPager2.SCROLL_STATE_IDLE)
+            return
+        // Wait until ViewPager2 has finished dispatching the page change before replacing its pages.
+        b.viewPager.post {
+            if (view == null || revealedWeekend != weekend || pagerScrollState != ViewPager2.SCROLL_STATE_IDLE)
+                return@post
+            val selectedDate = items.getOrNull(b.viewPager.currentItem) ?: return@post
+            if (selectedDate != weekend) {
+                revealedWeekend = null
+                rebuildDayPages(selectedDate)
+            }
+        }
+    }
 
     /**
      * Number of days visible at once - the selected one and the following days.
@@ -231,6 +289,7 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
 
     private var pagerScrollState = ViewPager2.SCROLL_STATE_IDLE
     private var pendingHourRangeUpdate = false
+    private var pendingLessonHighlight: TimetableLessonTarget? = null
 
     // Shared in-memory cache of day data to avoid per-page DB queries during swipes
     private var isCacheInitialized = false
@@ -252,6 +311,54 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
             events = eventsByDate[d] ?: emptyList(),
             attendanceList = attendanceByDate[d] ?: emptyList(),
         )
+    }
+
+    private fun goToDate(
+        date: Date,
+        lessonTarget: TimetableLessonTarget? = null,
+        downloadIfMissing: Boolean = true,
+    ): Boolean {
+        if (view == null || b.viewPager.adapter == null) return false
+        val index = items.indexOf(date)
+        if (index == -1) {
+            if (showWeekends || date !in schoolDates)
+                return false
+            revealedWeekend = date
+            rebuildDayPages(date)
+        } else {
+            goToPage(index)
+        }
+
+        pendingLessonHighlight = lessonTarget
+        if (downloadIfMissing && lessonsByDate[date.value].isNullOrEmpty())
+            downloadWeek(date)
+        highlightSelectedLesson()
+        return true
+    }
+
+    internal fun lessonToHighlight(date: Date): TimetableLessonTarget? {
+        if (pagerScrollState != ViewPager2.SCROLL_STATE_IDLE || items.getOrNull(b.viewPager.currentItem) != date)
+            return null
+        return pendingLessonHighlight?.takeIf { it.dateValue == date.value }
+    }
+
+    internal fun consumeLessonHighlight(target: TimetableLessonTarget) {
+        if (pendingLessonHighlight === target)
+            pendingLessonHighlight = null
+    }
+
+    private fun highlightSelectedLesson() {
+        if (pendingLessonHighlight == null)
+            return
+        (currentFragment as? TimetableDayFragment)?.highlightPendingLesson()
+    }
+
+    private fun downloadWeek(date: Date) {
+        EdziennikTask.syncProfile(
+            profileId = App.profileId,
+            featureTypes = setOf(FeatureType.TIMETABLE),
+            arguments = JsonObject("weekStart" to date.weekStart.stringY_m_d),
+        ).enqueue(activity)
     }
 
     fun acquireLessonBinding(parent: ViewGroup): TimetableLessonBinding {
@@ -331,40 +438,33 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, i: Intent) {
-            if (!isAdded)
+            if (view == null || b.viewPager.adapter == null || i.action != ACTION_RELOAD_PAGES)
                 return
-            when (i.action) {
-                ACTION_SCROLL_TO_DATE -> {
-                    val dateStr = i.extras?.getString("timetableDate", null) ?: return
-                    val date = Date.fromY_m_d(dateStr)
-                    val index = items.indexOf(date)
-                    if (index != -1)
-                        goToPage(index)
-                }
-
-                ACTION_RELOAD_PAGES -> {
-                    // e.g. the lesson height or trimming the hours might have changed
-                    computeMultiDayHourRange(b.viewPager.currentItem).let { (start, end) ->
-                        multiDayStartHour = start
-                        multiDayEndHour = end
-                    }
-                    sharedScrollY = -1
-                    cachedHourLabelHeight = 0
-                    rebuildHourLabels()
-                    reloadPages()
-                }
+            val configuredShowWeekends = app.profile.config.ui.timetableShowWeekends
+            if (showWeekends != configuredShowWeekends) {
+                val selectedDate = items.getOrNull(b.viewPager.currentItem) ?: today
+                showWeekends = configuredShowWeekends
+                revealedWeekend = null
+                rebuildDayPages(selectedDate)
+            } else {
+                reloadDayPages(b.viewPager.currentItem)
             }
         }
     }
 
+    private fun reloadDayPages(position: Int) {
+        computeMultiDayHourRange(position).let { (start, end) ->
+            multiDayStartHour = start
+            multiDayEndHour = end
+        }
+        sharedScrollY = -1
+        cachedHourLabelHeight = 0
+        rebuildHourLabels()
+        reloadPages()
+    }
+
     override fun onResume() {
         super.onResume()
-        ContextCompat.registerReceiver(
-            activity,
-            broadcastReceiver,
-            IntentFilter(ACTION_SCROLL_TO_DATE),
-            ContextCompat.RECEIVER_NOT_EXPORTED,
-        )
         ContextCompat.registerReceiver(
             activity,
             broadcastReceiver,
@@ -402,7 +502,9 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
             CommunityMaterial.Icon2.cmd_fullscreen.toDrawable(activity)
         )
         b.todayButton.setOnClickListener {
-            b.viewPager.setCurrentItem(items.indexOfFirst { it == today }, true)
+            val position = items.indexOf(today)
+            if (position >= 0)
+                goToPage(position)
         }
         b.fullscreenButton.setOnClickListener {
             val selectedDate = items.getOrNull(b.viewPager.currentItem) ?: today
@@ -418,37 +520,11 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
         prewarmLessonPool()
 
         val deferred = async(Dispatchers.Default) {
-            items.clear()
-            pageTitles.clear()
-
-            val monthDayCount = listOf(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-
-            val yearStart = app.profile.dateSemester1Start.clone() ?: return@async
+            val yearStart = app.profile.dateSemester1Start
             val yearEnd = app.profile.dateYearEnd
-            val wStart = weekStart
-            val wEnd = weekEnd
-            while (yearStart.value <= yearEnd.value) {
-                val date = yearStart.clone()
-                items += date
-                var title = Week.getFullDayName(date.weekDay)
-                if (date > wEnd || date < wStart) {
-                    title += ", ${date.stringDm}"
-                }
-                pageTitles += title
-
-                var maxDays = monthDayCount[yearStart.month - 1]
-                if (yearStart.month == 2 && yearStart.isLeap)
-                    maxDays++
-                yearStart.day++
-                if (yearStart.day > maxDays) {
-                    yearStart.day = 1
-                    yearStart.month++
-                }
-                if (yearStart.month > 12) {
-                    yearStart.month = 1
-                    yearStart.year++
-                }
-            }
+            schoolDates = generateSequence(yearStart.clone()) { it.clone().stepForward(0, 0, 1) }
+                .takeWhile { it <= yearEnd }
+                .toList()
 
             val lessonRanges = app.db.lessonRangeDao().getAllNow(App.profileId)
             startHour = lessonRanges.minOfOrNull { it.startTime.hour } ?: DEFAULT_START_HOUR
@@ -490,7 +566,16 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
 
         val selectedDate = arguments?.getString("timetableDate", "")
             ?.let { if (it.isBlank()) null else Date.fromY_m_d(it) }
-        savedPageSelection = items.indexOfFirst { it == (selectedDate ?: today) }
+        showWeekends = app.profile.config.ui.timetableShowWeekends
+        revealedWeekend = selectedDate?.takeIf { !showWeekends && it.weekDay >= Week.SATURDAY }
+        updateDayList()
+        savedPageSelection = positionAtOrAfter(selectedDate ?: today)
+        arguments?.let {
+            val target = BundleCompat.getParcelable(it, ARG_LESSON_TARGET, TimetableLessonTarget::class.java)
+            if (target != null && target.dateValue == items.getOrNull(savedPageSelection)?.value)
+                pendingLessonHighlight = target
+            it.remove(ARG_LESSON_TARGET)
+        }
         // before creating the pages, which get the hour range as arguments
         computeMultiDayHourRange(savedPageSelection).let { (start, end) ->
             multiDayStartHour = start
@@ -505,6 +590,11 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
         b.pagerContainer.onWidthChanged = ::onPagerWidthChanged
 
         observeDatabaseChanges()
+        if (arguments?.getBoolean("downloadTimetableIfMissing") == true) {
+            arguments?.remove("downloadTimetableIfMissing")
+            if (selectedDate != null && selectedDate in items && lessonsByDate[selectedDate.value].isNullOrEmpty())
+                downloadWeek(selectedDate)
+        }
     }
 
     private fun observeDatabaseChanges() {
@@ -669,10 +759,14 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
 
     override fun onPageScrollStateChanged(state: Int) {
         pagerScrollState = state
-        if (state == ViewPager2.SCROLL_STATE_IDLE && pendingHourRangeUpdate) {
+        if (state != ViewPager2.SCROLL_STATE_IDLE)
+            return
+        if (pendingHourRangeUpdate) {
             pendingHourRangeUpdate = false
             updateMultiDayHourRange()
         }
+        closeRevealedWeekend()
+        highlightSelectedLesson()
     }
 
     /**
@@ -764,35 +858,41 @@ class TimetableFragment : PagerFragment<FragmentTimetableV2Binding, MainActivity
             b.fullscreenButton.hide()
         } else if (dy < -12) {
             b.fullscreenButton.show()
-            if (!isTodayVisible()) {
+            if (shouldShowTodayButton()) {
                 b.todayButton.show()
             }
         }
     }
 
-    private fun isTodayVisible(position: Int = b.viewPager.currentItem): Boolean {
+    private fun shouldShowTodayButton(position: Int = b.viewPager.currentItem): Boolean {
         val todayIndex = items.indexOf(today)
-        return todayIndex in position until position + visibleDays
+        return todayIndex >= 0 && todayIndex !in position until position + visibleDays
     }
 
     private var fabShrinkJob: Job? = null
 
     override suspend fun onPageSelected(position: Int) {
+        if (view == null || position != b.viewPager.currentItem)
+            return
         fabShrinkJob?.cancel()
         pageSelection = items.getOrNull(position)
         // the visible days changed - defer heavy layout changes if currently animating scroll
         requestMultiDayHourRangeUpdate()
-        if (isTodayVisible(position)) {
-            b.todayButton.hide()
-        } else {
+        if (pendingLessonHighlight?.dateValue != pageSelection?.value)
+            pendingLessonHighlight = null
+        highlightSelectedLesson()
+        closeRevealedWeekend()
+        if (shouldShowTodayButton(position)) {
             b.todayButton.show()
             b.todayButton.extend()
             fabShrinkJob = launch {
                 delay(2500L)
-                if (isAdded && !isTodayVisible()) {
+                if (isAdded && shouldShowTodayButton()) {
                     b.todayButton.shrink()
                 }
             }
+        } else {
+            b.todayButton.hide()
         }
     }
 }

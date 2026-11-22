@@ -26,6 +26,19 @@ import pl.szczodrzynski.edziennik.utils.models.UnreadCounter;
 
 @Dao
 public abstract class MetadataDao {
+    private static final String UNREAD = " FROM metadata WHERE seen = 0 AND CASE thingType"
+            + " WHEN 1 THEN EXISTS (SELECT 1 FROM grades WHERE grades.profileId = metadata.profileId AND gradeId = thingId)"
+            + " WHEN 2 THEN EXISTS (SELECT 1 FROM notices WHERE notices.profileId = metadata.profileId AND noticeId = thingId)"
+            + " WHEN 3 THEN EXISTS (SELECT 1 FROM attendances WHERE attendances.profileId = metadata.profileId AND attendanceId = thingId)"
+            + " WHEN 4 THEN EXISTS (SELECT 1 FROM events WHERE events.profileId = metadata.profileId AND eventId = thingId AND eventType != -1 AND eventBlacklisted = 0)"
+            + " WHEN 5 THEN EXISTS (SELECT 1 FROM events WHERE events.profileId = metadata.profileId AND eventId = thingId AND eventType = -1 AND eventBlacklisted = 0)"
+            + " WHEN 6 THEN EXISTS (SELECT 1 FROM timetable WHERE timetable.profileId = metadata.profileId AND id = thingId AND type > 0)"
+            + " WHEN 7 THEN EXISTS (SELECT 1 FROM announcements WHERE announcements.profileId = metadata.profileId AND announcementId = thingId)"
+            + " WHEN 8 THEN EXISTS (SELECT 1 FROM messages WHERE messages.profileId = metadata.profileId AND messageId = thingId)"
+            + " WHEN 9 THEN EXISTS (SELECT 1 FROM teacherAbsence WHERE teacherAbsence.profileId = metadata.profileId AND teacherAbsenceId = thingId)"
+            + " WHEN 10 THEN EXISTS (SELECT 1 FROM luckyNumbers WHERE luckyNumbers.profileId = metadata.profileId AND luckyNumberDate = thingId)"
+            + " ELSE 0 END";
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     public abstract long add(Metadata metadata);
 
@@ -165,19 +178,22 @@ public abstract class MetadataDao {
 
 
 
-    @Query("SELECT count() FROM metadata WHERE profileId = :profileId AND thingType = :thingType AND seen = 0")
+    @Query("SELECT thingId FROM metadata WHERE profileId = :profileId AND thingType = :thingType AND seen = 1 ORDER BY thingId")
+    public abstract LiveData<List<Long>> getSeenIds(int profileId, MetadataType thingType);
+
+    @Query("SELECT count()" + UNREAD + " AND profileId = :profileId AND thingType = :thingType")
     public abstract LiveData<Integer> countUnseen(int profileId, MetadataType thingType);
 
-    @Query("SELECT count() FROM metadata WHERE profileId = :profileId AND thingType = :thingType AND seen = 0")
+    @Query("SELECT count()" + UNREAD + " AND profileId = :profileId AND thingType = :thingType")
     public abstract Integer countUnseenNow(int profileId, MetadataType thingType);
 
-    @Query("SELECT count() FROM metadata WHERE profileId = :profileId AND seen = 0")
+    @Query("SELECT count()" + UNREAD + " AND profileId = :profileId")
     public abstract LiveData<Integer> countUnseen(int profileId);
 
-    @Query("SELECT count() FROM metadata WHERE profileId = :profileId AND seen = 0")
+    @Query("SELECT count()" + UNREAD + " AND profileId = :profileId")
     public abstract Integer countUnseenNow(int profileId);
 
-    @Query("SELECT count() FROM metadata WHERE seen = 0")
+    @Query("SELECT count()" + UNREAD)
     public abstract LiveData<Integer> countUnseen();
 
 
@@ -190,10 +206,10 @@ public abstract class MetadataDao {
 
 
 
-    @Query("SELECT profileId, thingType, COUNT(thingId) AS count FROM metadata WHERE seen = 0 GROUP BY profileId, thingType")
+    @Query("SELECT profileId, thingType, COUNT(thingId) AS count" + UNREAD + " GROUP BY profileId, thingType")
     public abstract LiveData<List<UnreadCounter>> getUnreadCounts();
 
-    @Query("SELECT profileId, thingType, COUNT(thingId) AS count FROM metadata WHERE seen = 0 GROUP BY profileId, thingType")
+    @Query("SELECT profileId, thingType, COUNT(thingId) AS count" + UNREAD + " GROUP BY profileId, thingType")
     public abstract List<UnreadCounter> getUnreadCountsNow();
 
 

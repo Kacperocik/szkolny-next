@@ -952,7 +952,7 @@
     <string name="settings_register_dont_count_zero_text">Don\'t count 0 grade to average</string>
     <string name="settings_register_login_not_implemented_text">This e-register isn\'t implemented yet.</string>
     <string name="settings_register_show_teacher_absences_text">Show teacher absences in Agenda</string>
-    <string name="settings_sync_customize_endpoint_announcements">Notice board</string>
+    <string name="settings_sync_customize_endpoint_announcements">School announcements</string>
     <string name="settings_sync_customize_endpoint_attendance">Attendances</string>
     <string name="settings_sync_customize_endpoint_class_free_days">Class free days</string>
     <string name="settings_sync_customize_endpoint_classrooms">Classrooms</string>
@@ -1002,6 +1002,8 @@
     <string name="settings_sync_sync_interval_text">Automatic sync</string>
     <string name="settings_sync_pull_to_refresh_text">Pull down to synchronise</string>
     <string name="settings_card_sync_title">Sync &amp; notifications</string>
+    <string name="settings_sync_section_title">Synchronization</string>
+    <string name="settings_notifications_section_title">Notifications</string>
     <string name="settings_sync_updates_text">Notify about app updates</string>
     <string name="settings_sync_web_push_subtext">Show notifications on your PC</string>
     <string name="settings_sync_web_push_text">Notification forwarding</string>
@@ -1044,7 +1046,7 @@
     <string name="settings_card_about_title">About app</string>
     <string name="settings_card_theme_subtext">Light/dark theme, colors, sidebars, fullscreen mode</string>
     <string name="settings_card_register_subtext">Timetable, agenda, grades, messages, attendance</string>
-    <string name="settings_card_sync_subtext">Automatic refresh, notifications, quiet hours</string>
+    <string name="settings_card_sync_subtext">Automatic refresh, quiet hours, notification forwarding</string>
     <string name="settings_card_about_subtext">App version, changelog, licenses, contributors</string>
     <string name="settings_theme_snowfall_subtext">Jingle all the way</string>
     <string name="settings_theme_snowfall_text">Jingle bells, Jingle bells</string>
@@ -1238,7 +1240,10 @@
     <string name="timetable_generate_include_profile_name">Display the student\'s profile name</string>
     <string name="timetable_generate_next_week_format">With changes for the next week (%s to %s)</string>
     <string name="timetable_generate_no_changes">No timetable changes</string>
+    <string name="timetable_generate_image_format">File format</string>
     <string name="timetable_generate_no_colors">Printable (less colors)</string>
+    <string name="timetable_generate_no_lessons">There are no lessons in the selected week.</string>
+    <string name="timetable_generate_save_error">Could not save the timetable image.</string>
     <string name="timetable_generate_progress_text">This may take few seconds…</string>
     <string name="timetable_generate_progress_title">Generating timetable</string>
     <string name="timetable_generate_range">Range of the timetable</string>
@@ -1247,15 +1252,15 @@
     <string name="timetable_generate_show_teachers_names">Show names of teachers</string>
     <string name="timetable_generate_success_text">The timetable was saved in Szkolny.eu directory as an image file.\n\nYou can open or share it right away.</string>
     <string name="timetable_generate_success_title">Done</string>
-    <string name="timetable_lesson_cancelled">Lesson cancelled</string>
+    <string name="timetable_lesson_cancelled">Cancelled</string>
     <string name="timetable_lesson_change">Lesson change</string>
     <string name="timetable_lesson_change_format">Lesson change: instead of %s</string>
-    <string name="timetable_lesson_shifted">Lesson shifted to other day</string>
-    <string name="timetable_lesson_shifted_from">Lesson shifted from other day</string>
-    <string name="timetable_lesson_shifted_from_other_day">Lesson shifted from %s %s</string>
-    <string name="timetable_lesson_shifted_from_same_day">Lesson shifted from %s</string>
-    <string name="timetable_lesson_shifted_other_day">"Lesson shifted to %s %s "</string>
-    <string name="timetable_lesson_shifted_same_day">Lesson shifted to %s</string>
+    <string name="timetable_lesson_shifted">Moved to another day</string>
+    <string name="timetable_lesson_shifted_from">Moved from another day</string>
+    <string name="timetable_lesson_shifted_from_other_day">Moved from %s %s</string>
+    <string name="timetable_lesson_shifted_from_same_day">Moved from %s</string>
+    <string name="timetable_lesson_shifted_other_day">Moved to %s %s</string>
+    <string name="timetable_lesson_shifted_same_day">Moved to %s</string>
     <string name="timetable_manual_dialog_date">Date</string>
     <string name="timetable_manual_dialog_date_choose">Select the date</string>
     <string name="timetable_manual_dialog_subject_choose">Select the subject</string>
@@ -1417,6 +1422,7 @@
     <string name="profile_config_name_hint">Profile name</string>
     <string name="profile_config_logout">Logout</string>
     <string name="profile_config_sync_enabled">Synchronize this profile</string>
+    <string name="profile_config_sync_scope">Automatic sync scope</string>
     <string name="home_availability_update">Update</string>
     <string name="update_available_later">Not now</string>
     <string name="update_available_button">Update</string>
@@ -1676,6 +1682,7 @@
     <string name="grades_subject_unknown_help">{cmd-information-outline} Grades whose subject was not provided in the e-register. This could be a subject not taught this school year.</string>
     <string name="menu_timetable_config">Timetable settings</string>
     <string name="timetable_config_show_events">Show events next to lessons</string>
+    <string name="timetable_config_show_weekends">Show weekends</string>
     <string name="timetable_config_show_attendance">Show attendance type on lesson</string>
     <string name="timetable_config_hide_class_lessons">Hide whole-class lessons</string>
     <string name="timetable_config_color_subject_name">Color subject name</string>

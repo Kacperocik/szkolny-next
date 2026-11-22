@@ -54,15 +54,15 @@
                     android:paddingHorizontal="8dp"
                     android:paddingTop="4dp">
                     <!--tools:background="@drawable/timetable_subject_color_rounded"-->
-                    <com.mikepenz.iconics.view.IconicsTextView
+                    <pl.szczodrzynski.edziennik.ui.timetable.TimetableSubjectTextView
                         android:id="@+id/subjectName"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:ellipsize="end"
-                        android:maxLines="@{annotationVisible ? 1 : 2}"
+                        android:maxLines="2"
                         android:textAppearance="?textAppearanceTitleMedium"
-                        tools:maxLines="2"
+                        app:maxSubjectLines="@{annotationVisible ? 1 : 2}"
                         tools:text="pracownia urządzeń techniki komputerowej" />
 
                     <LinearLayout
@@ -180,6 +180,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="45dp"
                         android:layout_weight="0"
+                        android:checkable="false"
+                        android:clickable="false"
+                        android:focusable="false"
                         android:isVisible="@{annotationVisible}"
                         android:textAlignment="center"
                         android:textAppearance="?textAppearanceLabelMedium"

@@ -9,6 +9,7 @@ import pl.szczodrzynski.edziennik.data.api.edziennik.podlasie.DataPodlasie
 import pl.szczodrzynski.edziennik.data.api.edziennik.podlasie.ENDPOINT_PODLASIE_API_MAIN
 import pl.szczodrzynski.edziennik.data.api.edziennik.podlasie.data.PodlasieApi
 import pl.szczodrzynski.edziennik.data.db.entity.SYNC_ALWAYS
+import pl.szczodrzynski.edziennik.data.enums.FeatureType
 import pl.szczodrzynski.edziennik.ext.asJsonObjectList
 import pl.szczodrzynski.edziennik.ext.getInt
 import pl.szczodrzynski.edziennik.ext.getJsonArray
@@ -32,11 +33,19 @@ class PodlasieApiMain(override val data: DataPodlasie,
 
             json.getInt("LuckyNumber")?.let { PodlasieApiLuckyNumber(data, it) }
             json.getJsonArray("Teacher")?.asJsonObjectList()?.let { PodlasieApiTeachers(data, it) }
-            json.getJsonArray("Timetable")?.asJsonObjectList()?.let { PodlasieApiTimetable(data, it) }
-            json.getJsonArray("Marks")?.asJsonObjectList()?.let { PodlasieApiGrades(data, it) }
-            json.getJsonArray("MarkFinal")?.asJsonObjectList()?.let { PodlasieApiFinalGrades(data, it) }
-            json.getJsonArray("News")?.asJsonObjectList()?.let { PodlasieApiEvents(data, it) }
-            json.getJsonArray("Tasks")?.asJsonObjectList()?.let { PodlasieApiHomework(data, it) }
+            if (data.shouldSyncFeature(FeatureType.TIMETABLE)) {
+                json.getJsonArray("Timetable")?.asJsonObjectList()?.let { PodlasieApiTimetable(data, it) }
+            }
+            if (data.shouldSyncFeature(FeatureType.GRADES)) {
+                json.getJsonArray("Marks")?.asJsonObjectList()?.let { PodlasieApiGrades(data, it) }
+                json.getJsonArray("MarkFinal")?.asJsonObjectList()?.let { PodlasieApiFinalGrades(data, it) }
+            }
+            if (data.shouldSyncFeature(FeatureType.AGENDA)) {
+                json.getJsonArray("News")?.asJsonObjectList()?.let { PodlasieApiEvents(data, it) }
+            }
+            if (data.shouldSyncFeature(FeatureType.HOMEWORK)) {
+                json.getJsonArray("Tasks")?.asJsonObjectList()?.let { PodlasieApiHomework(data, it) }
+            }
 
             data.setSyncNext(ENDPOINT_PODLASIE_API_MAIN, SYNC_ALWAYS)
             onSuccess(ENDPOINT_PODLASIE_API_MAIN)

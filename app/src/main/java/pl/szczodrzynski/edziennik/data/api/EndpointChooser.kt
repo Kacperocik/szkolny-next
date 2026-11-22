@@ -29,6 +29,7 @@ fun Data.prepare(
         featureTypes.isNotNullNorEmpty() -> featureTypes!!
         else -> FeatureType.getUnnecessary()
     } + FeatureType.getNecessary()
+    this.syncFeatureTypes = syncFeatureTypes
     val forceFeatureType = featureTypes?.singleOrNull()
     val refreshSelectedWeek = forceFeatureType == FeatureType.TIMETABLE &&
             !arguments.getString("weekStart").isNullOrBlank()

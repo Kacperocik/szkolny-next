@@ -7,6 +7,7 @@ package pl.szczodrzynski.edziennik.ui.grades
 import android.os.Bundle
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
+import androidx.lifecycle.distinctUntilChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import kotlinx.coroutines.Dispatchers
@@ -79,6 +80,13 @@ class GradesListFragment : BaseFragment<GradesListFragmentBinding, MainActivity>
         val adapter = GradesAdapter(activity).also { gradesAdapter = it }
         var firstRun = true
 
+        val seenGrades = app.db.metadataDao().getSeenIds(App.profileId, MetadataType.GRADE).distinctUntilChanged()
+        seenGrades.observe(viewLifecycleOwner) { ids ->
+            val seenIds = ids.toHashSet()
+            adapter.applySeenGrades(seenIds)
+            lastGrades.forEach { grade -> if (grade.id in seenIds) grade.seen = true }
+        }
+
         app.db.gradeDao().getAllOrderBy(App.profileId, app.gradesManager.getOrderByString()).observe(viewLifecycleOwner, Observer { grades -> this@GradesListFragment.launch {
             if (!isAdded) return@launch
 
@@ -128,6 +136,7 @@ class GradesListFragment : BaseFragment<GradesListFragmentBinding, MainActivity>
                 return@launch
             }
             adapter.items = withContext(Dispatchers.Default) { processGrades(items) }
+            adapter.applySeenGrades(seenGrades.value.orEmpty().toHashSet())
             if (items.isNotNullNorEmpty() && b.list.adapter == null) {
                 b.list.adapter = adapter
                 b.list.apply {

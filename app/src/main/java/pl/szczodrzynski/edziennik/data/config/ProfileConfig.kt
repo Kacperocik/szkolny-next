@@ -102,6 +102,7 @@ class ProfileConfig(
 
         var timetableShowAttendance by config<Boolean>(true)
         var timetableShowEvents by config<Boolean>(true)
+        var timetableShowWeekends by config<Boolean>(true)
         var timetableHideClassLessons by config<Boolean>(false)
         var timetableTrimHourRange by config<Boolean>(false)
         var timetableColorSubjectName by config<Boolean>(false)
@@ -111,6 +112,7 @@ class ProfileConfig(
     }
 
     inner class Sync {
+        var automaticSyncFeatures by config<Set<FeatureType>?>(null)
         var notificationFilter by config(NotificationType.Companion::getDefaultConfig)
         var lastSuccessfulSync by config<Long>(0L)
         var luckyNumberOnlyYours by config<Boolean>(false)

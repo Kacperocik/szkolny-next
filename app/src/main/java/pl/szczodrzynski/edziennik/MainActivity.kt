@@ -59,7 +59,6 @@ import pl.droidsonroids.gif.GifDrawable
 import pl.szczodrzynski.edziennik.core.manager.AvailabilityManager.Error.Type
 import pl.szczodrzynski.edziennik.core.manager.UserActionManager
 import pl.szczodrzynski.edziennik.core.work.AppManagerDetectedEvent
-import pl.szczodrzynski.edziennik.core.work.SyncWorker
 import pl.szczodrzynski.edziennik.core.work.UpdateStateEvent
 import pl.szczodrzynski.edziennik.core.work.UpdateWorker
 import pl.szczodrzynski.edziennik.data.api.ERROR_VULCAN_API_DEPRECATED
@@ -552,7 +551,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         swipeRefreshLayout.setOnRefreshListener { launch { syncCurrentFeature() } }
 
-        SyncWorker.scheduleNext(app)
         UpdateWorker.scheduleNext(app)
 
         // if loaded profile is archived, switch to the up-to-date version of it
@@ -653,7 +651,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 .withGroup(BottomSheetGroup.ACTIONS)
                 .withOnClickListener {
                     bottomSheet.close()
-                    SyncViewListDialog(this, navTarget).show()
+                    SyncViewListDialog(this, app.profile, navTarget).show()
                 }
         )
 

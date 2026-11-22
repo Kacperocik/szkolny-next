@@ -24,17 +24,16 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import pl.szczodrzynski.edziennik.App
-import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.api.edziennik.EdziennikTask
 import pl.szczodrzynski.edziennik.data.api.events.EventGetEvent
 import pl.szczodrzynski.edziennik.data.db.full.EventFull
-import pl.szczodrzynski.edziennik.data.enums.NavTarget
 import pl.szczodrzynski.edziennik.databinding.DialogEventDetailsBinding
 import pl.szczodrzynski.edziennik.ext.*
 import pl.szczodrzynski.edziennik.ui.base.dialog.SimpleDialog
 import pl.szczodrzynski.edziennik.ui.notes.setupNotesButton
 import pl.szczodrzynski.edziennik.ui.teachers.bindTeacher
+import pl.szczodrzynski.edziennik.ui.timetable.EventLessonTarget
 import pl.szczodrzynski.edziennik.ui.timetable.TimetableFragment
 import pl.szczodrzynski.edziennik.utils.BetterLink
 import pl.szczodrzynski.edziennik.utils.models.Date
@@ -47,6 +46,7 @@ class EventDetailsBinder(
     val showNotes: Boolean = true,
     val onClose: (() -> Unit)? = null,
     val onEventUpdated: ((EventFull) -> Unit)? = null,
+    val onGoToTimetable: ((openTimetable: () -> Unit) -> Unit)? = null,
 ) : CoroutineScope {
 
     private val app = activity.applicationContext as App
@@ -205,26 +205,14 @@ class EventDetailsBinder(
 
         // GO TO TIMETABLE
         b.goToTimetableButton.onClick {
-            onClose?.invoke()
-            val dateStr = event.date.stringY_m_d
-
-            val intent = if (activity is MainActivity && activity.navTarget == NavTarget.TIMETABLE)
-                Intent(TimetableFragment.ACTION_SCROLL_TO_DATE)
-            else if (activity is MainActivity)
-                Intent("android.intent.action.MAIN")
-            else
-                Intent(activity, MainActivity::class.java)
-
-            intent.apply {
-                putExtras(
-                    "fragmentId" to NavTarget.TIMETABLE,
-                    "timetableDate" to dateStr,
-                )
+            val target = EventLessonTarget.from(event)
+            val openTimetable = { TimetableFragment.openDay(activity, event.profileId, event.date, target) }
+            if (onGoToTimetable != null) {
+                onGoToTimetable.invoke(openTimetable)
+            } else {
+                onClose?.invoke()
+                openTimetable()
             }
-            if (activity is MainActivity)
-                activity.sendBroadcast(intent)
-            else
-                activity.startActivity(intent)
         }
         b.goToTimetableButton.attachToastHint(R.string.hint_go_to_timetable)
 

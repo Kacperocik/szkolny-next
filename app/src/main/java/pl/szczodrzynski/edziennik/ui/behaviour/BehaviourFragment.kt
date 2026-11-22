@@ -2,6 +2,7 @@ package pl.szczodrzynski.edziennik.ui.behaviour
 
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.distinctUntilChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.color.MaterialColors
 import pl.szczodrzynski.edziennik.App
@@ -53,6 +54,13 @@ class BehaviourFragment : BaseFragment<FragmentBehaviourBinding, MainActivity>(
         val linearLayoutManager = LinearLayoutManager(context)
         b.noticesView.setHasFixedSize(true)
         b.noticesView.layoutManager = linearLayoutManager
+        val seenNotices = app.db.metadataDao().getSeenIds(profileId, MetadataType.NOTICE).distinctUntilChanged()
+        seenNotices.observe(viewLifecycleOwner) { ids ->
+            val seenIds = ids.toHashSet()
+            noticeList.orEmpty().forEach { if (it.id in seenIds) it.seen = true }
+            b.noticesView.adapter?.notifyDataSetChanged()
+        }
+
         App.db.noticeDao().getAll(profileId).observe(viewLifecycleOwner) { notices: List<NoticeFull>? ->
             if (!isAdded) return@observe
             if (notices == null) {
@@ -60,6 +68,8 @@ class BehaviourFragment : BaseFragment<FragmentBehaviourBinding, MainActivity>(
                 b.noticesNoData.visibility = View.VISIBLE
                 return@observe
             }
+            val seenIds = seenNotices.value.orEmpty().toHashSet()
+            notices.forEach { if (it.id in seenIds) it.seen = true }
             noticeList = notices
             updateList()
         }

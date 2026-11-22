@@ -195,7 +195,6 @@ class NavDrawer(
                 if (fourthId != 0) {
                     findViewById<View>(fourthId)?.enableExpressiveImageShapeMorph(pressedCornerRadiusDp = 10f)
                 }
-                styleSmallHeaderBadges()
                 bindCurrentProfileImageActions()
                 bindSmallHeaderProfileImages()
             }
@@ -943,15 +942,19 @@ class NavDrawer(
         updateProfileList()
     }
     private var currentProfileObj: IDrawerProfile? = null
+    private var pendingProfileSwipe: Pair<Int, Int>? = null
     val profileListEmpty: Boolean
         get() = profileList.isEmpty()
     var currentProfile: Int
         get() = accountHeader.activeProfile?.identifier?.toInt() ?: -1
         set(value) {
             Log.d("NavDebug", "currentProfile = $value")
+            val swipeOffset = pendingProfileSwipe?.takeIf { it.first == value }?.second ?: 0
+            if (swipeOffset != 0 || value != currentProfile)
+                pendingProfileSwipe = null
             accountHeader.setActiveProfile(value.toLong(), false)
             currentProfileObj = profileList.singleOrNull { it.id == value }
-            setToolbarProfileImage(currentProfileObj)
+            setToolbarProfileImage(currentProfileObj, swipeOffset)
             updateBadges()
             bindSmallHeaderProfileImages()
         }
@@ -1008,8 +1011,27 @@ class NavDrawer(
         }
     }
 
-    private fun setToolbarProfileImage(profile: IDrawerProfile?) {
-        toolbar.profileImage = profile?.getImageDrawable(context)
+    private fun setToolbarProfileImage(profile: IDrawerProfile?, swipeOffset: Int = 0) {
+        val image = profile?.getImageDrawable(context)
+        val imageView = toolbar.toolbarImage
+        if (swipeOffset != 0 && imageView is ToolbarProfileImageView)
+            imageView.slideToProfile(image, swipeOffset)
+        else
+            toolbar.profileImage = image
+    }
+
+    internal fun switchProfile(view: View, offset: Int) {
+        if (profileList.size < 2) return
+        val index = profileList.indexOfFirst { it.id == currentProfile }
+        if (index == -1) return
+
+        val next = profileList[(index + offset + profileList.size) % profileList.size]
+        val item = accountHeader.profiles?.filterIsInstance<ProfileDrawerItem>()
+            ?.firstOrNull { it.identifier == next.id.toLong() } ?: return
+        val selectProfile = accountHeader.onAccountHeaderProfileImageListener ?: return
+        pendingProfileSwipe = next.id to offset
+        if (!selectProfile(view, item, false))
+            pendingProfileSwipe = null
     }
 
 
@@ -1072,7 +1094,6 @@ class NavDrawer(
             )
             totalCount += it.count
         }
-        styleSmallHeaderBadges()
         bindCurrentProfileImageActions()
         bindSmallHeaderProfileImages()
         updateMiniDrawer()
@@ -1120,6 +1141,9 @@ class NavDrawer(
         val allProfileItems = accountHeader.profiles?.filterIsInstance<ProfileDrawerItem>() ?: return
 
         val secondaryProfiles = allProfileItems.filter { it.identifier != activeProfileId }
+        val density = context.resources.displayMetrics.density
+        val badgeSize = (18 * density).toInt()
+        val badgePadding = (3 * density).toInt()
 
         val fourthViewId = context.resources.getIdentifier("material_drawer_account_header_small_fourth", "id", context.packageName)
         val fourthBadgeId = context.resources.getIdentifier("material_drawer_account_header_small_fourth_badge", "id", context.packageName)
@@ -1146,12 +1170,18 @@ class NavDrawer(
                 imgView.setOnLongClickListener {
                     accountHeader.onAccountHeaderItemLongClickListener?.invoke(imgView, profile, false) ?: false
                 }
-                val badgeText = profile.badge?.getText(context)
-                if (!badgeText.isNullOrEmpty()) {
-                    badgeView?.visibility = View.VISIBLE
-                    badgeView?.text = badgeText
-                } else {
-                    badgeView?.visibility = View.GONE
+                badgeView?.apply {
+                    val badgeText = profile.badge?.getText(context)
+                    visibility = if (badgeText.isNullOrEmpty()) View.GONE else View.VISIBLE
+                    if (!badgeText.isNullOrEmpty()) {
+                        (profile.badgeStyle ?: badgeStyle).style(this)
+                        minWidth = badgeSize
+                        minHeight = badgeSize
+                        gravity = Gravity.CENTER
+                        includeFontPadding = false
+                        setPadding(badgePadding, badgePadding, badgePadding, badgePadding)
+                        text = badgeText
+                    }
                 }
             } else {
                 imgView.visibility = View.GONE
@@ -1173,36 +1203,6 @@ class NavDrawer(
         badge.includeFontPadding = false
         badge.setPadding(pad, pad, pad, pad)
         badge.textSize = 10f
-    }
-
-    private fun styleSmallHeaderBadges() {
-        if (!::accountHeader.isInitialized) return
-        val density = context.resources.displayMetrics.density
-        val size = (18 * density).toInt()
-        val pad = (3 * density).toInt()
-        val fourthBadgeId = context.resources.getIdentifier("material_drawer_account_header_small_fourth_badge", "id", context.packageName)
-        val badgeIds = if (fourthBadgeId != 0) {
-            intArrayOf(
-                com.mikepenz.materialdrawer.R.id.material_drawer_account_header_small_first_badge,
-                com.mikepenz.materialdrawer.R.id.material_drawer_account_header_small_second_badge,
-                com.mikepenz.materialdrawer.R.id.material_drawer_account_header_small_third_badge,
-                fourthBadgeId,
-            )
-        } else {
-            intArrayOf(
-                com.mikepenz.materialdrawer.R.id.material_drawer_account_header_small_first_badge,
-                com.mikepenz.materialdrawer.R.id.material_drawer_account_header_small_second_badge,
-                com.mikepenz.materialdrawer.R.id.material_drawer_account_header_small_third_badge,
-            )
-        }
-        for (id in badgeIds) {
-            val badge = accountHeader.findViewById<TextView>(id) ?: continue
-            badge.minWidth = size
-            badge.minHeight = size
-            badge.gravity = Gravity.CENTER
-            badge.includeFontPadding = false
-            badge.setPadding(pad, pad, pad, pad)
-        }
     }
 
     fun setUnreadCounterList(unreadCounterList: MutableList<out IUnreadCounter>) {

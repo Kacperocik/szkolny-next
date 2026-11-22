@@ -69,6 +69,8 @@ class AttendanceDetailsDialog(
         b.legend.isVisible = showNotes
         if (showNotes)
             NoteManager.setLegendText(attendance, b.legend)
+        if (!attendance.seen)
+            manager.markAsSeen(attendance)
         return true
     }
 

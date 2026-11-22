@@ -8,6 +8,7 @@ import android.widget.Toast
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import pl.szczodrzynski.edziennik.MainActivity
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.ui.login.LoginActivity
@@ -25,14 +26,17 @@ internal fun BaseFragment<*, *>.setupMainActivity(activity: MainActivity) {
             .withGroup(BottomSheetGroup.ACTIONS)
             .withOnClickListener {
                 activity.bottomSheet.close()
-                launch(Dispatchers.IO) {
-                    app.db.metadataDao().setAllSeen(app.profileId, markAsReadType, true)
+                val profileId = app.profileId
+                launch {
+                    withContext(Dispatchers.IO) {
+                        app.db.metadataDao().setAllSeen(profileId, markAsReadType, true)
+                    }
+                    Toast.makeText(
+                        activity,
+                        R.string.main_menu_mark_as_read_success,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-                Toast.makeText(
-                    activity,
-                    R.string.main_menu_mark_as_read_success,
-                    Toast.LENGTH_SHORT
-                ).show()
             }
     }
     if (items.isNotEmpty()) {

@@ -4,7 +4,6 @@
 
 package pl.szczodrzynski.edziennik.ui.timetable
 
-import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Bitmap
@@ -14,6 +13,8 @@ import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
@@ -22,23 +23,24 @@ import android.view.View
 import android.view.View.MeasureSpec
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
+import pl.szczodrzynski.edziennik.core.manager.filterTimetableLessons
 import pl.szczodrzynski.edziennik.data.api.edziennik.EdziennikTask
 import pl.szczodrzynski.edziennik.data.api.events.ApiTaskAllFinishedEvent
-import pl.szczodrzynski.edziennik.data.api.events.ApiTaskErrorEvent
-import pl.szczodrzynski.edziennik.data.api.events.ApiTaskFinishedEvent
 import pl.szczodrzynski.edziennik.data.db.entity.Lesson
 import pl.szczodrzynski.edziennik.data.db.full.LessonFull
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
+import pl.szczodrzynski.edziennik.data.enums.TimetableImageFormat
 import pl.szczodrzynski.edziennik.databinding.DialogGenerateBlockTimetableBinding
 import pl.szczodrzynski.edziennik.ext.JsonObject
 import pl.szczodrzynski.edziennik.ext.asStrikethroughSpannable
@@ -53,6 +55,7 @@ import pl.szczodrzynski.edziennik.utils.models.Time
 import pl.szczodrzynski.edziennik.utils.models.Week
 import timber.log.Timber
 import java.io.File
+import java.io.IOException
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
@@ -78,15 +81,15 @@ class GenerateBlockTimetableDialog(
     override fun getPositiveButtonText() = R.string.save
     override fun getNegativeButtonText() = R.string.cancel
 
-    private val heightProfileName by lazy { if (showProfileName) 100 else 0 }
+    private data class ExportRequest(val weekStart: Date, val weekEnd: Date, val format: TimetableImageFormat)
 
     private var showProfileName: Boolean = false
     private var showTeachersNames: Boolean = true
     private var noColors: Boolean = false
 
     private var enqueuedWeekDialog: BaseDialog<*>? = null
-    private var enqueuedWeekStart = Date.getToday()
-    private var enqueuedWeekEnd = Date.getToday()
+    private var pendingExport: ExportRequest? = null
+    private var exportJob: Job? = null
 
     private val weekCurrentStart = Week.getWeekStart()
     private val weekCurrentEnd = Week.getWeekEnd()
@@ -100,74 +103,76 @@ class GenerateBlockTimetableDialog(
         b.showProfileNameCheckbox.setOnCheckedChangeListener { _, isChecked -> showProfileName = isChecked }
         b.showTeachersNamesCheckbox.setOnCheckedChangeListener { _, isChecked -> showTeachersNames = isChecked }
         b.noColorsCheckbox.setOnCheckedChangeListener { _, isChecked -> noColors = isChecked }
+        b.colorBordersCheckbox.isChecked = app.profile.config.ui.timetableColorBorders
+        b.imageFormatRadioGroup.check(when (app.config.timetable.exportImageFormat) {
+            TimetableImageFormat.PNG -> R.id.imageFormatPngRadio
+            TimetableImageFormat.WEBP -> R.id.imageFormatWebpRadio
+        })
     }
 
     override suspend fun onPositiveClick(): Boolean {
+        val format = if (b.imageFormatWebpRadio.isChecked) TimetableImageFormat.WEBP else TimetableImageFormat.PNG
         when (b.weekSelectionRadioGroup.checkedRadioButtonId) {
-            R.id.withChangesCurrentWeekRadio -> generateBlockTimetable(weekCurrentStart, weekCurrentEnd)
-            R.id.withChangesNextWeekRadio -> generateBlockTimetable(weekNextStart, weekNextEnd)
-            R.id.forSelectedWeekRadio -> selectDate()
+            R.id.withChangesCurrentWeekRadio -> generateBlockTimetable(ExportRequest(weekCurrentStart, weekCurrentEnd, format))
+            R.id.withChangesNextWeekRadio -> generateBlockTimetable(ExportRequest(weekNextStart, weekNextEnd, format))
+            R.id.forSelectedWeekRadio -> selectDate(format)
         }
         return NO_DISMISS
     }
 
-    private fun selectDate() {
+    private fun selectDate(format: TimetableImageFormat) {
         MaterialDatePicker.Builder.datePicker()
             .setCalendarConstraints(app.profile.getSchoolYearConstrains())
             .build()
             .apply {
                 addOnPositiveButtonClickListener { millis ->
                     val dateSelected = Date.fromMillisUtc(millis)
-                    generateBlockTimetable(dateSelected.weekStart, dateSelected.weekEnd)
+                    generateBlockTimetable(ExportRequest(dateSelected.weekStart, dateSelected.weekEnd, format))
                 }
             }
             .show(activity.supportFragmentManager, TAG)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onApiTaskFinishedEvent(event: ApiTaskFinishedEvent) {
-        if (event.profileId == App.profileId) {
-            enqueuedWeekDialog?.dismiss()
-            generateBlockTimetable(enqueuedWeekStart, enqueuedWeekEnd)
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onApiTaskAllFinishedEvent(event: ApiTaskAllFinishedEvent) {
+        val request = pendingExport ?: return
+        pendingExport = null
         enqueuedWeekDialog?.dismiss()
+        enqueuedWeekDialog = null
+        generateBlockTimetable(request, canDownload = false)
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onApiTaskErrorEvent(event: ApiTaskErrorEvent) {
-        dismiss()
-        enqueuedWeekDialog?.dismiss()
+    private fun generateBlockTimetable(request: ExportRequest, canDownload: Boolean = true) {
+        if (exportJob?.isActive == true || pendingExport != null)
+            return
+        exportJob = launch { exportTimetable(request, canDownload) }
     }
 
-    private fun generateBlockTimetable(weekStart: Date, weekEnd: Date) { launch {
-        val weekDays = mutableListOf<MutableList<Lesson>>()
-        for (i in weekStart.weekDay..weekEnd.weekDay) {
-            weekDays.add(mutableListOf())
-        }
-
-        val allLessons = withContext(Dispatchers.Default) {
-            app.db.timetableDao().getBetweenDatesNow(weekStart, weekEnd)
+    private suspend fun exportTimetable(request: ExportRequest, canDownload: Boolean) {
+        val (weekStart, weekEnd, format) = request
+        val profile = app.profile
+        val hideClassLessons = profile.config.ui.timetableHideClassLessons
+        val colorBorders = b.colorBordersCheckbox.isChecked
+        val heightProfileName = if (showProfileName) 100 else 0
+        val visibleLessons = withContext(Dispatchers.Default) {
+            val profileLessons = app.db.timetableDao().getBetweenDatesNow(weekStart, weekEnd)
+                .filter { it.profileId == profile.id }
+            filterTimetableLessons(profileLessons, hideClassLessons)
         }
         val lessonRanges = mutableMapOf<Int, Int>()
 
-        var maxWeekDay = 5
+        var weekDayCount = 5
         var minTime: Time? = null
         var maxTime: Time? = null
 
-        val lessons: List<LessonFull> = allLessons.mapNotNull { lesson ->
-            if (lesson.profileId != app.profile.id || lesson.type == Lesson.TYPE_NO_LESSONS
+        val lessons: List<LessonFull> = visibleLessons.mapNotNull { lesson ->
+            if (lesson.type == Lesson.TYPE_NO_LESSONS
                     || lesson.displayDate == null || lesson.displayStartTime == null || lesson.displayEndTime == null)
                 return@mapNotNull null
 
-            if (lesson.displayDate!!.weekDay > maxWeekDay)
-                maxWeekDay = lesson.displayDate!!.weekDay
+            weekDayCount = maxOf(weekDayCount, lesson.displayDate!!.weekDay + 1)
 
             lessonRanges[lesson.displayStartTime!!.value] = lesson.displayEndTime!!.value
-            weekDays[lesson.displayDate!!.weekDay].add(lesson)
 
             if (minTime == null || lesson.displayStartTime!! < minTime!!) {
                 minTime = lesson.displayStartTime!!.clone()
@@ -181,8 +186,9 @@ class GenerateBlockTimetableDialog(
         }
 
         if (lessons.isEmpty()) {
-            if (enqueuedWeekDialog != null) {
-                return@launch
+            if (!canDownload) {
+                Toast.makeText(activity, R.string.timetable_generate_no_lessons, Toast.LENGTH_LONG).show()
+                return
             }
             enqueuedWeekDialog = SimpleDialog<Unit>(activity) {
                 title(R.string.please_wait)
@@ -190,17 +196,16 @@ class GenerateBlockTimetableDialog(
                 cancelable(false)
             }.show()
 
-            enqueuedWeekStart = weekStart
-            enqueuedWeekEnd = weekEnd
+            pendingExport = request
 
             EdziennikTask.syncProfile(
-                    profileId = App.profileId,
+                    profileId = profile.id,
                     featureTypes = setOf(FeatureType.TIMETABLE),
                     arguments = JsonObject(
                             "weekStart" to weekStart.stringY_m_d
                     )
             ).enqueue(activity)
-            return@launch
+            return
         }
 
         val progressDialog = SimpleDialog<Unit>(activity) {
@@ -212,14 +217,14 @@ class GenerateBlockTimetableDialog(
         if (minTime == null) {
             progressDialog.dismiss()
             // TODO: Toast
-            return@launch
+            return
         }
 
         val uri = withContext(Dispatchers.Default) {
 
             val diff = Time.diff(maxTime, minTime)
 
-            val imageWidth = WIDTH_CONSTANT + maxWeekDay * (WIDTH_WEEKDAY + WIDTH_SPACING) - WIDTH_SPACING
+            val imageWidth = WIDTH_CONSTANT + weekDayCount * (WIDTH_WEEKDAY + WIDTH_SPACING) - WIDTH_SPACING
             val imageHeight = heightProfileName + HEIGHT_CONSTANT + diff.inMinutes * HEIGHT_MINUTE + HEIGHT_FOOTER
             val bitmap = Bitmap.createBitmap(imageWidth + 20, imageHeight + 30, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
@@ -231,6 +236,33 @@ class GenerateBlockTimetableDialog(
                 isAntiAlias = true
                 isFilterBitmap = true
                 isDither = true
+            }
+
+            val timePaint = Paint(paint).apply {
+                color = 0xff7f7f7f.toInt()
+                textAlign = Paint.Align.CENTER
+                textSize = 16f
+            }
+            val linePaint = Paint(paint).apply {
+                color = 0xff646464.toInt()
+                style = Paint.Style.STROKE
+                pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
+            }
+            val timeTextCenter = ((timePaint.descent() + timePaint.ascent()) / 2).roundToInt()
+            val minTimeMinutes = minTime!!.inMinutes
+
+            // Draw the grid first so the lesson cards cover the lines.
+            lessonRanges.forEach { (startTime, endTime) ->
+                listOf(startTime, endTime).forEach { value ->
+                    val hour = value / 10000
+                    val minute = (value / 100) % 100
+                    val time = Time(hour, minute, 0)
+                    val firstOffset = time.inMinutes - minTimeMinutes
+                    val top = (heightProfileName + HEIGHT_CONSTANT + firstOffset * HEIGHT_MINUTE).toFloat()
+
+                    canvas.drawText(time.stringHM, WIDTH_CONSTANT / 2f, top - timeTextCenter, timePaint)
+                    canvas.drawLine(WIDTH_CONSTANT.toFloat(), top, imageWidth.toFloat(), top, linePaint)
+                }
             }
 
             lessons.forEach { lesson ->
@@ -259,11 +291,23 @@ class GenerateBlockTimetableDialog(
                 if (noColors) {
                     card.setCardBackgroundColor(Color.WHITE)
                     card.cardElevation = 0f
-                    item.setBackgroundResource(R.drawable.bg_rounded_16dp_outline)
                     subjectName.setTextColor(Color.BLACK)
                     classroomName.setTextColor(0xffaaaaaa.toInt())
                     teacherName.setTextColor(0xffaaaaaa.toInt())
                     teamName.setTextColor(0xffaaaaaa.toInt())
+                }
+
+                val borderColor = when {
+                    colorBorders -> lesson.color
+                        ?: app.timetableManager.getSubjectColor(lesson.displaySubjectId, lesson.displaySubjectName)
+                    noColors -> Color.BLACK
+                    else -> null
+                }
+                if (borderColor != null) {
+                    item.background = GradientDrawable().apply {
+                        cornerRadius = card.radius
+                        setStroke(6.dp, borderColor)
+                    }
                 }
 
                 subjectName.text = lesson.displaySubjectName ?: ""
@@ -274,17 +318,20 @@ class GenerateBlockTimetableDialog(
                 if (!showTeachersNames) teacherName.visibility = View.GONE
 
                 when (lesson.type) {
-                    Lesson.TYPE_NORMAL -> {
-                    }
+                    Lesson.TYPE_NORMAL -> Unit
                     Lesson.TYPE_CANCELLED, Lesson.TYPE_SHIFTED_SOURCE -> {
-                        card.setCardBackgroundColor(Color.BLACK)
-                        subjectName.setTextColor(Color.WHITE)
+                        if (!noColors) {
+                            card.setCardBackgroundColor(Color.BLACK)
+                            subjectName.setTextColor(Color.WHITE)
+                        }
                         subjectName.text = lesson.displaySubjectName?.asStrikethroughSpannable()
                                 ?: ""
                     }
                     else -> {
-                        card.setCardBackgroundColor(0xff234158.toInt())
-                        subjectName.setTextColor(Color.WHITE)
+                        if (!noColors) {
+                            card.setCardBackgroundColor(0xff234158.toInt())
+                            subjectName.setTextColor(Color.WHITE)
+                        }
                         subjectName.setTypeface(null, Typeface.BOLD_ITALIC)
                     }
                 }
@@ -308,14 +355,14 @@ class GenerateBlockTimetableDialog(
                 isDither = true
             }
 
-            for (w in 0..maxWeekDay) {
+            for (w in 0 until weekDayCount) {
                 val x = WIDTH_CONSTANT + w * WIDTH_WEEKDAY + w * WIDTH_SPACING
                 canvas.drawText(Week.getFullDayName(w), x + (WIDTH_WEEKDAY / 2f), heightProfileName + HEIGHT_CONSTANT / 2 + 10f, textPaint)
             }
 
             if (showProfileName) {
                 textPaint.textSize = 50f
-                canvas.drawText("${app.profile.name} - plan lekcji, ${weekStart.formattedStringShort} - ${weekEnd.formattedStringShort}", (imageWidth + 20) / 2f, 80f, textPaint)
+                canvas.drawText("${profile.name} - plan lekcji, ${weekStart.formattedStringShort} - ${weekEnd.formattedStringShort}", (imageWidth + 20) / 2f, 80f, textPaint)
             }
 
             textPaint.apply {
@@ -328,77 +375,26 @@ class GenerateBlockTimetableDialog(
             val footerTextPaintCenter = ((textPaint.descent() + textPaint.ascent()) / 2).roundToInt()
             canvas.drawText("Wygenerowano w aplikacji Szkolny.eu", imageWidth - 10f, imageHeight - footerTextPaintCenter - 10f, textPaint)
 
-            textPaint.apply {
-                setARGB(255, 127, 127, 127)
-                textAlign = Paint.Align.CENTER
-                textSize = 16f
-                typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-            }
-
-            val textPaintCenter = ((textPaint.descent() + textPaint.ascent()) / 2).roundToInt()
-
-            val linePaint = Paint().apply {
-                setARGB(255, 100, 100, 100)
-                style = Paint.Style.STROKE
-                pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
-                isAntiAlias = true
-                isFilterBitmap = true
-                isDither = true
-            }
-
-            val minTimeInt = ((minTime!!.value / 10000) * 60) + ((minTime!!.value / 100) % 100)
-
-            lessonRanges.forEach { (startTime, endTime) ->
-                listOf(startTime, endTime).forEach { value ->
-                    val hour = value / 10000
-                    val minute = (value / 100) % 100
-                    val time = Time(hour, minute, 0)
-
-                    val firstOffset = time.inMinutes - minTimeInt // offset in minutes
-                    val top = (heightProfileName + HEIGHT_CONSTANT + firstOffset * HEIGHT_MINUTE).toFloat()
-
-                    canvas.drawText(time.stringHM, WIDTH_CONSTANT / 2f, top - textPaintCenter, textPaint)
-                    canvas.drawLine(WIDTH_CONSTANT.toFloat(), top, imageWidth.toFloat(), top, linePaint)
-                }
-            }
-
             val today = Date.getToday().stringY_m_d
             val now = Time.getNow().stringH_M_S
-            val filename = "plan_lekcji_${app.profile.name}_${today}_${now}.png"
-            val resolver: ContentResolver = activity.applicationContext.contentResolver
-            val values = ContentValues()
-            values.put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                values.put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                values.put(MediaStore.MediaColumns.RELATIVE_PATH, File(Environment.DIRECTORY_PICTURES, "Szkolny.eu").path)
-            } else {
-                val picturesDirectory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Szkolny.eu")
-                picturesDirectory.mkdirs()
-                values.put(MediaStore.MediaColumns.DATA, File(picturesDirectory, filename).path)
-            }
-
-            try {
-                val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return@withContext null
-                resolver.openOutputStream(uri).use {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it ?: return@use)
-                }
-                uri
-            } catch (e: Exception) {
-                Timber.e(e)
-                return@withContext null
-            }
-
+            val filename = "plan_lekcji_${profile.name}_${today}_${now}.${format.extension}"
+            saveImage(bitmap, filename, format)
         }
 
         progressDialog.dismiss()
+        if (uri == null) {
+            Toast.makeText(activity, R.string.timetable_generate_save_error, Toast.LENGTH_LONG).show()
+            return
+        }
+        app.config.timetable.exportImageFormat = format
         SimpleDialog<Unit>(activity) {
             title(R.string.timetable_generate_success_title)
             message(R.string.timetable_generate_success_text)
             positive(R.string.share) {
                 val intent = Intent(Intent.ACTION_SEND)
-                intent.setDataAndType(null, "image/*")
+                intent.type = format.mimeType
                 intent.putExtra(Intent.EXTRA_STREAM, uri)
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 activity.startActivity(
                     Intent.createChooser(
                         intent,
@@ -408,12 +404,48 @@ class GenerateBlockTimetableDialog(
             }
             negative(R.string.open) {
                 val intent = Intent(Intent.ACTION_VIEW)
-                intent.setDataAndType(uri, "image/*")
+                intent.setDataAndType(uri, format.mimeType)
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 activity.startActivity(intent)
             }
             neutral(R.string.do_nothing)
         }.showModal()
         dismiss()
-    }}
+    }
+
+    private fun saveImage(bitmap: Bitmap, filename: String, format: TimetableImageFormat): Uri? {
+        val resolver = activity.applicationContext.contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.MIME_TYPE, format.mimeType)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+            values.put(MediaStore.MediaColumns.RELATIVE_PATH, File(Environment.DIRECTORY_PICTURES, "Szkolny.eu").path)
+            values.put(MediaStore.MediaColumns.IS_PENDING, 1)
+        } else {
+            val picturesDirectory = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Szkolny.eu")
+            picturesDirectory.mkdirs()
+            values.put(MediaStore.MediaColumns.DATA, File(picturesDirectory, filename).path)
+        }
+
+        var insertedUri: Uri? = null
+        return try {
+            val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return null
+            insertedUri = uri
+            if (resolver.openOutputStream(uri)?.use { format.compress(bitmap, it) } != true)
+                throw IOException("Could not write timetable image")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val published = ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }
+                if (resolver.update(uri, published, null, null) <= 0)
+                    throw IOException("Could not publish timetable image")
+            }
+            uri
+        } catch (e: Exception) {
+            Timber.e(e)
+            insertedUri?.let { uri ->
+                runCatching { resolver.delete(uri, null, null) }.onFailure { Timber.e(it) }
+            }
+            null
+        }
+    }
 }

@@ -15,6 +15,7 @@ import pl.szczodrzynski.edziennik.data.config.migration.ConfigMigration16
 import pl.szczodrzynski.edziennik.data.config.migration.ConfigMigration15
 import pl.szczodrzynski.edziennik.data.enums.NavTarget
 import pl.szczodrzynski.edziennik.data.enums.Theme
+import pl.szczodrzynski.edziennik.data.enums.TimetableImageFormat
 import pl.szczodrzynski.edziennik.ext.HOUR
 import pl.szczodrzynski.edziennik.core.manager.GradesManager.Companion.ORDER_BY_DATE_DESC
 import pl.szczodrzynski.edziennik.utils.models.Time
@@ -149,6 +150,7 @@ class Config(app: App) : BaseConfig<Config>(app, profileId = null) {
         var bellSyncMultiplier by config<Int>(0)
         var bellSyncDiff by config<Time?>(null)
         var countInSeconds by config<Boolean>(false)
+        var exportImageFormat by config(TimetableImageFormat.PNG)
     }
 
     inner class Grades {

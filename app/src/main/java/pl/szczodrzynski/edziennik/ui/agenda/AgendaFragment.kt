@@ -227,11 +227,9 @@ class AgendaFragment : BaseFragment<ViewBinding, MainActivity>(
             )
         }
 
-        val unreadEventDates = mutableSetOf<Int>()
         val dateColorsMap = mutableMapOf<String, Pair<Calendar, MutableList<Int>>>()
 
         events.forEach { event ->
-            if (!event.seen) unreadEventDates.add(event.date.value)
             val key = event.date.stringY_m_d
             val entry = dateColorsMap.getOrPut(key) { event.startTimeCalendar to mutableListOf() }
             entry.second.add(app.eventManager.getEventColor(event))
@@ -284,15 +282,11 @@ class AgendaFragment : BaseFragment<ViewBinding, MainActivity>(
             override fun onClick(day: CalendarDay) {
                 this@AgendaFragment.launch {
                     val date = Date.fromCalendar(day.calendar)
-
-                    if (date.value in unreadEventDates) {
-                        withContext(Dispatchers.Default) {
-                            app.db.eventDao().setSeenByDate(app.profileId, date, true)
-                        }
-                        unreadEventDates.remove(date.value)
+                    val profileId = app.profileId
+                    withContext(Dispatchers.IO) {
+                        app.db.eventDao().setSeenByDate(profileId, date, true)
                     }
-
-                    DayDialog(activity, app.profileId, date).show()
+                    DayDialog(activity, profileId, date).show()
                 }
             }
         })

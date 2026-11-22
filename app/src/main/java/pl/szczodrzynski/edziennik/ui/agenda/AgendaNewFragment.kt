@@ -36,6 +36,7 @@ import pl.szczodrzynski.edziennik.ext.toDrawable
 import pl.szczodrzynski.edziennik.ui.agenda.event.AgendaEventGroup
 import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.LessonChangesDialog
 import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.LessonChangesEvent
+import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.groupLessonChanges
 import pl.szczodrzynski.edziennik.ui.agenda.teacherabsence.TeacherAbsenceDialog
 import pl.szczodrzynski.edziennik.ui.agenda.teacherabsence.TeacherAbsenceEvent
 import pl.szczodrzynski.edziennik.ui.base.fragment.BaseFragment
@@ -578,12 +579,18 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
             rawStudentDuties = duties
             updateData()
         }
-        app.db.eventDao().getAll(app.profileId).observe(viewLifecycleOwner) { eventList ->
-            synchronized(rawEvents) {
+        app.db.eventDao().getAll(app.profileId, observeMetadata = true).observe(viewLifecycleOwner) { eventList ->
+            val keepListPosition = synchronized(rawEvents) {
+                val sameRows = rawEvents.size == eventList.size && rawEvents.indices.all { index ->
+                    val old = rawEvents[index]
+                    val updated = eventList[index]
+                    old.id == updated.id && old.date == updated.date && old.type == updated.type
+                }
                 rawEvents.clear()
                 rawEvents.addAll(eventList)
+                sameRows
             }
-            updateData()
+            updateData(keepListPosition)
         }
 
         app.db.teacherAbsenceDao().getAll(app.profileId).observe(viewLifecycleOwner) { absenceList ->
@@ -607,27 +614,27 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
         }
 
         app.db.timetableDao().getChanges(app.profileId).observe(viewLifecycleOwner) { changesList ->
-            synchronized(rawLessonChanges) {
+            val changesByDate = groupLessonChanges(app.profileId, changesList, app.profile.config.ui.timetableHideClassLessons)
+            val keepListPosition = synchronized(rawLessonChanges) {
+                val sameRows = rawLessonChanges.map { it.date to it.count } == changesByDate.map { it.date to it.count }
+                if (sameRows && rawLessonChanges.map { it.showItemBadge } == changesByDate.map { it.showItemBadge })
+                    return@observe
                 rawLessonChanges.clear()
-                val grouped = changesList.groupBy { it.displayDate }
-                grouped.forEach { (date, list) ->
-                    if (date != null) {
-                        rawLessonChanges.add(LessonChangesEvent(app.profileId, date, list.size, list.any { !it.seen }))
-                    }
-                }
+                rawLessonChanges.addAll(changesByDate)
+                sameRows
             }
-            updateData()
+            updateData(keepListPosition)
         }
     }
 
-    private fun updateData() {
+    private fun updateData(keepListPosition: Boolean = false) {
         val eventsSnapshot = synchronized(rawEvents) { rawEvents.toList() }
         val changesSnapshot = synchronized(rawLessonChanges) { rawLessonChanges.toList() }
         val absencesSnapshot = synchronized(rawTeacherAbsences) { rawTeacherAbsences.toList() }
 
         buildTopCalendarPills(eventsSnapshot, changesSnapshot, absencesSnapshot)
         buildMonthCalendarGrid(eventsSnapshot, changesSnapshot, absencesSnapshot)
-        buildAgendaList(eventsSnapshot, changesSnapshot, absencesSnapshot)
+        buildAgendaList(eventsSnapshot, changesSnapshot, absencesSnapshot, keepListPosition)
     }
 
     private fun setupMainEventsList() {
@@ -643,7 +650,8 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
                         LessonChangesDialog(
                             activity = activity,
                             profileId = app.profileId,
-                            defaultDate = counter.date
+                            defaultDate = counter.date,
+                            hideClassLessons = app.profile.config.ui.timetableHideClassLessons,
                         ).show()
                     }
                     AgendaListItem.CounterType.TEACHER_ABSENCE -> {
@@ -938,7 +946,8 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
     private fun buildAgendaList(
         events: List<EventFull> = synchronized(rawEvents) { rawEvents.toList() },
         changes: List<LessonChangesEvent> = synchronized(rawLessonChanges) { rawLessonChanges.toList() },
-        absences: List<TeacherAbsenceEvent> = synchronized(rawTeacherAbsences) { rawTeacherAbsences.toList() }
+        absences: List<TeacherAbsenceEvent> = synchronized(rawTeacherAbsences) { rawTeacherAbsences.toList() },
+        keepListPosition: Boolean = false,
     ) {
         buildAgendaJob?.cancel()
         buildAgendaJob = launch(Dispatchers.Default) {
@@ -1014,10 +1023,12 @@ class AgendaNewFragment : BaseFragment<FragmentAgendaNewBinding, MainActivity>(F
             }
 
             withContext(Dispatchers.Main) {
+                val scrollToSelection = !keepListPosition || agendaAdapter.itemCount == 0
                 agendaAdapter.setItems(itemsList)
                 b.progressBar.visibility = View.GONE
                 b.eventsRecyclerView.visibility = View.VISIBLE
-                scrollToDate(selectedDate)
+                if (scrollToSelection)
+                    scrollToDate(selectedDate)
             }
         }
     }

@@ -27,7 +27,7 @@ class UpdateWorker(val context: Context, val params: WorkerParameters) : Corouti
          */
         @SuppressLint("RestrictedApi")
         fun scheduleNext(app: App, rescheduleIfFailedFound: Boolean = true) {
-            WorkerUtils.scheduleNext(app, rescheduleIfFailedFound) {
+            WorkerUtils.scheduleNext(app, UpdateWorker::class.java.name, rescheduleIfFailedFound) {
                 rescheduleNext(app)
             }
         }

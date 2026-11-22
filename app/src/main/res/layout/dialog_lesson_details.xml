@@ -69,85 +69,94 @@
                 android:id="@+id/subjectContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:baselineAligned="false"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:paddingHorizontal="24dp"
                 android:paddingTop="24dp"
                 android:paddingBottom="16dp">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/oldSubjectNameView"
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/oldSubjectNameView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:isVisible="@{oldSubjectName != null}"
+                            android:text="@{oldSubjectName}"
+                            android:textAppearance="?textAppearanceBodyLarge"
+                            android:textColor="?android:textColorTertiary"
+                            android:textIsSelectable="true"
+                            app:strikeThrough="@{true}"
+                            tools:text="pracownia urządzeń techniki komputerowej" />
+
+                        <TextView
+                            android:id="@+id/subjectNameView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:isVisible="@{subjectName != null}"
+                            android:text="@{subjectName}"
+                            android:textAppearance="?textAppearanceTitleLarge"
+                            android:textIsSelectable="true"
+                            tools:text="pracownia urządzeń techniki komputerowej" />
+
+                        <TextView
+                            android:id="@+id/lessonDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?textAppearanceTitleMedium"
+                            android:textIsSelectable="true"
+                            tools:text="czwartek, 14 listopada 2019"
+                            tools:visibility="visible" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/lessonTimeContainer"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:isVisible="@{oldSubjectName != null}"
-                        android:text="@{oldSubjectName}"
-                        android:textAppearance="?textAppearanceBodyLarge"
-                        android:textColor="?android:textColorTertiary"
-                        android:textIsSelectable="true"
-                        app:strikeThrough="@{true}"
-                        tools:text="pracownia urządzeń techniki komputerowej" />
+                        android:gravity="right"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/subjectNameView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:isVisible="@{subjectName != null}"
-                        android:text="@{subjectName}"
-                        android:textAppearance="?textAppearanceTitleLarge"
-                        android:textIsSelectable="true"
-                        tools:text="pracownia urządzeń techniki komputerowej" />
+                        <TextView
+                            android:id="@+id/lessonNumberText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:isVisible="@{lesson.displayLessonNumber != null}"
+                            android:text="@{lesson.displayLessonNumber.toString()}"
+                            android:textAppearance="?textAppearanceHeadlineLarge"
+                            tools:text="4" />
 
-                    <TextView
-                        android:id="@+id/lessonDate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?textAppearanceTitleMedium"
-                        android:textIsSelectable="true"
-                        tools:text="czwartek, 14 listopada 2019"
-                        tools:visibility="visible" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/annotation"
-                        style="?chipStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:isVisible="@{annotationVisible}"
-                        android:text="@string/timetable_lesson_cancelled"
-                        android:textColor="?colorOnError"
-                        app:chipBackgroundColor="?colorError"
-                        app:chipStrokeWidth="0dp" />
+                        <TextView
+                            android:id="@+id/lessonTimeView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@{lesson.displayStartTime.stringHM + ` - ` + lesson.displayEndTime.stringHM}"
+                            tools:text="14:55 - 15:40" />
+                    </LinearLayout>
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/lessonTimeContainer"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/annotation"
+                    style="?chipStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="right"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/lessonNumberText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:isVisible="@{lesson.displayLessonNumber != null}"
-                        android:text="@{lesson.displayLessonNumber.toString()}"
-                        android:textAppearance="?textAppearanceHeadlineLarge"
-                        tools:text="4" />
-
-                    <TextView
-                        android:id="@+id/lessonTimeView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@{lesson.displayStartTime.stringHM + ` - ` + lesson.displayEndTime.stringHM}"
-                        tools:text="14:55 - 15:40" />
-                </LinearLayout>
+                    android:layout_gravity="start"
+                    android:checkable="false"
+                    android:ellipsize="end"
+                    android:isVisible="@{annotationVisible}"
+                    android:textColor="?colorOnError"
+                    app:chipBackgroundColor="?colorError"
+                    app:chipStrokeWidth="0dp"
+                    tools:text="@string/timetable_lesson_cancelled" />
             </LinearLayout>
 
             <LinearLayout

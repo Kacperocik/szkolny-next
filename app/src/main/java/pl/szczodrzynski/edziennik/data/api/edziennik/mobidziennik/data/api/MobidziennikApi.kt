@@ -10,6 +10,7 @@ import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.ENDPOINT_MOBID
 import pl.szczodrzynski.edziennik.data.api.edziennik.mobidziennik.data.MobidziennikWeb
 import pl.szczodrzynski.edziennik.data.api.models.ApiError
 import pl.szczodrzynski.edziennik.data.db.entity.SYNC_ALWAYS
+import pl.szczodrzynski.edziennik.data.enums.FeatureType
 
 class MobidziennikApi(override val data: DataMobidziennik,
                       override val lastSync: Long?,
@@ -37,14 +38,14 @@ class MobidziennikApi(override val data: DataMobidziennik,
                     7 -> MobidziennikApiTeams(data, rows, null)
                     8 -> MobidziennikApiStudent(data, rows)
                     9 -> MobidziennikApiTeams(data, null, rows)
-                    14 -> MobidziennikApiGradeCategories(data, rows)
+                    14 -> if (data.shouldSyncFeature(FeatureType.GRADES)) MobidziennikApiGradeCategories(data, rows)
                     15 -> MobidziennikApiLessons(data, rows)
                     //16 -> MobidziennikApiAttendance(data, rows) // disabled since the new web scrapper is used
-                    17 -> MobidziennikApiNotices(data, rows)
-                    18 -> MobidziennikApiGrades(data, rows)
-                    21 -> MobidziennikApiEvents(data, rows)
-                    23 -> MobidziennikApiHomework(data, rows)
-                    24 -> MobidziennikApiTimetable(data, rows)
+                    17 -> if (data.shouldSyncFeature(FeatureType.BEHAVIOUR)) MobidziennikApiNotices(data, rows)
+                    18 -> if (data.shouldSyncFeature(FeatureType.GRADES)) MobidziennikApiGrades(data, rows)
+                    21 -> if (data.shouldSyncFeature(FeatureType.AGENDA)) MobidziennikApiEvents(data, rows)
+                    23 -> if (data.shouldSyncFeature(FeatureType.HOMEWORK)) MobidziennikApiHomework(data, rows)
+                    24 -> if (data.shouldSyncFeature(FeatureType.TIMETABLE)) MobidziennikApiTimetable(data, rows)
                 }
             }
 

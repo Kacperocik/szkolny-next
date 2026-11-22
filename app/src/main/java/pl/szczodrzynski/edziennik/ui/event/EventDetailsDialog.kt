@@ -12,6 +12,7 @@ import com.mikepenz.iconics.typeface.library.community.material.CommunityMateria
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.full.EventFull
 import pl.szczodrzynski.edziennik.databinding.DialogEventDetailsBinding
+import pl.szczodrzynski.edziennik.ext.dismissWithAnimation
 import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ui.base.dialog.BindingDialog
 
@@ -22,6 +23,7 @@ class EventDetailsDialog(
     var event: EventFull,
     private val showNotes: Boolean = true,
     private val onDismiss: (() -> Unit)? = null,
+    private val onGoToTimetable: (() -> Unit)? = null,
 ) : BindingDialog<DialogEventDetailsBinding>(activity) {
 
     private lateinit var binder: EventDetailsBinder
@@ -63,6 +65,11 @@ class EventDetailsDialog(
             showNotes = showNotes,
             onClose = ::dismiss,
             onEventUpdated = { event = it },
+            onGoToTimetable = { openTimetable ->
+                b.goToTimetableButton.isEnabled = false
+                onGoToTimetable?.invoke()
+                dialog.dismissWithAnimation(openTimetable)
+            },
         )
         binder.bind(event)
     }

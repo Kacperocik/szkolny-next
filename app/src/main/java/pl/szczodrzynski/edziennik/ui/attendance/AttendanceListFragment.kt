@@ -40,6 +40,7 @@ class AttendanceListFragment : BaseFragment<AttendanceListFragmentBinding, MainA
         expandSubjectId = arguments?.getLong("gradesSubjectId") ?: 0L
 
         val adapter = AttendanceAdapter(activity, viewType)
+        adapter.observeSeen(viewLifecycleOwner, App.profileId)
         var firstRun = true
 
         app.db.attendanceDao().getAll(App.profileId).observe(viewLifecycleOwner, Observer { items -> this@AttendanceListFragment.launch {

@@ -31,6 +31,7 @@ import com.mikepenz.iconics.Iconics
 import com.qifan.powerpermission.PowerPermission
 import com.qifan.powerpermission.core.PermissionFragment
 import im.wangchao.mhttp.MHttp
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -144,6 +145,7 @@ class App : MultiDexApplication(), Configuration.Provider, CoroutineScope {
          |  __  |  | |     | |  |  ___/
          | |  | |  | |     | |  | |
          |_|  |_|  |_|     |_|  |*/
+    internal val syncReady = CompletableDeferred<Unit>()
     lateinit var http: OkHttpClient
     lateinit var httpLazy: OkHttpClient
 
@@ -312,10 +314,8 @@ class App : MultiDexApplication(), Configuration.Provider, CoroutineScope {
 
             SSLProviderInstaller.install(applicationContext, this@App::buildHttp)
 
-            if (config.sync.enabled)
-                SyncWorker.scheduleNext(this@App, false)
-            else
-                SyncWorker.cancelNext(this@App)
+            syncReady.complete(Unit)
+            SyncWorker.scheduleNext(this@App)
 
             if (config.sync.notifyAboutUpdates)
                 UpdateWorker.scheduleNext(this@App, false)

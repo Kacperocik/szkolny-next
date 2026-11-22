@@ -4,17 +4,22 @@
 
 package pl.szczodrzynski.edziennik.ui.timetable
 
-import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Outline
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.shape.AdjustedCornerSize
+import com.google.android.material.shape.MaterialShapeDrawable
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.core.manager.NoteManager
@@ -24,6 +29,7 @@ import pl.szczodrzynski.edziennik.data.db.full.AttendanceFull
 import pl.szczodrzynski.edziennik.data.db.full.LessonFull
 import pl.szczodrzynski.edziennik.databinding.DialogLessonDetailsBinding
 import pl.szczodrzynski.edziennik.databinding.LessonTopicEmbeddedBinding
+import pl.szczodrzynski.edziennik.ext.dismissWithAnimation
 import pl.szczodrzynski.edziennik.ext.dp
 import pl.szczodrzynski.edziennik.ext.enableExpressiveCardShapeMorph
 import pl.szczodrzynski.edziennik.ext.onClick
@@ -38,7 +44,6 @@ import pl.szczodrzynski.edziennik.ui.lessontopics.LessonTopicDetailsDialog
 import pl.szczodrzynski.edziennik.ui.notes.setupNotesButton
 import pl.szczodrzynski.edziennik.utils.BetterLink
 import pl.szczodrzynski.edziennik.utils.SimpleDividerItemDecoration
-import pl.szczodrzynski.edziennik.utils.models.Date
 import pl.szczodrzynski.edziennik.utils.models.Week
 
 class LessonDetailsDialog(
@@ -77,8 +82,46 @@ class LessonDetailsDialog(
     private lateinit var adapter: EventListAdapter
     private val manager
         get() = app.timetableManager
+    private val timetableConfig
+        get() = app.config[lesson.profileId].ui
     private val attendanceManager
         get() = app.attendanceManager
+    private var coloredContentOutline: ViewOutlineProvider? = null
+
+    override fun configureDialogBackground(background: MaterialShapeDrawable) {
+        val strokeWidth = if (timetableConfig.timetableColorBorders) 2.dp else 0
+        if (strokeWidth > 0)
+            background.setStroke(strokeWidth.toFloat(), manager.getSubjectColor(lesson))
+
+        coloredContentOutline = if (timetableConfig.timetableColorSubjectName) {
+            val innerShape = background.shapeAppearanceModel.withTransformedCornerSizes { corner ->
+                AdjustedCornerSize(-strokeWidth.toFloat(), corner)
+            }
+            val outlineShape = MaterialShapeDrawable(innerShape)
+            object : ViewOutlineProvider() {
+                override fun getOutline(view: View, outline: Outline) {
+                    outlineShape.setBounds(strokeWidth, strokeWidth, view.width - strokeWidth, view.height - strokeWidth)
+                    outlineShape.getOutline(outline)
+                }
+            }
+        } else {
+            null
+        }
+    }
+
+    override suspend fun onBeforeShow(): Boolean {
+        if (timetableConfig.timetableColorSubjectName) {
+            val color = ColorUtils.setAlphaComponent(manager.getSubjectColor(lesson), 255)
+            val textColor = lessonHeaderTextColor(color)
+            b.subjectContainer.setBackgroundColor(color)
+            b.oldSubjectNameView.setTextColor(textColor)
+            b.subjectNameView.setTextColor(textColor)
+            b.lessonDate.setTextColor(textColor)
+            b.lessonNumberText.setTextColor(textColor)
+            b.lessonTimeView.setTextColor(textColor)
+        }
+        return true
+    }
 
     fun openAddEventDialog(): Boolean {
         EventManualDialog(
@@ -90,23 +133,31 @@ class LessonDetailsDialog(
     }
 
     override suspend fun onShow() {
+        coloredContentOutline?.let { outline ->
+            dialog.findViewById<View>(androidx.appcompat.R.id.parentPanel)?.apply {
+                outlineProvider = outline
+                clipToOutline = true
+            }
+        }
         if (App.devMode)
             b.lessonId.visibility = View.VISIBLE
 
         b.lesson = lesson
         val lessonDate = lesson.displayDate ?: return
         val lessonTime = lesson.displayStartTime ?: return
+        manager.markAsSeen(lesson)
         b.lessonDate.text =
             Week.getFullDayName(lessonDate.weekDay) + ", " + lessonDate.formattedString
 
         b.annotationVisible = manager.getAnnotation(activity, lesson, b.annotation)
+        b.annotation.onClick { chip ->
+            Toast.makeText(chip.context, chip.text, Toast.LENGTH_LONG).show()
+        }
 
         if (lesson.type >= Lesson.TYPE_SHIFTED_SOURCE) {
             b.shiftedLayout.visibility = View.VISIBLE
-            var otherLessonDate: Date? = null
             when (lesson.type) {
                 Lesson.TYPE_SHIFTED_SOURCE -> {
-                    otherLessonDate = lesson.date
                     when {
                         lesson.date != lesson.oldDate -> b.shiftedText.setText(
                             R.string.timetable_lesson_shifted_other_day,
@@ -121,7 +172,6 @@ class LessonDetailsDialog(
                     }
                 }
                 Lesson.TYPE_SHIFTED_TARGET -> {
-                    otherLessonDate = lesson.oldDate
                     when {
                         lesson.date != lesson.oldDate -> b.shiftedText.setText(
                             R.string.timetable_lesson_shifted_from_other_day,
@@ -136,13 +186,14 @@ class LessonDetailsDialog(
                     }
                 }
             }
+            val target = ShiftedLessonTarget.from(lesson)
+            b.shiftedGoTo.isVisible = target != null
             b.shiftedGoTo.setOnClickListener {
-                dismiss()
-                val dateStr = otherLessonDate?.stringY_m_d ?: return@setOnClickListener
-                val intent = Intent(TimetableFragment.ACTION_SCROLL_TO_DATE).apply {
-                    putExtra("timetableDate", dateStr)
+                target ?: return@setOnClickListener
+                b.shiftedGoTo.isEnabled = false
+                dialog.dismissWithAnimation {
+                    TimetableFragment.openDay(activity, lesson.profileId, target.date, target)
                 }
-                activity.sendBroadcast(intent)
             }
         } else {
             b.shiftedLayout.visibility = View.GONE
@@ -231,6 +282,7 @@ class LessonDetailsDialog(
                 EventDetailsDialog(
                     activity,
                     it,
+                    onGoToTimetable = ::dismiss,
                 ).show()
             },
             onEventEditClick = {

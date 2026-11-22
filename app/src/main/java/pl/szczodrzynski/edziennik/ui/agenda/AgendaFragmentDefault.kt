@@ -23,10 +23,7 @@ import com.github.tibolte.agendacalendarview.models.BaseCalendarEvent
 import com.github.tibolte.agendacalendarview.models.CalendarEvent
 import com.github.tibolte.agendacalendarview.models.IDayItem
 import com.google.android.material.card.MaterialCardView
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pl.szczodrzynski.edziennik.App
@@ -45,6 +42,7 @@ import pl.szczodrzynski.edziennik.ui.agenda.event.AgendaEventRenderer
 import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.LessonChangesDialog
 import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.LessonChangesEvent
 import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.LessonChangesEventRenderer
+import pl.szczodrzynski.edziennik.ui.agenda.lessonchanges.groupLessonChanges
 import pl.szczodrzynski.edziennik.ui.agenda.teacherabsence.TeacherAbsenceDialog
 import pl.szczodrzynski.edziennik.ui.agenda.teacherabsence.TeacherAbsenceEvent
 import pl.szczodrzynski.edziennik.ui.agenda.teacherabsence.TeacherAbsenceEventRenderer
@@ -56,12 +54,10 @@ class AgendaFragmentDefault(
     private val activity: MainActivity,
     private val app: App,
     private val b: FragmentAgendaDefaultBinding
-) : OnScrollListener, CoroutineScope {
+) : OnScrollListener {
     companion object {
         var selectedDate: Date = Date.getToday()
     }
-
-    override val coroutineContext = Job() + Dispatchers.Main
 
     private val unreadDates = mutableSetOf<Int>()
     private val events = mutableListOf<CalendarEvent>()
@@ -84,8 +80,6 @@ class AgendaFragmentDefault(
         get() = CalendarManager.getInstance()
 
     private var scrollState = OnScrollListener.SCROLL_STATE_IDLE
-    private var updatePending = false
-    private var notifyPending = false
     override fun onScrollStateChanged(view: AbsListView?, newScrollState: Int) {
         b.agendaDefaultView.agendaScrollListener.onScrollStateChanged(view, scrollState)
         scrollState = newScrollState
@@ -93,8 +87,6 @@ class AgendaFragmentDefault(
             // the user is scrolling the list, so stop keeping a day at the top
             scrollTargetDay = null
         }
-        if (updatePending) updateData()
-        if (notifyPending) notifyDataSetChanged()
     }
 
     override fun onScroll(
@@ -109,50 +101,41 @@ class AgendaFragmentDefault(
         totalItemCount
     )
 
-    /**
-     * Mark the data as needing update, either after 1 second (when
-     * not scrolling) or 1 second after scrolling stops.
-     */
-    private fun updateData() = launch {
-        if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
-            updatePending = false
-            delay(1000)
-            notifyDataSetChanged()
-        } else updatePending = true
-    }
-
-    /**
-     * Notify the adapter about changes, either instantly or after
-     * scrolling stops.
-     */
-    private fun notifyDataSetChanged() {
-        if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
-            notifyPending = false
-            adapter?.notifyDataSetChanged()
-        } else notifyPending = true
-    }
-
     suspend fun initView(fragment: AgendaFragment) {
         isInitialized = false
+        val owner = fragment.viewLifecycleOwner
 
         withContext(Dispatchers.Default) {
-            if (app.profile.config.ui.agendaLessonChanges)
-                addLessonChanges(events)
-
             if (app.profile.config.ui.agendaTeacherAbsence)
                 addTeacherAbsence(events)
         }
 
-        app.db.studentDutyDao().getAll(app.profileId).observe(fragment) { duties ->
+        val profileId = app.profileId
+        if (app.profile.config.ui.agendaLessonChanges) {
+            app.db.timetableDao().getChanges(profileId).observe(owner) { changes ->
+                val changesByDay = groupLessonChanges(profileId, changes, app.profile.config.ui.timetableHideClassLessons)
+                val previous = events.filterIsInstance<LessonChangesEvent>()
+                if (previous.size == changesByDay.size && previous.indices.all { index ->
+                    val old = previous[index]
+                    val updated = changesByDay[index]
+                    old.date == updated.date && old.count == updated.count && old.showItemBadge == updated.showItemBadge
+                }) return@observe
+                events.removeAll { it is LessonChangesEvent }
+                events.addAll(changesByDay)
+                if (isInitialized) updateView(keepListPosition = true)
+            }
+        }
+
+        app.db.studentDutyDao().getAll(profileId).observe(owner) { duties ->
             events.removeAll { it is StudentDutyEvent }
             events.addAll(duties.map(::StudentDutyEvent))
             if (isInitialized) updateView()
         }
 
-        app.db.eventDao().getAll(app.profileId).observe(fragment) {
+        app.db.eventDao().getAll(profileId, observeMetadata = true).observe(owner) {
             addEvents(events, it)
             if (isInitialized)
-                updateView()
+                updateView(keepListPosition = true)
             else
                 initViewPriv()
         }
@@ -189,7 +172,8 @@ class AgendaFragmentDefault(
                         is LessonChangesEvent -> LessonChangesDialog(
                             activity = activity,
                             profileId = app.profileId,
-                            defaultDate = date
+                            defaultDate = date,
+                            hideClassLessons = app.profile.config.ui.timetableHideClassLessons,
                         ).show()
                         is TeacherAbsenceEvent -> TeacherAbsenceDialog(
                             activity = activity,
@@ -205,30 +189,18 @@ class AgendaFragmentDefault(
                         is BaseCalendarEvent -> if (event.isPlaceHolder)
                             DayDialog(activity, app.profileId, date).show()
                     }
-
-                    if (event is BaseEvent && event.showItemBadge) {
-                        val unreadCount = manager.events.count {
-                            it.instanceDay.equals(event.instanceDay) && it.showBadge
-                        }
-                        // only clicked event is unread, remove the day badge
-                        if (unreadCount == 1 && event.showBadge) {
-                            event.dayReference.showBadge = false
-                            unreadDates.remove(date.value)
-                        }
-                        setAsRead(event)
-                    }
                 }
 
                 override fun onScrollToDate(calendar: Calendar) {
-                    selectedDate = Date.fromCalendar(calendar)
+                    val date = Date.fromCalendar(calendar)
+                    selectedDate = date
 
                     // Mark as read scrolled date
-                    if (selectedDate.value in unreadDates) {
-                        setAsRead(calendar)
+                    if (unreadDates.remove(date.value)) {
+                        val profileId = app.profileId
                         activity.launch(Dispatchers.Default) {
-                            app.db.eventDao().setSeenByDate(app.profileId, selectedDate, true)
+                            app.db.eventDao().setSeenByDate(profileId, date, true)
                         }
-                        unreadDates.remove(selectedDate.value)
                     }
                 }
             },
@@ -405,7 +377,7 @@ class AgendaFragmentDefault(
         }
     }
 
-    private fun updateView() {
+    private fun updateView(keepListPosition: Boolean = false) {
         manager.events.clear()
         manager.loadEvents(events, BaseCalendarEvent())
         val originalOrder = manager.events.withIndex().associate { it.value to it.index }
@@ -420,34 +392,8 @@ class AgendaFragmentDefault(
         ))
 
         adapter?.updateEvents(manager.events)
-        scrollToSelectedDate(selectedDate.asCalendar)
-    }
-
-    private fun setAsRead(date: Calendar) {
-        // get all events matching the date
-        val events = manager.events.filter {
-            if (it.instanceDay.equals(date) && it.showBadge && it is AgendaEvent) {
-                // hide the day badge for the date
-                it.dayReference.showBadge = false
-                return@filter true
-            }
-            false
-        }
-        // set this date's events as read
-        setAsRead(*events.toTypedArray())
-    }
-
-    private fun setAsRead(vararg event: CalendarEvent) {
-        // hide per-event badges
-        for (e in event) {
-            events.firstOrNull {
-                it == e
-            }?.showBadge = false
-            e.showBadge = false
-        }
-
-        listView.setOnScrollListener(this)
-        updateData()
+        if (!keepListPosition)
+            scrollToSelectedDate(selectedDate.asCalendar)
     }
 
     private fun addEvents(
@@ -455,6 +401,7 @@ class AgendaFragmentDefault(
         eventList: List<EventFull>
     ) {
         events.removeAll { it is AgendaEvent || it is AgendaEventGroup }
+        unreadDates.clear()
 
         if (!app.profile.config.ui.agendaGroupByType) {
             events += eventList.map {
@@ -484,23 +431,6 @@ class AgendaFragmentDefault(
                     showBadge = list.any { !it.seen }
                 ))
             }
-        }
-    }
-
-    private fun addLessonChanges(events: MutableList<CalendarEvent>) {
-        val lessons = app.db.timetableDao().getChangesNow(app.profileId)
-
-        val grouped = lessons.groupBy {
-            it.displayDate
-        }
-
-        events += grouped.mapNotNull { (date, changes) ->
-            LessonChangesEvent(
-                app.profileId,
-                date = date ?: return@mapNotNull null,
-                count = changes.size,
-                showBadge = changes.any { !it.seen }
-            )
         }
     }
 

@@ -70,6 +70,10 @@ abstract class Data(val app: App, val profile: Profile?, val loginStore: LoginSt
      * to run.
      */
     var targetEndpoints = sortedMapOf<Int, Long?>()
+
+    internal var syncFeatureTypes: Set<FeatureType>? = null
+
+    internal fun shouldSyncFeature(feature: FeatureType) = syncFeatureTypes?.contains(feature) ?: true
     /**
      * A count of all network requests to do.
      */

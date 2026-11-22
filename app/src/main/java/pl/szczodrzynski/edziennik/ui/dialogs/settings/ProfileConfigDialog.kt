@@ -6,6 +6,7 @@ package pl.szczodrzynski.edziennik.ui.dialogs.settings
 
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.shape.MaterialShapeDrawable
@@ -19,6 +20,7 @@ import pl.szczodrzynski.edziennik.ext.onChange
 import pl.szczodrzynski.edziennik.ext.onClick
 import pl.szczodrzynski.edziennik.ext.toDrawable
 import pl.szczodrzynski.edziennik.ui.dialogs.ProfileRemoveDialog
+import pl.szczodrzynski.edziennik.ui.dialogs.sync.ProfileSyncScopeDialog
 import pl.szczodrzynski.edziennik.ui.base.dialog.BindingDialog
 
 class ProfileConfigDialog(
@@ -62,6 +64,14 @@ class ProfileConfigDialog(
         b.syncSwitch.onChange { _, _ ->
             profileChanged = true
         }
+
+        val showSyncScope = !profile.archived &&
+            profile.loginStoreType.features.any { !it.isAlwaysNeeded && it.nameRes != null }
+        b.syncScopeButton.isVisible = showSyncScope
+        b.syncScopeDivider.isVisible = showSyncScope
+        b.syncScopeButton.icon = CommunityMaterial.Icon.cmd_chevron_right.toDrawable(activity)
+        b.syncScopeButton.enableExpressiveShapeMorph()
+        b.syncScopeButton.onClick { ProfileSyncScopeDialog(activity, profile).show() }
 
         b.imageButton.onClick {
             if (activity !is MainActivity)

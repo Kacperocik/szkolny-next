@@ -21,7 +21,12 @@ object WorkerUtils {
      * Schedule the sync job only if it's not already scheduled.
      */
     @SuppressLint("RestrictedApi")
-    inline fun scheduleNext(app: App, rescheduleIfFailedFound: Boolean = true, crossinline onReschedule: () -> Unit) {
+    inline fun scheduleNext(
+        app: App,
+        workerClassName: String,
+        rescheduleIfFailedFound: Boolean,
+        crossinline onReschedule: () -> Unit,
+    ) {
         AsyncTask.execute {
             // TODO fix and refactor this class
             val workManager = WorkManager.getInstance(app) as WorkManagerImpl
@@ -29,8 +34,7 @@ object WorkerUtils {
             scheduledWork.forEach {
                 Timber.d("Work: ${it.id} at ${it.calculateNextRunTime().formatDate()}. State = ${it.state} (finished = ${it.state.isFinished})")
             }
-            // remove finished work and other than SyncWorker
-            scheduledWork.removeAll { it.workerClassName != SyncWorker::class.java.canonicalName || it.isPeriodic || it.state.isFinished }
+            scheduledWork.removeAll { it.workerClassName != workerClassName || it.isPeriodic || it.state.isFinished }
             Timber.d("Found ${scheduledWork.size} unfinished work")
             // remove all enqueued work that had to (but didn't) run at some point in the past (at least 1min ago)
             val failedWork = scheduledWork.filter { it.state == WorkInfo.State.ENQUEUED && it.calculateNextRunTime() < System.currentTimeMillis() - 1 * MINUTE * 1000 }

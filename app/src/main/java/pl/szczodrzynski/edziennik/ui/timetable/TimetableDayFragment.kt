@@ -4,25 +4,27 @@
 
 package pl.szczodrzynski.edziennik.ui.timetable
 
-import android.graphics.drawable.ColorDrawable
+import android.animation.ValueAnimator
+import android.content.res.ColorStateList
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
-import android.text.Layout
-import android.text.StaticLayout
-import android.text.TextPaint
-import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater
-import androidx.core.graphics.ColorUtils
+import androidx.core.animation.doOnEnd
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.core.view.marginTop
 import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.NestedScrollView
+import androidx.lifecycle.distinctUntilChanged
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.shape.MaterialShapeDrawable
 import com.linkedin.android.tachyon.DayView
 import com.linkedin.android.tachyon.DayViewConfig
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -41,6 +43,7 @@ import pl.szczodrzynski.edziennik.data.db.full.AttendanceFull
 import pl.szczodrzynski.edziennik.data.db.full.EventFull
 import pl.szczodrzynski.edziennik.data.db.full.LessonFull
 import pl.szczodrzynski.edziennik.data.enums.FeatureType
+import pl.szczodrzynski.edziennik.data.enums.MetadataType
 import pl.szczodrzynski.edziennik.databinding.TimetableDayFragmentBinding
 import pl.szczodrzynski.edziennik.databinding.TimetableLessonBinding
 import pl.szczodrzynski.edziennik.databinding.TimetableNoLessonsBinding
@@ -68,7 +71,6 @@ import pl.szczodrzynski.edziennik.utils.models.Date
 import pl.szczodrzynski.edziennik.utils.models.Time
 import pl.szczodrzynski.edziennik.utils.models.Week
 import pl.szczodrzynski.edziennik.utils.mutableLazy
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -99,8 +101,10 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
     private var placeholderGeneration = 0
 
     private val activeLessonBindings = mutableListOf<TimetableLessonBinding>()
+    private var seenLessonIds = emptySet<Long>()
     private val activeHourLabels = mutableListOf<TextView>()
     private var lastEventTimeRanges = listOf<DayView.EventTimeRange>()
+    private var lessonHighlightAnimator: ValueAnimator? = null
 
     private val lessonClickListener = View.OnClickListener { v ->
         if (isAdded && v.tag is Pair<*, *>) {
@@ -111,6 +115,52 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
                 attendance = attendanceObj as AttendanceFull?,
             ).show()
         }
+    }
+
+    internal fun highlightPendingLesson() {
+        if (!isResumed || view == null || !::date.isInitialized)
+            return
+        val parent = timetableFragment ?: return
+        val target = parent.lessonToHighlight(date) ?: return
+
+        b.dayFrame.doOnPreDraw {
+            if (!isResumed || parent.lessonToHighlight(date) !== target)
+                return@doOnPreDraw
+            val lessonCards = activeLessonBindings.mapNotNull { binding ->
+                val lesson = (binding.root.tag as? Pair<*, *>)?.first as? LessonFull ?: return@mapNotNull null
+                lesson to binding.lessonCard
+            }
+            val lesson = target.findLesson(lessonCards.map { it.first }) ?: return@doOnPreDraw
+            val card = lessonCards.first { it.first === lesson }.second
+            if (!card.isAttachedToWindow || card.width <= 0 || card.height <= 0)
+                return@doOnPreDraw
+
+            parent.consumeLessonHighlight(target)
+            card.requestRectangleOnScreen(Rect(0, 0, card.width, card.height), true)
+            highlightLesson(card)
+        }
+        b.dayFrame.postInvalidateOnAnimation()
+    }
+
+    private fun highlightLesson(card: MaterialCardView) {
+        lessonHighlightAnimator?.cancel()
+        val highlight = MaterialShapeDrawable(card.shapeAppearanceModel).apply {
+            fillColor = ColorStateList.valueOf(R.attr.colorPrimary.resolveAttr(card.context))
+            setBounds(0, 0, card.width, card.height)
+            alpha = 0
+        }
+        card.overlay.add(highlight)
+        val animator = ValueAnimator.ofInt(0, 105, 0).apply {
+            duration = 450L
+            repeatCount = 1
+            addUpdateListener { highlight.alpha = it.animatedValue as Int }
+            doOnEnd {
+                card.overlay.remove(highlight)
+                lessonHighlightAnimator = null
+            }
+        }
+        lessonHighlightAnimator = animator
+        animator.start()
     }
 
     private val manager
@@ -165,6 +215,19 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
         )
 
         attachScrollListener()
+
+        app.db.metadataDao().getSeenIds(App.profileId, MetadataType.LESSON_CHANGE)
+            .distinctUntilChanged().observe(viewLifecycleOwner) { ids ->
+                seenLessonIds = ids.toHashSet()
+                for (binding in activeLessonBindings) {
+                    val lesson = (binding.root.tag as? Pair<*, *>)?.first as? LessonFull ?: continue
+                    if (lesson.id in seenLessonIds) {
+                        lesson.seen = true
+                        lesson.showAsUnseen = false
+                        binding.unread = false
+                    }
+                }
+            }
 
         val parent = timetableFragment
         val cached = parent?.getCachedDayData(date)
@@ -284,6 +347,7 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
     }
 
     private fun releaseLessonBindingsToPool() {
+        lessonHighlightAnimator?.cancel()
         if (activeLessonBindings.isNotEmpty()) {
             if (dayViewDelegate.isInitialized()) {
                 dayView.removeEventViews()
@@ -406,7 +470,10 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
 
         setupHourLabels()
 
-        lessons.forEach { it.showAsUnseen = !it.seen }
+        lessons.forEach {
+            if (it.id in seenLessonIds) it.seen = true
+            it.showAsUnseen = !it.seen
+        }
 
         buildLessonViews(lessonsActual, events, attendanceList)
     }
@@ -434,6 +501,7 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
         if (!isAdded)
             return
 
+        lessonHighlightAnimator?.cancel()
         val parent = timetableFragment
         val eventViews = ArrayList<View>(lessons.size)
         val eventTimeRanges = ArrayList<DayView.EventTimeRange>(lessons.size)
@@ -443,12 +511,9 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
         var remaining = recycledBindings.size
 
         val bullet = " • "
-        val colorOnSurface = R.attr.colorOnSurface.resolveAttr(activity)
         val colorSecondary = android.R.attr.textColorSecondary.resolveAttr(activity)
         val showAttendance = app.profile.config.ui.timetableShowAttendance
         val showEvents = app.profile.config.ui.timetableShowEvents
-        val colorSubjectName = app.profile.config.ui.timetableColorSubjectName
-        val colorBorders = app.profile.config.ui.timetableColorBorders
 
         firstEventMinute = 24 * 60
 
@@ -540,44 +605,7 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
             val lessonText =
                 lesson.getNoteSubstituteText(showNotes = true) ?: lesson.displaySubjectName
 
-            val subjectColor = lesson.color
-                ?: manager.getSubjectColor(lesson.displaySubjectId, lessonText?.toString())
-            val (subjectTextPrimary, subjectTextSecondary) = if (colorSubjectName) {
-                if (lb.annotationVisible) {
-                    lb.subjectContainer.background = ColorDrawable(subjectColor)
-                } else {
-                    lb.subjectContainer.setBackgroundResource(R.drawable.timetable_subject_color_rounded)
-                    lb.subjectContainer.background.setTintColor(subjectColor)
-                }
-                when (ColorUtils.calculateLuminance(subjectColor) > 0.5) {
-                    true -> /* light */ 0xFF000000 to 0xFF666666
-                    false -> /* dark */ 0xFFFFFFFF to 0xFFAAAAAA
-                }
-            } else {
-                lb.subjectContainer.background = null
-                null to colorSecondary
-            }
-
-            if (colorBorders) {
-                lb.lessonCard.setStrokeColor(subjectColor)
-                lb.lessonCard.strokeWidth = 2.dp
-            } else {
-                lb.lessonCard.strokeWidth = 0
-            }
-
-            lb.lessonNumber = lesson.displayLessonNumber
-            if (subjectTextPrimary != null)
-                lb.lessonNumberText.setTextColor(subjectTextPrimary.toInt())
-            else
-                lb.lessonNumberText.setTextColor(colorOnSurface)
-            lb.subjectName.text = lessonText?.let {
-                if (lesson.type == Lesson.TYPE_CANCELLED || lesson.type == Lesson.TYPE_SHIFTED_SOURCE)
-                    it.asStrikethroughSpannable().asColoredSpannable(subjectTextSecondary.toInt())
-                else if (subjectTextPrimary != null)
-                    it.asColoredSpannable(subjectTextPrimary.toInt())
-                else
-                    it
-            }
+            lb.bindLessonAppearance(app, lesson, lessonText)
             lb.detailsFirst.text = listOfNotEmpty(classroomInfo, timeRange).concat(bullet)
             lb.detailsSecond.text = listOfNotEmpty(teacherInfo, teamInfo).concat(bullet)
 
@@ -591,12 +619,11 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
             } ?: false
 
             lb.unread = lesson.type != Lesson.TYPE_NORMAL && lesson.showAsUnseen
-            if (!lesson.seen) {
+            if (lesson.type > Lesson.TYPE_NORMAL && !lesson.seen) {
                 manager.markAsSeen(lesson)
             }
 
             lb.executePendingBindings()
-            lb.subjectName.ensureSubjectNameFitsWidth()
 
             // The day view needs the event time ranges in the start minute/end minute format,
             // so calculate those here
@@ -628,6 +655,7 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
         }
 
         b.progressBar.isVisible = false
+        highlightPendingLesson()
     }
 
     private fun updateTimeIndicator() {
@@ -681,6 +709,7 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
             b.scrollView.scrollTo(0, firstEventTop.toInt())
         }
         updateTimeIndicator()
+        highlightPendingLesson()
     }
 
     override fun onDestroyView() {
@@ -721,6 +750,7 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
 
     override fun onPause() {
         super.onPause()
+        lessonHighlightAnimator?.cancel()
         timeIndicatorJob?.cancel()
         timeIndicatorJob = null
     }
@@ -741,81 +771,6 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
         }
         b.scrollView.isFillViewport = false
         b.scrollView.isNestedScrollingEnabled = false
-    }
-
-    /**
-     * The subject name used to rely on TextView autosize. That measures against the view's
-     * own height, and the height is wrap_content, so once a narrow landscape column shrinks
-     * the text it never grows back when the same card becomes wider in portrait.
-     * Size is chosen from the available width instead, between 12sp and 16sp.
-     */
-    private fun TextView.ensureSubjectNameFitsWidth() {
-        if (getTag(R.id.subjectName) != true) {
-            setTag(R.id.subjectName, true)
-            addOnLayoutChangeListener { v, left, _, right, _, oldLeft, _, oldRight, _ ->
-                if (right - left == oldRight - oldLeft) return@addOnLayoutChangeListener
-                (v as TextView).fitSubjectNameToWidth()
-            }
-        }
-        fitSubjectNameToWidth()
-    }
-
-    private fun TextView.fitSubjectNameToWidth() {
-        val availableWidth = width - totalPaddingLeft - totalPaddingRight
-        if (availableWidth <= 0) return
-        val maxPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 16f, resources.displayMetrics)
-        val minPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, resources.displayMetrics)
-        val best = if (subjectNameFits(maxPx, availableWidth)) {
-            maxPx
-        } else {
-            var low = minPx.toInt()
-            var high = maxPx.toInt()
-            var fitted = low
-            while (low <= high) {
-                val mid = (low + high) / 2
-                if (subjectNameFits(mid.toFloat(), availableWidth)) {
-                    fitted = mid
-                    low = mid + 1
-                } else {
-                    high = mid - 1
-                }
-            }
-            fitted.toFloat()
-        }
-        if (abs(textSize - best) > 0.5f)
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, best)
-    }
-
-    private fun TextView.subjectNameFits(sizePx: Float, availableWidth: Int): Boolean {
-        if (text.isEmpty()) return true
-        val layout = buildSubjectLayout(sizePx, availableWidth)
-        val lines = if (maxLines > 0) maxLines else Int.MAX_VALUE
-        return layout.lineCount <= lines
-    }
-
-    private fun TextView.buildSubjectLayout(sizePx: Float, availableWidth: Int): StaticLayout {
-        val layoutPaint = TextPaint(paint)
-        layoutPaint.textSize = sizePx
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            StaticLayout.Builder.obtain(text, 0, text.length, layoutPaint, availableWidth)
-                .setAlignment(Layout.Alignment.ALIGN_NORMAL)
-                .setIncludePad(includeFontPadding)
-                .setLineSpacing(lineSpacingExtra, lineSpacingMultiplier)
-                .setBreakStrategy(breakStrategy)
-                .setHyphenationFrequency(hyphenationFrequency)
-                .build()
-        } else {
-            @Suppress("DEPRECATION")
-            StaticLayout(
-                text,
-                layoutPaint,
-                availableWidth,
-                Layout.Alignment.ALIGN_NORMAL,
-                lineSpacingMultiplier,
-                lineSpacingExtra,
-                includeFontPadding,
-            )
-        }
     }
 
     private fun attachScrollListener() {

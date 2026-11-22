@@ -100,7 +100,7 @@
                                 tools:backgroundTint="#a0ff0000"
                                 tools:text="Nightly\n20200503" />
 
-                            <com.mikepenz.materialdrawer.view.BezelImageView
+                            <pl.szczodrzynski.navlib.ToolbarProfileImageView
                                 android:id="@+id/nv_toolbar_image"
                                 style="@style/BezelImageView"
                                 android:layout_width="30dp"

@@ -21,7 +21,7 @@ enum class FeatureType(
     MESSAGES_INBOX(id = 7, isAlwaysNeeded = false, nameRes = R.string.title_messages_inbox_single),
     MESSAGES_SENT(id = 8, isAlwaysNeeded = false, nameRes = R.string.title_messages_sent_single),
     EXCUSES(id = 10, isAlwaysNeeded = false, nameRes = R.string.menu_excuses),
-    ANNOUNCEMENTS(id = 9, isAlwaysNeeded = false, nameRes = R.string.menu_announcements),
+    ANNOUNCEMENTS(id = 9, isAlwaysNeeded = false, nameRes = R.string.settings_sync_customize_endpoint_announcements),
 
     LESSON_TOPICS(id = 11, isAlwaysNeeded = false, nameRes = R.string.menu_lesson_topics),
 

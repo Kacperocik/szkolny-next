@@ -186,6 +186,7 @@ class DayDialog(
                 EventDetailsDialog(
                     activity,
                     it,
+                    onGoToTimetable = ::dismiss,
                 ).show()
             },
             onEventEditClick = {

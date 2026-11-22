@@ -968,7 +968,7 @@
     <string name="settings_register_dont_count_zero_text">Zählen Sie die Note 0 nicht zum Durchschnitt</string>
     <string name="settings_register_login_not_implemented_text">Dieses E-Register ist noch nicht implementiert</string>
     <string name="settings_register_show_teacher_absences_text">Zeigen Sie die Abwesenheiten von Lehrern im Zeitplan an</string>
-    <string name="settings_sync_customize_endpoint_announcements">Schwarzes Brett</string>
+    <string name="settings_sync_customize_endpoint_announcements">Schulmitteilungen</string>
     <string name="settings_sync_customize_endpoint_attendance">Anwesenheiten</string>
     <string name="settings_sync_customize_endpoint_class_free_days">Klasse freie Tage</string>
     <string name="settings_sync_customize_endpoint_classrooms">Klassenzimmern</string>
@@ -1054,6 +1054,8 @@
     <string name="settings_sync_sync_interval_text">Automatische Synchronisierung</string>
     <string name="settings_sync_pull_to_refresh_text">Nach unten ziehen startet die Synchronisierung</string>
     <string name="settings_card_sync_title">Synchronisation und Benachrichtigungen</string>
+    <string name="settings_sync_section_title">Synchronisation</string>
+    <string name="settings_notifications_section_title">Benachrichtigungen</string>
     <string name="settings_sync_updates_text">Über App-Aktualisierungen benachrichtigen</string>
     <string name="settings_sync_web_push_subtext">Benachrichtigungen auf Ihrem PC anzeigen</string>
     <string name="settings_sync_web_push_text">Benachrichtigungsweiterleitung</string>
@@ -1096,7 +1098,7 @@
     <string name="settings_card_about_title">Über die App</string>
     <string name="settings_card_theme_subtext">Hell/Dunkel Thema, Farben, Seitenleisten, Vollbildmodus</string>
     <string name="settings_card_register_subtext">Stundenplan, Agenda, Noten, Nachrichten, Anwesenheit</string>
-    <string name="settings_card_sync_subtext">Automatische Aktualisierung, Benachrichtigungen, Ruhezeiten</string>
+    <string name="settings_card_sync_subtext">Automatische Aktualisierung, Ruhezeiten, Benachrichtigungsweiterleitung</string>
     <string name="settings_card_about_subtext">App-Version, Änderungsprotokoll, Lizenzen, Mitwirkende</string>
     <string name="settings_theme_snowfall_subtext">Schlittenfahrt im Schnee</string>
     <string name="settings_theme_snowfall_text">Jingle Bells, Jingle Bells</string>
@@ -1290,7 +1292,10 @@
     <string name="timetable_generate_include_profile_name">Namen des Schülerprofils anzeigen</string>
     <string name="timetable_generate_next_week_format">Mit Änderungen für die nächste Woche (%s bis %s)</string>
     <string name="timetable_generate_no_changes">Keine Stundenplanänderungen</string>
+    <string name="timetable_generate_image_format">Dateiformat</string>
     <string name="timetable_generate_no_colors">Druckbar (weniger Farben)</string>
+    <string name="timetable_generate_no_lessons">In der ausgewählten Woche findet kein Unterricht statt.</string>
+    <string name="timetable_generate_save_error">Das Stundenplanbild konnte nicht gespeichert werden.</string>
     <string name="timetable_generate_progress_text">Dies kann einige Sekunden dauern…</string>
     <string name="timetable_generate_progress_title">Stunden erstellen</string>
     <string name="timetable_generate_range">Der Umfang des generierten Plans</string>
@@ -1299,15 +1304,15 @@
     <string name="timetable_generate_show_teachers_names">Namen von Lehrern anzeigen</string>
     <string name="timetable_generate_success_text">Der Stundenplan wurde im Verzeichnis Szkolny.eu als Bilddatei gespeichert. \ N \ nSie können ihn sofort öffnen oder freigeben.</string>
     <string name="timetable_generate_success_title">Gemacht!</string>
-    <string name="timetable_lesson_cancelled">Lektion abgesagt</string>
+    <string name="timetable_lesson_cancelled">Abgesagt</string>
     <string name="timetable_lesson_change">Ersatz</string>
     <string name="timetable_lesson_change_format">Ersatz: anstelle von %s</string>
-    <string name="timetable_lesson_shifted">Die Lektion wurde auf einen anderen Tag verschoben</string>
-    <string name="timetable_lesson_shifted_from">Die Lektion wurde von einem anderen Tag verschoben</string>
-    <string name="timetable_lesson_shifted_from_other_day">Die Lektion wurde von %s %s verschoben</string>
-    <string name="timetable_lesson_shifted_from_same_day">Die Lektion wurde von %s verschoben</string>
-    <string name="timetable_lesson_shifted_other_day">"Die Lektion wurde auf %s %s verschoben"</string>
-    <string name="timetable_lesson_shifted_same_day">Die Lektion wurde auf %s verschoben</string>
+    <string name="timetable_lesson_shifted">Auf einen anderen Tag verschoben</string>
+    <string name="timetable_lesson_shifted_from">Von einem anderen Tag verschoben</string>
+    <string name="timetable_lesson_shifted_from_other_day">Vom %s, %s verschoben</string>
+    <string name="timetable_lesson_shifted_from_same_day">Von %s verschoben</string>
+    <string name="timetable_lesson_shifted_other_day">Auf %s, %s verschoben</string>
+    <string name="timetable_lesson_shifted_same_day">Auf %s verschoben</string>
     <string name="timetable_manual_dialog_date">Datum</string>
     <string name="timetable_manual_dialog_date_choose">Wählen Sie das Datum</string>
     <string name="timetable_manual_dialog_subject_choose">Wählen Sie das Thema aus</string>
@@ -1529,6 +1534,7 @@
 
     <string name="profile_config_name_hint">Profilname</string>
     <string name="profile_config_sync_enabled">Dieses Profil synchronisieren</string>
+    <string name="profile_config_sync_scope">Umfang der automatischen Synchronisierung</string>
     <string name="profile_config_logout">Abmelden</string>
     <string name="permissions_qr_scanner">Sie müssen Kamerazugriff gewähren, um den QR-Code zu scannen.\n\nKlicken Sie auf OK, um die Berechtigung zu erteilen.</string>
     <string name="build_version">App-Version</string>
@@ -1699,6 +1705,7 @@
     <string name="grades_subject_unknown_help">{cmd-information-outline} Noten, deren Fach im Klassenbuch nicht angegeben wurde.</string>
     <string name="menu_timetable_config">Stundenplaneinstellungen</string>
     <string name="timetable_config_show_events">Ereignisse bei Lektionen anzeigen</string>
+    <string name="timetable_config_show_weekends">Wochenenden anzeigen</string>
     <string name="timetable_config_show_attendance">Anwesenheitsart bei der Lektion anzeigen</string>
     <string name="timetable_config_hide_class_lessons">Unterricht der ganzen Klasse ausblenden</string>
     <string name="timetable_config_color_subject_name">Fachnamen einfärben</string>

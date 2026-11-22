@@ -5,6 +5,7 @@
 package pl.szczodrzynski.edziennik.ui.agenda.lessonchanges
 
 import pl.szczodrzynski.edziennik.core.manager.EventManager
+import pl.szczodrzynski.edziennik.data.db.full.LessonFull
 import pl.szczodrzynski.edziennik.ui.agenda.BaseEvent
 import pl.szczodrzynski.edziennik.utils.models.Date
 
@@ -28,3 +29,15 @@ class LessonChangesEvent(
 
     override fun getShowBadge() = false
 }
+
+internal fun groupLessonChanges(
+    profileId: Int,
+    lessons: List<LessonFull>,
+    hideClassLessons: Boolean,
+): List<LessonChangesEvent> = lessons
+    .filter { !hideClassLessons || it.isExtra }
+    .groupBy { it.displayDate }
+    .mapNotNull { (date, changes) ->
+        date ?: return@mapNotNull null
+        LessonChangesEvent(profileId, date, changes.size, changes.any { !it.seen })
+    }

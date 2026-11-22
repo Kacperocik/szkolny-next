@@ -12,7 +12,9 @@ import kotlinx.coroutines.Job
 import pl.szczodrzynski.edziennik.App
 import pl.szczodrzynski.edziennik.R
 import pl.szczodrzynski.edziennik.data.db.entity.Lesson
+import pl.szczodrzynski.edziennik.data.db.entity.Metadata
 import pl.szczodrzynski.edziennik.data.db.full.LessonFull
+import pl.szczodrzynski.edziennik.data.enums.MetadataType
 import pl.szczodrzynski.edziennik.ext.setText
 import pl.szczodrzynski.edziennik.ext.startCoroutineTimer
 import pl.szczodrzynski.edziennik.utils.Colors
@@ -24,12 +26,17 @@ class TimetableManager(val app: App) : CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Default
 
-    fun markAsSeen(lesson: LessonFull) {
-        lesson.seen = true
-        if (lesson.type <= Lesson.TYPE_NORMAL)
-            return
+    fun markAsSeen(lesson: LessonFull) = markAsSeen(listOf(lesson))
+
+    fun markAsSeen(lessons: List<LessonFull>) {
+        val metadata = lessons.mapNotNull { lesson ->
+            if (lesson.seen || lesson.type <= Lesson.TYPE_NORMAL) return@mapNotNull null
+            lesson.seen = true
+            Metadata(lesson.profileId, MetadataType.LESSON_CHANGE, lesson.id, true, false)
+        }
+        if (metadata.isEmpty()) return
         startCoroutineTimer(500L, 0L) {
-            app.db.metadataDao().setSeen(lesson.profileId, lesson, true)
+            app.db.metadataDao().setSeen(metadata)
         }
     }
 
@@ -87,15 +94,18 @@ class TimetableManager(val app: App) : CoroutineScope {
         return annotationVisible
     }
 
-    fun getSubjectColor(subjectId: Long?, name: String?): Int {
+    fun getSubjectColor(subjectId: Long?, name: String?, profileId: Int = app.profileId): Int {
         subjectId?.let { id ->
-            app.profile.config.ui.timetableSubjectColors
+            app.config[profileId].ui.timetableSubjectColors
                 .get(id.toString())
                 ?.takeIf { it.isJsonPrimitive }
                 ?.asInt
         }?.let { return it }
         return Colors.stringToMaterialColorCRC(name ?: "")
     }
+
+    fun getSubjectColor(lesson: LessonFull, name: CharSequence? = lesson.displaySubjectName): Int =
+        lesson.color ?: getSubjectColor(lesson.displaySubjectId, name?.toString(), lesson.profileId)
 }
 
 

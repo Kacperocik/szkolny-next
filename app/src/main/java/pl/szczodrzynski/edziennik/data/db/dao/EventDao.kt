@@ -36,7 +36,7 @@ abstract class EventDao : BaseDao<Event, EventFull> {
             LEFT JOIN subjects USING(profileId, subjectId)
             LEFT JOIN teams USING(profileId, teamId)
             LEFT JOIN eventTypes USING(profileId, eventType)
-            LEFT JOIN metadata ON eventId = thingId AND (thingType = 4 OR thingType = 5) AND metadata.profileId = events.profileId
+            LEFT JOIN metadata ON eventId = thingId AND thingType = CASE WHEN eventType = -1 THEN 5 ELSE 4 END AND metadata.profileId = events.profileId
         """
 
         private const val ORDER_BY = """GROUP BY eventId ORDER BY eventDate, eventTime, addedDate ASC"""
@@ -48,6 +48,10 @@ abstract class EventDao : BaseDao<Event, EventFull> {
 
     @RawQuery(observedEntities = [Event::class])
     abstract override fun getRaw(query: SupportSQLiteQuery): LiveData<List<EventFull>>
+
+    @RawQuery(observedEntities = [Event::class, Metadata::class])
+    protected abstract fun getRawObservingMetadata(query: SupportSQLiteQuery): LiveData<List<EventFull>>
+
     @RawQuery(observedEntities = [Event::class])
     abstract override fun getOne(query: SupportSQLiteQuery): LiveData<EventFull?>
 
@@ -64,16 +68,18 @@ abstract class EventDao : BaseDao<Event, EventFull> {
     abstract override fun removeNotKept()
 
     // GET ALL - LIVE DATA
-    fun getAll(profileId: Int) =
-            getRaw("$QUERY WHERE $NOT_BLACKLISTED AND events.profileId = $profileId $ORDER_BY")
+    fun getAll(profileId: Int, observeMetadata: Boolean = false): LiveData<List<EventFull>> {
+        val query = SimpleSQLiteQuery("$QUERY WHERE $NOT_BLACKLISTED AND events.profileId = $profileId $ORDER_BY")
+        return if (observeMetadata) getRawObservingMetadata(query) else getRaw(query)
+    }
     fun getAllByType(profileId: Int, type: Long, filter: String = "1") =
-            getRaw("$QUERY WHERE $NOT_BLACKLISTED AND events.profileId = $profileId AND eventType = $type AND $filter $ORDER_BY")
+            getRawObservingMetadata(SimpleSQLiteQuery("$QUERY WHERE $NOT_BLACKLISTED AND events.profileId = $profileId AND eventType = $type AND $filter $ORDER_BY"))
     fun getAllByDate(profileId: Int, date: Date) =
             getRaw("$QUERY WHERE $NOT_BLACKLISTED AND events.profileId = $profileId AND eventDate = '${date.stringY_m_d}' $ORDER_BY")
     fun getAllByDateTime(profileId: Int, date: Date, time: Time) =
             getRaw("$QUERY WHERE $NOT_BLACKLISTED AND events.profileId = $profileId AND eventDate = '${date.stringY_m_d}' AND eventTime = '${time.stringValue}' $ORDER_BY")
     fun getNearestNotDone(profileId: Int, today: Date, limit: Int) =
-            getRaw("$QUERY WHERE $NOT_BLACKLISTED AND $NOT_DONE AND events.profileId = $profileId AND eventDate >= '${today.stringY_m_d}' $ORDER_BY LIMIT $limit")
+            getRawObservingMetadata(SimpleSQLiteQuery("$QUERY WHERE $NOT_BLACKLISTED AND $NOT_DONE AND events.profileId = $profileId AND eventDate >= '${today.stringY_m_d}' $ORDER_BY LIMIT $limit"))
 
     // GET ALL - NOW
     fun getAllNow(profileId: Int) =
@@ -133,7 +139,14 @@ abstract class EventDao : BaseDao<Event, EventFull> {
         dontKeepFuture(profileId, todayDate, "eventType NOT IN " + exceptTypes.toString().replace('[', '(').replace(']', ')'))
     }
 
-    @Query("UPDATE metadata SET seen = :seen WHERE profileId = :profileId AND (thingType = 4 OR thingType = 6 OR thingType = 5) AND thingId IN (SELECT eventId FROM events WHERE profileId = :profileId AND eventDate = :date)")
+    @Query("""
+        UPDATE metadata SET seen = :seen
+        WHERE profileId = :profileId AND thingType IN (4, 5) AND seen != :seen AND EXISTS (
+            SELECT 1 FROM events
+            WHERE events.profileId = metadata.profileId AND eventId = thingId AND eventDate = :date
+                AND eventBlacklisted = 0 AND thingType = CASE WHEN eventType = -1 THEN 5 ELSE 4 END
+        )
+    """)
     abstract fun setSeenByDate(profileId: Int, date: Date, seen: Boolean)
 
     @Query("UPDATE events SET eventBlacklisted = :blacklisted WHERE profileId = :profileId AND eventId = :eventId")

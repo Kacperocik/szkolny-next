@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RawQuery
+import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import eu.szkolny.selectivedao.annotation.SelectiveDao
 import eu.szkolny.selectivedao.annotation.UpdateSelective
@@ -43,12 +44,16 @@ abstract class TimetableDao : BaseDao<Lesson, LessonFull> {
 
         private const val ORDER_BY = """ORDER BY profileId, id, type"""
         private const val IS_CHANGED = """type != -1 AND type != 0"""
+        private const val DISPLAY_DATE = """CASE WHEN type = 3 THEN oldDate ELSE COALESCE(date, oldDate) END"""
     }
 
     private val selective by lazy { TimetableDaoSelective(App.db) }
 
     @RawQuery(observedEntities = [Lesson::class])
     abstract override fun getRaw(query: SupportSQLiteQuery): LiveData<List<LessonFull>>
+
+    @RawQuery(observedEntities = [Lesson::class, Metadata::class])
+    protected abstract fun getRawObservingMetadata(query: SupportSQLiteQuery): LiveData<List<LessonFull>>
     @RawQuery(observedEntities = [Lesson::class])
     abstract override fun getOne(query: SupportSQLiteQuery): LiveData<LessonFull?>
 
@@ -85,7 +90,7 @@ abstract class TimetableDao : BaseDao<Lesson, LessonFull> {
     fun getBetweenDates(dateFrom: Date, dateTo: Date) =
             getRaw("$QUERY WHERE (type != 3 AND date >= '${dateFrom.stringY_m_d}' AND date <= '${dateTo.stringY_m_d}') OR ((type = 3 OR type = 1) AND oldDate >= '${dateFrom.stringY_m_d}' AND oldDate <= '${dateTo.stringY_m_d}') $ORDER_BY")
     fun getChanges(profileId: Int) =
-            getRaw("$QUERY WHERE timetable.profileId = $profileId AND $IS_CHANGED $ORDER_BY")
+            getRawObservingMetadata(SimpleSQLiteQuery("$QUERY WHERE timetable.profileId = $profileId AND $IS_CHANGED $ORDER_BY"))
 
     // GET ALL - NOW
     fun getAllNow(profileId: Int) =
@@ -99,7 +104,7 @@ abstract class TimetableDao : BaseDao<Lesson, LessonFull> {
     fun getChangesNow(profileId: Int) =
             getRawNow("$QUERY WHERE timetable.profileId = $profileId AND $IS_CHANGED $ORDER_BY")
     fun getChangesForDateNow(profileId: Int, date: Date) =
-            getRawNow("$QUERY WHERE timetable.profileId = $profileId AND $IS_CHANGED AND ((type != 3 AND date = '${date.stringY_m_d}') OR ((type = 3 OR type = 1) AND oldDate = '${date.stringY_m_d}')) $ORDER_BY")
+            getRawNow("$QUERY WHERE timetable.profileId = $profileId AND $IS_CHANGED AND ($DISPLAY_DATE) = '${date.stringY_m_d}' $ORDER_BY")
     fun getBetweenDatesNow(dateFrom: Date, dateTo: Date) =
             getRawNow("$QUERY WHERE (type != 3 AND date >= '${dateFrom.stringY_m_d}' AND date <= '${dateTo.stringY_m_d}') OR ((type = 3 OR type = 1) AND oldDate >= '${dateFrom.stringY_m_d}' AND oldDate <= '${dateTo.stringY_m_d}') $ORDER_BY")
 

@@ -33,7 +33,7 @@ class MyFirebaseService : FirebaseService(), CoroutineScope {
     override fun onMessageReceived(message: Message) {
         launch(Dispatchers.Default) {
             Timber.d("Message received from ${message.from}: $message")
-            val profiles = app.db.profileDao().profilesForFirebaseNow
+            val profiles = app.db.profileDao().profilesForSyncNow
             when (message.from) {
                 "640759989760" -> SzkolnyAppFirebase(app, profiles, message)
                 "747285019373" -> SzkolnyMobidziennikFirebase(app, profiles, message)

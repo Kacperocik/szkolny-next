@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.TextViewCompat
 import androidx.core.widget.addTextChangedListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.textfield.TextInputEditText
 import com.mikepenz.iconics.typeface.IIcon
 import kotlinx.coroutines.CoroutineScope
@@ -78,6 +79,7 @@ abstract class BaseDialog<I : Any>(
     protected open fun getMessageRes(): Int? = null
     protected open fun getMessageFormat(): Pair<Int, List<CharSequence>>? = null
     protected open fun getView(): View? = null
+    protected open fun configureDialogBackground(background: MaterialShapeDrawable) = Unit
     /** Extra height requested by custom content that can shrink during measurement. */
     protected open fun getContentOverflow() = 0
     protected open fun isCancelable() = true
@@ -227,6 +229,7 @@ abstract class BaseDialog<I : Any>(
     }
 
     private fun configure(md: MaterialAlertDialogBuilder) {
+        (md.background as? MaterialShapeDrawable)?.let(::configureDialogBackground)
         getTitle()?.let {
             md.setTitle(it)
         }

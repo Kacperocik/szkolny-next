@@ -10,6 +10,13 @@ import android.content.Intent
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
 import android.os.IBinder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -33,6 +40,7 @@ import kotlin.math.roundToInt
 
 class ApiService : Service() {
     companion object {
+        internal val executionLock = Mutex()
         const val TAG = "ApiService"
         const val NOTIFICATION_API_CHANNEL_ID = "pl.szczodrzynski.edziennik.SYNC"
         fun start(context: Context) {
@@ -75,6 +83,9 @@ class ApiService : Service() {
     object PendingTasksEvent
 
     private val app by lazy { applicationContext as App }
+    private val executionScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var waitingForExecution: Job? = null
+    private var ownsExecution = false
 
     private val syncingProfiles = mutableListOf<Profile>()
 
@@ -173,6 +184,26 @@ class ApiService : Service() {
             |_|\__,_|___/_|\_\  \___/_/\_\___|\___|\__,_|\__|_|\___/|_| |*/
     @Synchronized
     private fun runTask() {
+        if (serviceClosed) return
+        if (!ownsExecution) {
+            if (waitingForExecution?.isActive == true) return
+            ownsExecution = executionLock.tryLock(this)
+            if (!ownsExecution) {
+                waitingForExecution = executionScope.launch {
+                    executionLock.lock(this@ApiService)
+                    synchronized(this@ApiService) {
+                        waitingForExecution = null
+                        if (serviceClosed) {
+                            executionLock.unlock(this@ApiService)
+                        } else {
+                            ownsExecution = true
+                            runTask()
+                        }
+                    }
+                }
+                return
+            }
+        }
         checkIfTaskFrozen()
         if (taskIsRunning)
             return
@@ -191,7 +222,15 @@ class ApiService : Service() {
         }
 
         task.taskId = ++taskMaximumId
-        task.prepare(app)
+        try {
+            task.prepare(app)
+        } catch (e: Exception) {
+            val error = e.toApiError(TAG).apply { profileId = task.profileId }
+            EventBus.getDefault().postSticky(ApiTaskErrorEvent(error, (task as? EdziennikTask)?.request))
+            errorList.add(error)
+            runTask()
+            return
+        }
         taskIsRunning = true
         taskRunningId = task.taskId
         taskRunning = task
@@ -235,6 +274,7 @@ class ApiService : Service() {
                 || taskCancelTries >= 3) {
             val time = System.currentTimeMillis() - lastEventTime
             Timber.d("!!! Task $taskRunningId froze for $time ms. $taskRunning")
+            cancelRunningTask()
             clearTask()
             return true
         }
@@ -264,8 +304,22 @@ class ApiService : Service() {
         taskCancelTries = 0
     }
 
+    private fun cancelRunningTask() {
+        runCatching { taskRunning?.cancel() }.onFailure { Timber.w(it, "Could not cancel API task") }
+    }
+
+    private fun releaseExecution() {
+        if (ownsExecution) {
+            ownsExecution = false
+            executionLock.unlock(this)
+        }
+    }
+
+    @Synchronized
     private fun allCompleted() {
         serviceClosed = true
+        waitingForExecution?.cancel()
+        releaseExecution()
         EventBus.getDefault().postSticky(ApiTaskAllFinishedEvent())
         stopSelf()
     }
@@ -323,6 +377,7 @@ class ApiService : Service() {
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
+    @Synchronized
     fun onTaskCancelRequest(request: TaskCancelRequest) {
         EventBus.getDefault().removeStickyEvent(request)
         Timber.d(request.toString())
@@ -333,6 +388,7 @@ class ApiService : Service() {
         stopIfTaskFrozen()
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
+    @Synchronized
     fun onServiceCloseRequest(request: ServiceCloseRequest) {
         EventBus.getDefault().removeStickyEvent(request)
         Timber.d(request.toString())
@@ -363,9 +419,15 @@ class ApiService : Service() {
         return START_NOT_STICKY
     }
 
+    @Synchronized
     override fun onDestroy() {
         Timber.d("Service destroyed")
         serviceClosed = true
+        executionScope.cancel()
+        if (ownsExecution) {
+            cancelRunningTask()
+            releaseExecution()
+        }
         EventBus.getDefault().unregister(this)
     }
 

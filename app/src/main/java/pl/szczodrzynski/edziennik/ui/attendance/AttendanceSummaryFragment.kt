@@ -64,6 +64,7 @@ class AttendanceSummaryFragment : BaseFragment<AttendanceSummaryFragmentBinding,
         expandSubjectId = arguments?.getLong("gradesSubjectId") ?: 0L
 
         val adapter = AttendanceAdapter(activity, VIEW_SUMMARY)
+        adapter.observeSeen(viewLifecycleOwner, App.profileId)
         var firstRun = true
 
         app.db.attendanceDao().getAll(App.profileId).observe(viewLifecycleOwner, Observer { items -> this@AttendanceSummaryFragment.launch {

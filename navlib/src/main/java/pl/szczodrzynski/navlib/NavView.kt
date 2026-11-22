@@ -68,6 +68,7 @@ class NavView @JvmOverloads constructor(
         b.nvToolbar.navView = this
         b.nvToolbar.toolbarImage = b.nvToolbarImage
         b.nvToolbarImage.enableExpressiveImageShapeMorph(pressedCornerRadiusDp = 8f)
+        b.nvToolbarImage.onProfileSwipe = drawer::switchProfile
 
         b.nvBottomBar.navView = this
         b.nvBottomBar.fabExtendedView = b.nvExtendedFloatingActionButton

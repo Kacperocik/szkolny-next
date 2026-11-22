@@ -113,7 +113,7 @@ class NoticesAdapter//getting the context and product list with constructor
                 else -> holder.noticesItemReason.background.colorFilter = PorterDuffColorFilter(0x692196f3, PorterDuff.Mode.MULTIPLY)
             }
             notice.seen = true
-            AsyncTask.execute { app.db.metadataDao().setSeen(App.profileId, notice, true) }
+            AsyncTask.execute { app.db.metadataDao().setSeen(notice.profileId, notice, true) }
         } else {
             holder.noticesItemReason.background = null
         }
