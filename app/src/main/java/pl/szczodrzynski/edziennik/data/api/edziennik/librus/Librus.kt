@@ -225,6 +225,10 @@ class Librus(val app: App, val profile: Profile?, val loginStore: LoginStore, va
             override fun onProgress(step: Float) { callback.onProgress(step) }
             override fun onStartProgress(stringRes: Int) { callback.onStartProgress(stringRes) }
             override fun onError(apiError: ApiError) {
+                if (!apiError.isCritical) {
+                    callback.onError(apiError)
+                    return
+                }
                 if (apiError.errorCode in internalErrorList) {
                     // finish immediately if the same error occurs twice during the same sync
                     callback.onError(apiError)
