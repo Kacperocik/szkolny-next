@@ -10,7 +10,6 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
-import android.view.View
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
@@ -19,13 +18,11 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.Fragment
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import pl.szczodrzynski.edziennik.R
-import pl.szczodrzynski.edziennik.ui.base.dialog.BaseDialog
 import pl.szczodrzynski.navlib.ImageHolder
 
 fun colorFromName(name: String?): Int {
@@ -134,35 +131,3 @@ fun IIcon.toDrawable(
         ?: colorAttr.resolveAttr(context)
     this.sizeDp = sizeDp
 }
-
-context(Context)
-fun IIcon.toDrawable(
-    colorInt: Int? = null,
-    colorRes: Int? = null,
-    colorAttr: Int = R.attr.colorOnBackground,
-    sizeDp: Int = 24,
-) = toDrawable(applicationContext, colorInt, colorRes, colorAttr, sizeDp)
-
-context(Fragment)
-fun IIcon.toDrawable(
-    colorInt: Int? = null,
-    colorRes: Int? = null,
-    colorAttr: Int = R.attr.colorOnBackground,
-    sizeDp: Int = 24,
-) = toDrawable(requireContext(), colorInt, colorRes, colorAttr, sizeDp)
-
-context(BaseDialog<*>)
-fun IIcon.toDrawable(
-    colorInt: Int? = null,
-    colorRes: Int? = null,
-    colorAttr: Int = R.attr.colorOnBackground,
-    sizeDp: Int = 24,
-) = toDrawable(app, colorInt, colorRes, colorAttr, sizeDp)
-
-context(View)
-fun IIcon.toDrawable(
-    colorInt: Int? = null,
-    colorRes: Int? = null,
-    colorAttr: Int = R.attr.colorOnBackground,
-    sizeDp: Int = 24,
-) = toDrawable(context, colorInt, colorRes, colorAttr, sizeDp)

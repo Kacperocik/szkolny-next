@@ -140,7 +140,7 @@ class NoteEditorDialog(
                 text = color.stringRes.resolveString(activity),
                 tag = color,
                 icon = if (color.value != null)
-                    CommunityMaterial.Icon.cmd_circle.toDrawable(color.value.toInt())
+                    CommunityMaterial.Icon.cmd_circle.toDrawable(app, colorInt = color.value.toInt())
                 else null,
             )
         })

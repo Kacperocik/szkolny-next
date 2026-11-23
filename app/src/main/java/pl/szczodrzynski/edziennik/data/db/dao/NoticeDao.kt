@@ -21,9 +21,9 @@ import pl.szczodrzynski.edziennik.data.db.full.NoticeFull
 abstract class NoticeDao : BaseDao<Notice, NoticeFull> {
     companion object {
         private const val QUERY = """
-            SELECT 
-            *, 
-            teachers.teacherName ||" "|| teachers.teacherSurname AS teacherName
+            SELECT notices.*,
+            teachers.teacherName || ' ' || teachers.teacherSurname AS teacherName,
+            metadata.seen, metadata.notified
             FROM notices
             LEFT JOIN teachers USING(profileId, teacherId)
             LEFT JOIN metadata ON noticeId = thingId AND thingType = 2 AND metadata.profileId = notices.profileId

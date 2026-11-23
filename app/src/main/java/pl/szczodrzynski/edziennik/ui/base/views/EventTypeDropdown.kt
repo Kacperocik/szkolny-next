@@ -44,7 +44,8 @@ class EventTypeDropdown : TextInputDropDown {
                     text = it.name,
                     tag = it,
                     icon = CommunityMaterial.Icon.cmd_circle.toDrawable(
-                        MaterialColors.harmonizeWithPrimary(context, color)
+                        context,
+                        colorInt = MaterialColors.harmonizeWithPrimary(context, color),
                     ),
                 )
             }

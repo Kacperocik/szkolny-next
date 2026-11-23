@@ -72,7 +72,7 @@ class CounterActivity : AppCompatActivity(), CoroutineScope {
 
         b.bellSync.setImageDrawable(
             SzkolnyFont.Icon.szf_alarm_bell_outline
-                .toDrawable(0xff404040.toInt(), sizeDp = 36)
+                .toDrawable(applicationContext, colorInt = 0xff404040.toInt(), sizeDp = 36)
         )
         b.bellSync.onClick {
             BellSyncTimeChooseDialog(activity = this@CounterActivity).show()

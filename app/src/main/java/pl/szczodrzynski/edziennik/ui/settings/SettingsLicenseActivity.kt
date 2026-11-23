@@ -21,7 +21,7 @@ class SettingsLicenseActivity : MaterialAboutActivity() {
     var foregroundColor: Int = 0
 
     private val icon
-        get() = CommunityMaterial.Icon.cmd_book_outline.toDrawable(foregroundColor)
+        get() = CommunityMaterial.Icon.cmd_book_outline.toDrawable(applicationContext, colorInt = foregroundColor)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         app.uiManager.applyTheme(this)

@@ -16,6 +16,28 @@ interface TeacherDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun addAllIgnore(teacherList: List<Teacher>)
 
+    @Transaction
+    fun updateNames(teachers: List<Teacher>) {
+        teachers.forEach { teacher ->
+            updateName(
+                teacher.profileId,
+                teacher.id,
+                teacher.name?.takeIf { it.isNotBlank() },
+                teacher.surname?.takeIf { it.isNotBlank() },
+            )
+        }
+    }
+
+    @Query("""
+        UPDATE teachers
+        SET teacherName = COALESCE(:name, teacherName),
+            teacherSurname = COALESCE(:surname, teacherSurname)
+        WHERE profileId = :profileId AND teacherId = :id
+        AND ((:name IS NOT NULL AND teacherName IS NOT :name)
+          OR (:surname IS NOT NULL AND teacherSurname IS NOT :surname))
+    """)
+    fun updateName(profileId: Int, id: Long, name: String?, surname: String?)
+
     @RawQuery
     fun query(query: SupportSQLiteQuery): Int
 

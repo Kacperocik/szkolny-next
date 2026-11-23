@@ -21,9 +21,9 @@ import pl.szczodrzynski.edziennik.data.db.full.AnnouncementFull
 abstract class AnnouncementDao : BaseDao<Announcement, AnnouncementFull> {
     companion object {
         private const val QUERY = """
-            SELECT 
-            *, 
-            teachers.teacherName ||" "|| teachers.teacherSurname AS teacherName
+            SELECT announcements.*,
+            teachers.teacherName || ' ' || teachers.teacherSurname AS teacherName,
+            metadata.seen, metadata.notified
             FROM announcements
             LEFT JOIN teachers USING(profileId, teacherId)
             LEFT JOIN metadata ON announcementId = thingId AND thingType = 7 AND metadata.profileId = announcements.profileId

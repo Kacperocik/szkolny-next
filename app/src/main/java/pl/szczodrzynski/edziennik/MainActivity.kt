@@ -608,7 +608,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 CafeBar.builder(this)
                     .theme(CafeBarTheme.Custom(R.attr.colorSurfaceInverse.resolveAttr(this)))
                     .content(R.string.rate_snackbar_text)
-                    .icon(CommunityMaterial.Icon3.cmd_star_outline.toDrawable())
+                    .icon(CommunityMaterial.Icon3.cmd_star_outline.toDrawable(applicationContext))
                     .positiveText(R.string.rate_snackbar_positive)
                     .positiveColor(-0xb350b0)
                     .negativeText(R.string.rate_snackbar_negative)

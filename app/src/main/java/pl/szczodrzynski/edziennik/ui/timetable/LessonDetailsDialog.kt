@@ -257,7 +257,7 @@ class LessonDetailsDialog(
             b.attendanceIcon.isVisible = attendance.let {
                 val icon = attendanceManager.getAttendanceIcon(it) ?: return@let false
                 val color = attendanceManager.getAttendanceColor(it)
-                b.attendanceIcon.setImageDrawable(icon.toDrawable(color))
+                b.attendanceIcon.setImageDrawable(icon.toDrawable(app, colorInt = color))
                 true
             }
             b.attendanceCard.enableExpressiveCardShapeMorph()

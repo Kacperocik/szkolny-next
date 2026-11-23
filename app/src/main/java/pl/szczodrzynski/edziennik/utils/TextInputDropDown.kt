@@ -37,7 +37,7 @@ open class TextInputDropDown : TextInputEditText {
 
     @SuppressLint("RestrictedApi")
     open fun create(context: Context) {
-        val drawable = CommunityMaterial.Icon.cmd_chevron_down.toDrawable()
+        val drawable = CommunityMaterial.Icon.cmd_chevron_down.toDrawable(this.context)
 
         setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null)
         isFocusableInTouchMode = false

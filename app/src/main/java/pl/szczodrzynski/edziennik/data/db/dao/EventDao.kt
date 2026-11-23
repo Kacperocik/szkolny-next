@@ -26,11 +26,13 @@ import pl.szczodrzynski.edziennik.utils.models.Time
 abstract class EventDao : BaseDao<Event, EventFull> {
     companion object {
         private const val QUERY = """
-            SELECT 
-            *, 
-            teachers.teacherName ||" "|| teachers.teacherSurname AS teacherName,
+            SELECT events.*,
+            teachers.teacherName || ' ' || teachers.teacherSurname AS teacherName,
+            subjects.subjectLongName, subjects.subjectShortName,
+            teams.teamName, teams.teamCode,
             eventTypes.eventTypeName AS typeName,
-            eventTypes.eventTypeColor AS typeColor
+            eventTypes.eventTypeColor AS typeColor,
+            metadata.seen, metadata.notified
             FROM events
             LEFT JOIN teachers USING(profileId, teacherId)
             LEFT JOIN subjects USING(profileId, subjectId)

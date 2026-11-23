@@ -181,7 +181,7 @@ class LoginFormFragment : Fragment(), CoroutineScope {
 
         if (credential.qrDecoderClass != null) {
             b.textLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
-            b.textLayout.endIconDrawable = CommunityMaterial.Icon3.cmd_qrcode.toDrawable()
+            b.textLayout.endIconDrawable = CommunityMaterial.Icon3.cmd_qrcode.toDrawable(requireContext())
             b.textLayout.setEndIconOnClickListener {
                 scanQrCode(credential)
             }
@@ -203,7 +203,7 @@ class LoginFormFragment : Fragment(), CoroutineScope {
         b.textLayout.suffixText = credential.suffix?.resolveString(app)
         b.textLayout.tag = credential
 
-        b.textLayout.startIconDrawable = credential.icon.toDrawable()
+        b.textLayout.startIconDrawable = credential.icon.toDrawable(requireContext())
 
         return b
     }

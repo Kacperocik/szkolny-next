@@ -94,6 +94,7 @@ abstract class Data(val app: App, val profile: Profile?, val loginStore: LoginSt
     val notifications = mutableListOf<Notification>()
 
     val teacherList = LongSparseArray<Teacher>()
+    val teacherNameUpdates = mutableListOf<Teacher>()
     val subjectList = LongSparseArray<Subject>()
     val teamList = LongSparseArray<Team>()
     val lessonRanges = SparseArray<LessonRange>()
@@ -170,6 +171,7 @@ abstract class Data(val app: App, val profile: Profile?, val loginStore: LoginSt
         toRemove.clear()
         endpointTimers.clear()
         teacherList.clear()
+        teacherNameUpdates.clear()
         subjectList.clear()
         teamList.clear()
         lessonRanges.clear()
@@ -236,12 +238,14 @@ abstract class Data(val app: App, val profile: Profile?, val loginStore: LoginSt
         Timber.d("Profiles saved in ${System.currentTimeMillis()-startTime} ms")
         startTime = System.currentTimeMillis()
 
-        // always present and not empty, during every sync
-        db.endpointTimerDao().addAll(endpointTimers)
         if (teacherOnConflictStrategy == OnConflictStrategy.IGNORE)
             db.teacherDao().addAllIgnore(teacherList.values())
         else if (teacherOnConflictStrategy == OnConflictStrategy.REPLACE)
             db.teacherDao().addAll(teacherList.values())
+        if (teacherNameUpdates.isNotEmpty())
+            db.teacherDao().updateNames(teacherNameUpdates)
+        // Save the timers after the teacher updates so a failed write can be retried.
+        db.endpointTimerDao().addAll(endpointTimers)
         db.subjectDao().addAll(subjectList.values())
         db.teamDao().clear(profileId)
         db.teamDao().addAll(teamList.values())

@@ -35,7 +35,13 @@ class LibrusApiUsers(override val data: DataLibrus,
                 if (user.getBoolean("IsPedagogue") == true)
                     teacher.setTeacherType(Teacher.TYPE_PEDAGOGUE)
 
-                data.teacherList.put(id, teacher)
+                val existing = data.teacherList[id]
+                data.teacherList.put(id, if (existing == null) teacher else Teacher(existing).apply {
+                    name = firstName.takeIf { it.isNotBlank() } ?: name
+                    surname = lastName.takeIf { it.isNotBlank() } ?: surname
+                    type = type or teacher.type
+                })
+                data.teacherNameUpdates += teacher
             }
 
             data.setSyncNext(ENDPOINT_LIBRUS_API_USERS, 4* DAY)

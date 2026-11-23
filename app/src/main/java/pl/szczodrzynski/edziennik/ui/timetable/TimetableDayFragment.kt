@@ -614,7 +614,7 @@ class TimetableDayFragment : BaseFragment<TimetableDayFragmentBinding, AppCompat
             lb.attendanceIcon.isVisible = attendance?.let {
                 val icon = attendanceManager.getAttendanceIcon(it) ?: return@let false
                 val color = attendanceManager.getAttendanceColor(it)
-                lb.attendanceIcon.setImageDrawable(icon.toDrawable(color))
+                lb.attendanceIcon.setImageDrawable(icon.toDrawable(requireContext(), colorInt = color))
                 true
             } ?: false
 

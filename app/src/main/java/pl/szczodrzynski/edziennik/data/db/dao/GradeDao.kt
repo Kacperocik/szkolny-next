@@ -27,9 +27,10 @@ import kotlin.collections.set
 abstract class GradeDao : BaseDao<Grade, GradeFull> {
     companion object {
         private const val QUERY = """
-            SELECT 
-            *, 
-            teachers.teacherName ||" "|| teachers.teacherSurname AS teacherName
+            SELECT grades.*,
+            teachers.teacherName || ' ' || teachers.teacherSurname AS teacherName,
+            subjects.subjectLongName, subjects.subjectShortName,
+            metadata.seen, metadata.notified
             FROM grades
             LEFT JOIN teachers USING(profileId, teacherId)
             LEFT JOIN subjects USING(profileId, subjectId)

@@ -22,9 +22,9 @@ import pl.szczodrzynski.edziennik.utils.models.Date
 abstract class TeacherAbsenceDao : BaseDao<TeacherAbsence, TeacherAbsenceFull> {
     companion object {
         private const val QUERY = """
-            SELECT 
-            *, 
-            teachers.teacherName ||" "|| teachers.teacherSurname AS teacherName
+            SELECT teacherAbsence.*,
+            teachers.teacherName || ' ' || teachers.teacherSurname AS teacherName,
+            metadata.seen, metadata.notified
             FROM teacherAbsence
             LEFT JOIN teachers USING(profileId, teacherId)
             LEFT JOIN metadata ON teacherAbsenceId = thingId AND thingType = 9 AND metadata.profileId = teacherAbsence.profileId
